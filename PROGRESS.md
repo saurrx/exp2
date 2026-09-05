@@ -282,3 +282,5 @@ DSN-0017 final validation: required serial gates 7/7, role lint, both builds and
 Photon Admin dashboard is complete, merged into main with --no-ff (29e5f6c) and pushed. Coverage is 14/17. Ownership gaps and incoming work lead; exact operational links and explicit source recovery preserve firm/client context. Independent round 1 PASS, all seven scores 4, no findings or missing states. Required gates 7/7, V0 53/53, both builds, role lint, 29 stable captures and 24 accessibility/overflow contexts pass. Broad runner 18/23 and its detailed follow-ups remain disclosed in the DSN record. The concurrent yield note was preserved; no founder decision is pending for this surface.
 
 Next surface: **DSN-0018 — Clients and onboarding**. The overall run remains incomplete.
+
+Concurrency yield — 2026-09-05T11:50:15.641546+00:00: this scheduled firing yielded to other-run commit 92db9b2 (DSN-0018) inside the 25-minute exclusion window. Active dirty codex/dsn-0018-clients checkout preserved untouched; yield recorded from a separate main worktree. No surface edits or validation performed.

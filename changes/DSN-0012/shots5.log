@@ -1,0 +1,22 @@
+wrote  surfaces-patent-portfolio--empty-imported-portfolio--at-1280x720
+wrote  surfaces-patent-portfolio--empty-imported-portfolio--at-1440x900
+wrote  surfaces-patent-portfolio--thousands-of-records--at-1280x720
+wrote  surfaces-patent-portfolio--thousands-of-records--at-1440x900
+wrote  surfaces-patent-portfolio--multiple-jurisdictions--at-1280x720
+UNSTABLE surfaces-patent-portfolio--multiple-jurisdictions--at-1440x900: two clean renders differ by 34341 pixels in [312,144,1314,897]
+wrote  surfaces-patent-portfolio--import-result--at-1280x720
+wrote  surfaces-patent-portfolio--import-result--at-1440x900
+wrote  surfaces-patent-portfolio--error--at-1280x720
+wrote  surfaces-patent-portfolio--error--at-1440x900
+   note surfaces-patent-portfolio--import-failure--at-1280x720: 3 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-portfolio--import-failure--at-1280x720
+   note surfaces-patent-portfolio--import-failure--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-portfolio--import-failure--at-1440x900
+wrote  surfaces-patent-portfolio--import-in-progress--at-1280x720
+wrote  surfaces-patent-portfolio--import-in-progress--at-1440x900
+   note surfaces-patent-portfolio--empty-case-owner--at-1280x720: 9 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-portfolio--empty-case-owner--at-1280x720
+wrote  surfaces-patent-portfolio--empty-case-owner--at-1440x900
+wrote  surfaces-patent-portfolio--empty-photon-admin--at-1280x720
+wrote  surfaces-patent-portfolio--empty-photon-admin--at-1440x900
+shots: 1 failure(s)

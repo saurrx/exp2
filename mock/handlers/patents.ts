@@ -19,7 +19,7 @@ const ideaLinkFor = (p: Patent) => {
 const listRow = (p: Patent) => {
   const next = allDueDates([p.client_id]).filter((d) => d.patent_id === p.id && d.status === "PENDING").sort((a, b) => a.due_at.localeCompare(b.due_at))[0];
   const client = getDb().clients.find((c) => c.id === p.client_id);
-  return { ...p, due_dates: next ? [dueSummary(next)] : [], idea_link: ideaLinkFor(p), client: client ? { id: client.id, name: client.name } : null };
+  return { ...p, due_dates: next && !(getDb().flags.v0 && currentUser()?.role === "INVENTOR") ? [dueSummary(next)] : [], idea_link: ideaLinkFor(p), client: client ? { id: client.id, name: client.name } : null };
 };
 
 const scoped = (url: URL) => {
@@ -28,6 +28,23 @@ const scoped = (url: URL) => {
   const cid = q(url, "client_id");
   if (cid && scope && !scope.includes(cid)) return { scope: [] as string[], u };
   return { scope: cid ? [cid] : scope, u };
+};
+
+/** List/export share the same scope and filter interpretation. */
+const filteredPatents = (url: URL) => {
+  const { scope } = scoped(url);
+  let rows = allPatents(scope);
+  const search = (q(url, "search") || "").trim().toLowerCase();
+  if (search) rows = rows.filter(p => `${p.title} ${p.application_number || ""} ${p.inventors.join(" ")}`.toLowerCase().includes(search));
+  const status = q(url, "status"); if (status) rows = rows.filter(p => p.status === status);
+  const tags = (q(url, "tags") || q(url, "tag") || "").split(",").filter(Boolean); if (tags.length) rows = rows.filter(p => tags.some(tag => p.tags.includes(tag)));
+  const jurisdiction = q(url, "jurisdiction"); if (jurisdiction) rows = rows.filter(p => p.jurisdiction === jurisdiction);
+  const from = q(url, "date_from"), to = q(url, "date_to");
+  if (from) rows = rows.filter(p => !!p.filing_date && p.filing_date.slice(0,10) >= from.slice(0,10));
+  if (to) rows = rows.filter(p => !!p.filing_date && p.filing_date.slice(0,10) <= to.slice(0,10));
+  const sort = q(url, "sort") || "filing_date", order = q(url, "order") === "asc" ? 1 : -1;
+  rows.sort((a,b) => order * String(a[sort as keyof Patent] || "").localeCompare(String(b[sort as keyof Patent] || "")));
+  return rows;
 };
 
 export const patentHandlers = [
@@ -44,12 +61,11 @@ export const patentHandlers = [
     return [...new Set(allPatents(scope).flatMap((p) => p.tags))].sort();
   }),
   route("get", "/v1/patents/export", ({ url }) => {
-    const { scope } = scoped(url);
-    const rows = allPatents(scope);
+    const rows = filteredPatents(url);
     const esc = (v: unknown) => { const s = String(v ?? ""); return /^[=+\-@]/.test(s) ? `'${s}` : s; };
     const csv = ["application_number,title,jurisdiction,status,filing_date,grant_date,tags", ...rows.map((p) => [p.application_number, p.title, p.jurisdiction, p.status, p.filing_date?.slice(0, 10), p.grant_date?.slice(0, 10), p.tags.join("|")].map((v) => `"${esc(v).replace(/"/g, '""')}"`).join(","))].join("\n");
     return new Response(csv, { status: 200, headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": "attachment; filename=patents.csv" } }) as unknown as { status: number };
-  }),
+  }, { rawResponse: true }),
   route("get", "/v1/patents/import-history", ({ url }) => {
     const db = getDb();
     const cid = q(url, "client_id");
@@ -63,6 +79,8 @@ export const patentHandlers = [
     const cid = b.client_id ?? u?.client_id;
     const client = db.clients.find((c) => c.id === cid);
     if (!client) return { status: 400, body: { message: "A client is required." } };
+    const scope = scopeFor(u);
+    if (db.flags.v0 && (!u || !["CASE_OWNER", "PHOTON_ADMIN"].includes(u.role) || (scope && !scope.includes(client.id)) || file.client_id !== client.id || file.status !== "STORED")) return { status: 403, body: { message: "Choose a stored portfolio file for a client you can maintain." } };
     const trouble = Boolean(db.flags?.importTrouble);
     const rng = mulberry32(seedFrom(file.id));
     const created: Patent[] = [];
@@ -73,22 +91,15 @@ export const patentHandlers = [
     db.patents.push(...created);
     const dues = created.slice(0, Math.floor(created.length / 2)).map((p, k) => ({ id: uuid(rng), patent_id: p.id, client_id: client.id, event_type: "Annuity Payment Due", title: "Annuity Payment Due", due_at: clock.daysAhead(30 + k * 11), status: "PENDING" as const, created_at: clock.iso(), updated_at: clock.iso() }));
     db.dueDates.push(...dues);
-    const result = { id: uuid(rng), client_id: client.id, file_id: file.id, status: (trouble ? "PARTIAL" : "COMPLETED") as "PARTIAL" | "COMPLETED", rows_total: rows, created_count: created.length, updated_count: trouble ? 9 : 0, unchanged_count: trouble ? 5 : 0, failed_count: trouble ? 19 : 0, due_dates_created: dues.length, duplicate_in_file: trouble ? 7 : 0, unmapped_columns: trouble ? ["Docket Ref", "Old Status"] : [], errors: trouble ? [{ row: 14, message: "Application number is empty." }, { row: 22, message: "Filing date is not a date: 'tbd'." }, { row: 57, message: "Jurisdiction 'XX' is not recognised." }] : [], completed_at: clock.iso(), created_at: clock.iso(), imported_by_id: u?.id ?? "" };
+    const result = { id: uuid(rng), client_id: client.id, file_id: file.id, status: (trouble ? "PARTIAL" : "COMPLETED") as "PARTIAL" | "COMPLETED", rows_total: rows, created_count: created.length, updated_count: trouble ? 9 : 0, unchanged_count: trouble ? 5 : 0, failed_count: trouble ? 19 : 0, due_dates_created: dues.length, duplicate_in_file: trouble ? 7 : 0, unmapped_columns: trouble ? ["Docket Ref", "Old Status"] : [], errors: trouble ? Array.from({ length: 19 }, (_, index) => ({ row: [14, 22, 57, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90][index], message: ["Application number is empty.", "Filing date is not a date: 'tbd'.", "Jurisdiction 'XX' is not recognised."][index % 3] })) : [], completed_at: clock.iso(), created_at: clock.iso(), imported_by_id: u?.id ?? "" };
     db.imports.push(result); touched();
     return { ...result, success_count: created.length, updated: trouble ? [{ application_number: "IMP/1003", changes: { status: { from: "APPLIED", to: "GRANTED" } } }] : [], duplicates: trouble ? [{ application_number: "IMP/1010", rows: [10, 17] }] : [], deadlines: dues.length };
   }),
   route("get", "/v1/patents", ({ url }) => {
-    const { scope } = scoped(url);
-    let rows = allPatents(scope);
-    const search = (q(url, "search") ?? "").trim().toLowerCase();
-    if (search) rows = rows.filter((p) => `${p.title} ${p.application_number ?? ""} ${p.inventors.join(" ")}`.toLowerCase().includes(search));
-    const status = q(url, "status"); if (status) rows = rows.filter((p) => p.status === status);
-    const tag = q(url, "tag"); if (tag) rows = rows.filter((p) => p.tags.includes(tag));
-    const jur = q(url, "jurisdiction"); if (jur) rows = rows.filter((p) => p.jurisdiction === jur);
-    const sort = q(url, "sort") ?? "filing_date"; const order = q(url, "order") === "asc" ? 1 : -1;
-    rows.sort((a, b) => order * String((a as never)[sort] ?? "").localeCompare(String((b as never)[sort] ?? "")));
+    const rows = filteredPatents(url);
     const limit = Math.min(100, qi(url, "limit", 20));
-    return paginate(rows.map(listRow), qi(url, "page", 1), limit);
+    const page = paginate(rows, qi(url, "page", 1), limit);
+    return { ...page, data: page.data.map(listRow) };
   }),
   route("post", "/v1/patents", async ({ body }) => {
     const b = (await body()) as Partial<Patent> & { client_id?: string };

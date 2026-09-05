@@ -1,0 +1,8 @@
+PASS retained file and client retry completed
+PASS import-failure zoom
+PASS pending dialog protects file/client and closure
+PASS import-in-progress zoom
+PASS import-result zoom
+PASS long-titles zoom
+PASS optional fields stay readable without horizontal scroll
+PASS case-owner zoom

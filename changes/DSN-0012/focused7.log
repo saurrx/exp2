@@ -1,0 +1,51 @@
+
+> design@0.0.0 test:stories
+> vitest run --project=storybook design/stories/surfaces/PatentPortfolio.stories.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:36:19 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+│
+▲  No story files found for the specified pattern:
+│  design/stories/**/*.mdx
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:36:19 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:36:19 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:36:19 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+
+ RUN  v4.1.11 /Users/saurabh/PL/exp2
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:36:19 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+You or a plugin you are using have set `optimizeDeps.esbuildOptions` but this option is now deprecated. Vite now uses Rolldown to optimize the dependencies. Please use `optimizeDeps.rolldownOptions` instead.
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+10:36:22 AM [vite] (client) [console.warn] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+10:36:22 AM [vite] (client) [console.warn] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  10:36:19
+   Duration  3.51s (transform 0ms, setup 1.55s, import 216ms, tests 1.10s, environment 0ms)
+

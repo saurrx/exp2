@@ -5,10 +5,13 @@ import { PageHeader } from "@/components/DashboardChrome";
 import PatentsContent from "@/components/patents/PatentsContent";
 import PatentDetailsContent from "@/components/patents/PatentDetailsContent";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, ChevronDown } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import API_CONFIG from "@/lib/apiConfig";
+import useUserCookie from "@/hooks/use-auth";
+import { Link } from "react-router-dom";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const injectGlobalStyles = () => {
   const styleId = "patent-abstract-styles";
@@ -381,6 +384,7 @@ const injectGlobalStyles = () => {
 
 const PatentsPage: React.FC = () => {
   const { patentId } = useParams();
+  const { user } = useUserCookie();
   // One route, two screens: the portfolio list and a single record. They answer
   // different questions ("is anyone browsing patents?" vs "which records get
   // opened?"), so they are two events, each fired only on its own branch.
@@ -406,8 +410,8 @@ const PatentsPage: React.FC = () => {
   const patentStatus = searchParams.get("status");
 
   React.useEffect(() => {
-    injectGlobalStyles();
-  }, []);
+    if (patentId) injectGlobalStyles();
+  }, [patentId]);
 
   return (
     <>
@@ -417,14 +421,13 @@ const PatentsPage: React.FC = () => {
         <PageHeader
           actions={
             <>
-              <span className="hidden text-xs font-medium text-[var(--pulse-ink-muted)] md:inline">
-                {totalPatents} total patents
-              </span>
+              <DropdownMenu><DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="md:hidden">Navigation <ChevronDown aria-hidden="true"/></Button></DropdownMenuTrigger><DropdownMenuContent className="bg-pl-bg text-pl-ink motion-reduce:!animate-none" align="end">{(user?.role === "INVENTOR" ? [["Home","/"],["Ideas","/ideas"],["Patents","/patents"],["Profile","/profile"]] : user?.role === "LEGAL_COUNSEL" ? [["Home","/"],["Ideas","/ideas"],["Patents","/patents"],["Actions","/due-dates"],["Workspace","/workspace"],["Profile","/profile"]] : [[user?.role === "CASE_OWNER" ? "My work" : "Dashboard","/"],["Clients","/clients"],["Ideas","/ideas"],["Patents","/patents"],["Due dates","/due-dates"],["Actions","/actions"],...(user?.role === "PHOTON_ADMIN" ? [["Workspace","/workspace"]] : []),["Profile","/profile"]]).map(([label,path]) => <DropdownMenuItem key={path} asChild><Link to={path}>{label}</Link></DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleExportClick}
                 disabled={isExporting || totalPatents === 0}
+                aria-label={isExporting ? "Exporting CSV" : "Export CSV"}
                 className="pulse-filter-control h-9 gap-2"
               >
                 <Download className="h-4 w-4" />
@@ -444,9 +447,7 @@ const PatentsPage: React.FC = () => {
           The detail view keeps the old behaviour: it is a document, and a
           document should scroll. */}
       <div
-        className={`pulse-product-page pulse-table-page relative mx-auto flex w-full max-w-[1680px] flex-col px-6 py-6 lg:px-8 ${
-          patentId ? "min-h-[calc(100dvh-64px)]" : "min-h-0 flex-1 overflow-hidden"
-        }`}
+        className={patentId ? "pulse-product-page pulse-table-page relative mx-auto flex w-full max-w-[1680px] flex-col px-6 py-6 lg:px-8 min-h-[calc(100dvh-64px)]" : "flex min-h-0 w-full flex-1 flex-col overflow-hidden"}
       >
         <div className={`flex min-w-0 w-full flex-col ${patentId ? "" : "min-h-0 flex-1"}`}>
           {patentId ? (

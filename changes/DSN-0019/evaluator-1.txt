@@ -1,0 +1,12 @@
+VERDICT: NEEDS_WORK
+SURFACE: authentication  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 3 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 4 · business 2
+COGNITIVE LOAD: fail — My six default-state answers at 1280×720 and 1440×900 agree with the record, but expired-reset recovery makes users reconcile an unusable primary action with a subordinate next step.
+FINDINGS (most severe first, max 7):
+
+1. Email signup — eligible Inventors are told self-signup is available, but the record confirms HTTP 400 and a completion path that cannot create accounts; users cannot resolve this by correcting their input — resolve the signup contract blocker and verify eligible activation and actual unknown-domain rejection end to end; the injected rejection screenshot does not establish functional completion.
+2. Expired reset link — “Reset password” remains dominant after the link is declared invalid or expired, making users guess whether retrying can work; at 200% zoom the recovery link is partly below the viewport — make “Request a new reset link” the primary action for this terminal error and keep it visible with the explanation.
+3. Reset-request confirmation — “Check email or resend” makes the occasional Inventor guess whether the button opens their inbox, resends immediately, or returns to the form — label its actual destination, such as “Review email address or resend.”
+
+STATES MISSING: None of the eleven named brief states lacks screenshots; all 58 PNGs were inspected. Working eligible signup and completion remain unverified and blocked.
+REFERENCE MATCH: yes — restrained surfaces, amber primary controls, small radii and hairline separation match the reference language; public-entry headings use serif typography.

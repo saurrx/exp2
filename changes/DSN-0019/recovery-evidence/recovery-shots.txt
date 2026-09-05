@@ -1,0 +1,6 @@
+wrote  surfaces-authentication-and-access--reset-requested--at-1280x720
+wrote  surfaces-authentication-and-access--reset-requested--at-1440x900
+wrote  surfaces-authentication-and-access--reset-error--at-1280x720
+wrote  surfaces-authentication-and-access--reset-error--at-1440x900
+wrote  surfaces-authentication-and-access--reset-error--at-640x360@2
+shots: all stories rendered, stable within 40 pixels, no egress

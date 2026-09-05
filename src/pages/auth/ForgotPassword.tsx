@@ -86,7 +86,7 @@ const ForgotPassword = () => {
       </form> : <div className="space-y-4">
         <p className="ph-no-capture break-words text-sm font-medium text-pl-navy">{values.email}</p>
         <p className="text-sm leading-relaxed text-pl-text-2">Check your spam folder. If it does not arrive, return to the form to check your email and request another link.</p>
-        <Button size="sm" className="w-full" onClick={() => { setStatus("PENDING"); setSubmitted(false); }}>Check email or resend</Button>
+        <Button size="sm" className="w-full" onClick={() => { setStatus("PENDING"); setSubmitted(false); }}>Review email address or resend</Button>
       </div>}
       <AuthBackLink />
     </AuthLayout>

@@ -205,6 +205,13 @@ const ResetPassword: React.FC = () => {
 
   const complete = currentPageStatus === "SUCCESS_RESET" || currentPageStatus === "SUCCESS_SET";
   if (complete) return <PasswordCompletion reset={isForgotPasswordFlow} />;
+  if (isForgotPasswordFlow && entryError === "The reset link is invalid or has expired.") return (
+    <AuthLayout title="Reset link unavailable">
+      <AuthMessage>{entryError}</AuthMessage>
+      <Button size="sm" className="w-full" onClick={() => navigate("/forgot-password")}>Request a new reset link</Button>
+      <AuthBackLink />
+    </AuthLayout>
+  );
   return (
     <AuthLayout title={isForgotPasswordFlow ? "Reset your password" : "Set your password"}
       description="Use at least 8 characters, with an uppercase letter, lowercase letter, number and special character.">

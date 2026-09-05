@@ -1,0 +1,25 @@
+surfaces-photon-admin-dashboard--healthy-operations 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--healthy-operations 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--unassigned-client 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--unassigned-client 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--aging-approved-ideas 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--aging-approved-ideas 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--urgent-actions 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--urgent-actions 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--failed-import 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--failed-import 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--missing-client-configuration 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--missing-client-configuration 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--no-exceptions 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--no-exceptions 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--partial-data 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--partial-data 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--loading 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--loading 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--data-error 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--data-error 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--long-title 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--long-title 640 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--portfolio-context 1440 {"violations":[],"overflow":false}
+surfaces-photon-admin-dashboard--portfolio-context 640 {"violations":[],"overflow":false}
+failures 0

@@ -1,0 +1,31 @@
+wrote  surfaces-photon-admin-dashboard--healthy-operations--at-1280x720
+wrote  surfaces-photon-admin-dashboard--healthy-operations--at-1440x900
+wrote  surfaces-photon-admin-dashboard--healthy-operations--at-1366x768
+wrote  surfaces-photon-admin-dashboard--healthy-operations--at-1920x1080
+wrote  surfaces-photon-admin-dashboard--healthy-operations--at-640x360@2
+wrote  surfaces-photon-admin-dashboard--unassigned-client--at-1280x720
+wrote  surfaces-photon-admin-dashboard--unassigned-client--at-1440x900
+wrote  surfaces-photon-admin-dashboard--aging-approved-ideas--at-1280x720
+wrote  surfaces-photon-admin-dashboard--aging-approved-ideas--at-1440x900
+wrote  surfaces-photon-admin-dashboard--urgent-actions--at-1280x720
+wrote  surfaces-photon-admin-dashboard--urgent-actions--at-1440x900
+wrote  surfaces-photon-admin-dashboard--failed-import--at-1280x720
+   note surfaces-photon-admin-dashboard--failed-import--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-photon-admin-dashboard--failed-import--at-1440x900
+wrote  surfaces-photon-admin-dashboard--missing-client-configuration--at-1280x720
+wrote  surfaces-photon-admin-dashboard--missing-client-configuration--at-1440x900
+wrote  surfaces-photon-admin-dashboard--no-exceptions--at-1280x720
+wrote  surfaces-photon-admin-dashboard--no-exceptions--at-1440x900
+wrote  surfaces-photon-admin-dashboard--partial-data--at-1280x720
+wrote  surfaces-photon-admin-dashboard--partial-data--at-1440x900
+wrote  surfaces-photon-admin-dashboard--partial-data--at-640x360@2
+wrote  surfaces-photon-admin-dashboard--loading--at-1280x720
+wrote  surfaces-photon-admin-dashboard--loading--at-1440x900
+wrote  surfaces-photon-admin-dashboard--data-error--at-1280x720
+wrote  surfaces-photon-admin-dashboard--data-error--at-1440x900
+wrote  surfaces-photon-admin-dashboard--long-title--at-1280x720
+wrote  surfaces-photon-admin-dashboard--long-title--at-1440x900
+wrote  surfaces-photon-admin-dashboard--long-title--at-640x360@2
+wrote  surfaces-photon-admin-dashboard--portfolio-context--at-1280x720
+wrote  surfaces-photon-admin-dashboard--portfolio-context--at-1440x900
+shots: all stories rendered, stable within 40 pixels, no egress

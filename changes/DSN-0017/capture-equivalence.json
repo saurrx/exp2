@@ -1,0 +1,35 @@
+{
+  "identical": 26,
+  "changes": [
+    {
+      "name": "surfaces-photon-admin-dashboard--failed-import--at-1280x720.png",
+      "count": 1,
+      "box": [
+        1247,
+        718,
+        1247,
+        718
+      ]
+    },
+    {
+      "name": "surfaces-photon-admin-dashboard--failed-import--at-1440x900.png",
+      "count": 3,
+      "box": [
+        320,
+        718,
+        1407,
+        720
+      ]
+    },
+    {
+      "name": "surfaces-photon-admin-dashboard--partial-data--at-1280x720.png",
+      "count": 8,
+      "box": [
+        14,
+        86,
+        62,
+        121
+      ]
+    }
+  ]
+}

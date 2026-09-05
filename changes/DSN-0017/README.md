@@ -19,7 +19,7 @@ Tobias Berg must keep ownership and incoming client work under control across Ph
 | C · Daily operations digest | A short narrative explains today's highest-priority gap; category disclosures follow | Calm orientation; speeds a small daily check | Work becomes harder to scan when exceptions grow, and the narrative repeats queue facts. |
 
 ## Validation status
-The final implementation and rendered evidence are available for independent review. Required serial checks are queued behind the ongoing broad runner; no coverage or merge claim is made yet.
+Implementation, all required checks and independent evaluation pass. Coverage records DSN-0017. The pre-authorized merge is the remaining completion step.
 
 ## Implementation and preserved boundaries
 The existing Index route and dashboard query feed a presentational PhotonAdminDashboard. Ownership gaps lead, then approved ideas (oldest waiting first), urgent client instructions/dates, configuration and failed imports. Each selected brief brings client, Case Owner, reference, age/date and a specific record-opening action together. Selection survives navigation in the URL. A secondary Refresh operations control uses the existing refetch callback after work on another route; it resolves the five-minute cache without changing query policy.
@@ -44,10 +44,10 @@ Rendered roleplay confirms the task leads: healthy operations opens the incoming
 | Accessibility | 4 | Final isolated-build 24 accessibility/overflow contexts clean; long/partial zoom actions fully visible. |
 | Business | 4 | Direct ownership and work handoff reduce coordination steps; no unmeasured success claim. |
 
-Cognitive-load check: pass on inspected captures. No leading map/metric, duplicate selected title, extra lifecycle stage, badge, destructive action or horizontal scroll. Final review and checks remain pending.
+Cognitive-load check: pass on inspected captures. No leading map/metric, duplicate selected title, extra lifecycle stage, badge, destructive action or horizontal scroll. Independent review and final required checks pass.
 
 ## Validation checkpoint
-Both builds, all 360 interaction tests, V0 53/53, required gate 7/7 and 29 scoped two-render captures pass before the refresh-control addition. Full-app functional probe passes assignment plus dashboard refresh, approved-idea navigation and Back selection, firm totals and filtered portfolio destinations, map expansion/close, exact urgent instruction/date destinations, failed-import context and partial-data reload (functional3.log). Full broad gate remains running. Final capture refresh, required checks and independent evaluator will be recorded before coverage or merge.
+Both builds, all 360 interaction tests, V0 53/53, required gate 7/7 and 29 scoped two-render captures pass before the refresh-control addition. Full-app functional probe passes assignment plus dashboard refresh, approved-idea navigation and Back selection, firm totals and filtered portfolio destinations, map expansion/close, exact urgent instruction/date destinations, failed-import context and partial-data reload (functional-final.log). Full broad gate remains running. Final capture refresh, required checks and independent evaluator will be recorded before coverage or merge.
 
 Final isolated-build evidence: storybook-isolated-final.log, shots-isolated-final.log (29 captures, stable within 40 pixels, zero egress), axe-isolated-final.log (24 contexts, zero violations/overflow) and functional-final.log (all five workflows pass, including prior-period date-range navigation). Independent review follows against the current shots/.
 
@@ -62,3 +62,14 @@ None.
 STATES MISSING: none; all 29 screenshots inspected.
 REFERENCE MATCH: yes — Consistent typography, restrained amber primary controls, hairline separation and list/detail hierarchy; firm totals and geography remain below operational work.
 ```
+
+## Final repository validation
+The exact repository command `node tools/design/shots.mjs --update --twice --only '^surfaces-photon-admin-dashboard--'` passes all 29 captures with zero egress. Final shots/ copies are byte-identical to the independent review set for 26 images, including all five default viewports; the remaining three differ by only 1, 3 and 8 edge pixels (capture-equivalence.json). No content or layout changed. Both final builds pass, and all 24 final accessibility/overflow contexts pass.
+
+The full broad runner finished at **18/23** (gates-full.log; details under broad-gate-details/). Follow-ups: documentation-host allowlist entries in historical logs; 43 other-surface baseline differences and five unstable captures, none on this dashboard; 27 new accessibility fingerprints and one Workspace Admin Ideas reference contrast block; 54 broader layout violations; 1,289 structural deviations against the historical baseline across 31 surfaces. Isolation, smoke, full crawl, desktop access, visible identifiers, lockfile reproduction and runtime graph pass. Broader screenshot comparison artifacts were preserved outside the checkout; unrelated baselines were not accepted. These checks are not represented as a clean full-suite result.
+
+Known compromises: BF-15 remains a mock proposal until backend verification. The existing dashboard cache is refreshed explicitly after operational work on another route. Long queues scroll naturally; portfolio context intentionally follows all operational groups. Business impact is a hypothesis, not a measured outcome. No founder decision is needed for this surface.
+
+Final required serial gate: **7/7 pass**, including typecheck, tokens, V0 semantic/coverage and all story interactions (gates-required-final.log). Role lint passes (roles-final.log). Coverage now lists all 12 stories and the nine actual V0 scenarios and records BF-15 as conceptual.
+
+Post-ledger V0 verification: **53/53 pass** (v0-final.log).

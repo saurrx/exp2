@@ -163,3 +163,6 @@ Built the progressive patent record and scoped operational editor; 23 V0 stories
 
 ### DSN-0013 broader accessibility findings
 Required gates passed 8/8. The broader all-story accessibility ratchet reported a disabled-editor scrolling issue and newly reachable legacy operational due-date table scrolling; both are corrected with named, keyboard-focusable scroll regions. It also reported 27 fingerprints and one blocking contrast finding outside this surface (duplicate unnamed landmarks on disclosure/evaluation/client stories, Idea unavailable/aging-text contrast, including the approved Ideas queue). Those components are unchanged in this DSN; recorded for the run sweep, not baseline-whitelisted. Focused surface checks are rerun after the correction. This is not a claim that the full accessibility ratchet is green.
+
+### DSN-0013 evaluator corrections
+Round 1 NEEDS_WORK identified an offscreen removal prompt, duplicate editor identity/status and contradictory native file-selection text. Corrected with a focused inline removal prompt, compact editing header and one authoritative selected-file state. Added removal zoom coverage and a decision-control viewport assertion. Rechecking builds, gates, captures and accessibility before fresh round 2; coverage remains 9/17.

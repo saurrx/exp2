@@ -1680,7 +1680,9 @@ const DueDatesContent: React.FC<DueDatesContentProps> = ({
               </div>
             ) : (
               <div
-                className="pulse-table-frame !mx-0 !mb-3 min-h-0 flex-1 overflow-auto"
+                tabIndex={0}
+                aria-label="Due date records"
+                className="pulse-table-frame !mx-0 !mb-3 min-h-0 flex-1 overflow-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--pulse-focus)]"
               >
                 <div className="min-w-full inline-block align-middle">
                   <table className="pulse-data-table min-w-full">

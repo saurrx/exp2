@@ -23,7 +23,7 @@ All three preserve the current route and persona boundaries. A uses whitespace, 
 6. Anxiety: missing imported fields say not recorded, dates come from recorded data, documents name the file, and failed saves preserve inputs. An unavailable record offers a specific recovery without rendering its internal identifier.
 
 ## Validation
-Implementation and required checks are complete; final independent review is pending. Coverage remains null until the evaluator returns PASS.
+Complete: final required checks pass and independent evaluator round 2 returned PASS. Coverage is marked DSN-0013.
 
 ## Transport and navigation defects exposed by the surface
 Canonical detail reads retain missing dates and patent inventors rather than the legacy adapter's inferred creation-date fallback and idea-inventor substitution. The query key, patent prop and existing GET/update routes remain. Same-client document association is modeled as BF-11; canonical assignee/family/history fields are now honored by the existing mock update handler. Patent-file downloads alone opt into native byte responses; legacy file routes retain their existing behavior. No adapter, auth, analytics or shared query-hook file changed.
@@ -52,7 +52,7 @@ Final required gates passed 8/8 (`gates-review2-final.log`), including typecheck
 
 Full-app tests cover all four personas: canonical assignee/family updates survive refresh, patent inventors remain faithful, read-only writes are rejected, uploads/downloads round-trip original bytes, removal can be canceled/confirmed, Back preserves the portfolio search after reload, and contextual links render the matching due-date event (`functional-review2-final.log`). Foreign/unassigned patent reads return 404 and the Inventor's originating disclosure opens the existing detail route (`boundaries.log`). Retained save/upload retry and zoom notes editing with Save visible pass (`zoom-review2.log`).
 
-BF-11 document association remains conceptual until the real backend contract is verified; no real service was contacted. The broad all-story accessibility ratchet is **not green**: its attempt reported unrelated unnamed-landmark and contrast findings on earlier disclosure/evaluation/idea/client/reference stories. These are recorded in PROGRESS.md for the run sweep and not baseline-whitelisted. The three findings attributable to this change were fixed and the focused 25-state pass is green. Required surface gates remain green. Fresh independent evaluator verdict is pending below; coverage stays 9/17 until PASS.
+BF-11 document association remains conceptual until the real backend contract is verified; no real service was contacted. The broad all-story accessibility ratchet is **not green**: its attempt reported unrelated unnamed-landmark and contrast findings on earlier disclosure/evaluation/idea/client/reference stories. These are recorded in PROGRESS.md for the run sweep and not baseline-whitelisted. The three findings attributable to this change were fixed and the focused 25-state pass is green. Required surface gates remain green. Independent evaluator round 2 returned PASS below; coverage is now 10/17.
 
 ## Independent review round 1 and corrections
 The reviewer identified three task-level defects: removal confirmation below the viewport, repeated title/status in the operational editor, and contradictory native/retained file-selection text. The editor now starts with one compact Edit patent record heading under the persistent client header; title and status appear only in editable fields. Document removal replaces its own row with the complete question and decisions, receives keyboard focus and scrolls the complete prompt into view. File selection now uses one named Choose/Change document control and one authoritative selected filename. Removal now has a supplemental zoom capture and a viewport assertion for its decision control.
@@ -77,3 +77,16 @@ REFERENCE MATCH: yes — Typography, compact amber controls, restrained borders,
 Revised captures were inspected at both review widths and zoom: removal question and both decisions are visible together; the editor retains client context without repeated saved fields; upload retry has one selected filename. Focused accessibility is clean in all 25 contexts, retained save/upload retry passes at zoom, and full-app four-persona verification confirms cancel/confirmed removal against stored data as well as document byte integrity. The 49-pixel antialiasing pair in Photon Admin editor was recaptured at the unchanged tolerance and passed.
 
 Final revision validation: `gates-review2-final.log` passes 8/8, both revised builds pass, and the 23 patent stories pass within the complete serial suite. The first revised suite run had a transient prior-surface Patent Portfolio / Multiple Jurisdictions selection failure; the unchanged rerun passed. The isolation probe remains informational and is not counted as a passing test. Current evidence logs are committed with this record.
+
+## Independent review round 2 — PASS
+
+```text
+VERDICT: PASS
+SURFACE: patent-detail  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — Independent six-question roleplays at 1280×720 and 1440×900 agree with the record: identity leads, persona-appropriate controls are clear, supporting evidence recedes, and recovery avoids unnecessary remembering or guessing.
+FINDINGS (most severe first, max 7):
+None in the 72 inspected screenshots; the record documents three directions and the chosen tradeoff.
+STATES MISSING: none
+REFERENCE MATCH: yes — Typography, compact amber controls, restrained borders, whitespace and hairline separation follow the Workspace Admin reference language.
+```

@@ -166,3 +166,6 @@ Required gates passed 8/8. The broader all-story accessibility ratchet reported 
 
 ### DSN-0013 evaluator corrections
 Round 1 NEEDS_WORK identified an offscreen removal prompt, duplicate editor identity/status and contradictory native file-selection text. Corrected with a focused inline removal prompt, compact editing header and one authoritative selected-file state. Added removal zoom coverage and a decision-control viewport assertion. Rechecking builds, gates, captures and accessibility before fresh round 2; coverage remains 9/17.
+
+### DSN-0013 complete — evaluator PASS
+Round 2 PASS: all seven scorecard categories 4, no findings or missing states across 72 inspected screenshots. Final required gates 8/8, both builds, focused accessibility 25/25, four-persona stored-data/document/navigation checks and retained recovery at zoom pass. Twenty-three V0 stories replace two legacy detail stories; all 15 intended IDs exist. Coverage now 10/17. Ready for no-ff merge; next DSN-0014 Actions.

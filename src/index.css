@@ -87,12 +87,20 @@
   }
 
   /* DSN-0005 reflows at desktop zoom; the device access gate is unchanged. */
-  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]) {
+  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]), body:has([data-ideas-list]), body:has([data-review-queue]) {
     min-width: 0;
   }
 
-  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh {
+  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh, body:has([data-ideas-list]) .h-dvh, body:has([data-review-queue]) .h-dvh {
     min-height: 0;
+  }
+
+  /* DSN-0009: keep navigation and the list action within desktop zoom. */
+  @media (max-width: theme('screens.md')) {
+    body:has([data-ideas-list]) main > header > div > div > p,
+    body:has([data-ideas-list]) main > header > div > div > span[aria-hidden="true"] {
+      display: none;
+    }
   }
 
   /* A one-time entrance for dashboard numbers: transform only, no fade, so

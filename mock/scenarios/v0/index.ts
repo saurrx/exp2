@@ -250,9 +250,42 @@ const ideaDetailStates = ["draft", "evaluated", "submitted", "under-review", "ch
     return db;
   }));
 
+/** DSN-0009: meaningful, source-consistent review evidence for queue states. */
+function reviewQueueEvidence(data: Data): Data {
+  for (const idea of data.ideas) {
+    const draft = data.drafts.find((draft) => draft.idea_id === idea.id);
+    if (!draft) continue;
+    const thermal = idea.title.startsWith("Thermal drift");
+    const path = idea.title.startsWith("Collision-aware");
+    const answers = draft.answers as Record<string, any>;
+    const source = thermal ? {
+      problem: "Position readings drift as the encoder warms during a shift. A temperature reading at the motor does not describe the sensing element's recent thermal history.",
+      solution: "A temperature sensor beside the encoder tracks recent heating and cooling. The controller uses that history to adjust the position signal continuously while the robot moves.",
+      novelty: "Local thermal history drives the correction, rather than a fixed lookup table or a remote temperature reading. The inventor proposes testing repeated heating and cooling cycles to quantify the difference.",
+    } : path ? {
+      problem: "A robot makes abrupt steering corrections when its planned route passes close to obstacles. Repeated corrections slow the route and can disturb the carried load.",
+      solution: "A learned clearance map estimates available space around the route. The planner smooths changes in curvature using that map before sending the path to the motion controller.",
+      novelty: "The proposed distinction is using learned clearance estimates during smoothing, without building a separate obstacle model. Comparative route measurements would help establish its effect.",
+    } : { problem: answers.problem, solution: answers.solution, novelty: answers.novelty };
+    Object.assign(answers, source);
+    for (const section of answers.__meta_data || []) for (const question of section.questions || []) if (source[question.id as keyof typeof source]) question.answer = source[question.id as keyof typeof source];
+    idea.body = source.novelty;
+    const report = draft.report as any;
+    if (report?.scoringResult) {
+      const distinction = thermal ? "using local thermal history in the correction" : path ? "using learned clearance during path smoothing" : "combining the passive element with the correction loop";
+      report.scoringResult.summary = (draft.score ?? 0) < 40
+        ? `The returned references overlap closely with the disclosed mechanism. The distinction in ${distinction} needs a clearer comparison and supporting measurements.`
+        : (draft.score ?? 0) >= 80
+          ? `The returned references share the underlying system but do not describe ${distinction}. This is the main distinction identified by the search; comparative measurements would strengthen the disclosure.`
+          : `The returned references share several features. The proposed difference is ${distinction}; its effect and implementation need a more specific explanation.`;
+    }
+  }
+  return data;
+}
+
 const workspaceAdminQueue = v0("v0/workspace-admin/queue", "Workspace Admin queue at Northwind",
   "Seven scored ideas awaiting the one review stage, oldest 56 days, one submitted on behalf of an inventor by the admin, one resubmitted after changes. Five contributing inventors, two Workspace Admins, and deadlines with contextual dates.",
-  U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => northwindBuild("v0/workspace-admin/queue"));
+  U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => reviewQueueEvidence(northwindBuild("v0/workspace-admin/queue")));
 
 const workspaceAdminEmpty = v0("v0/workspace-admin/empty", "New workspace at Beacon, no inventors yet",
   "Elin Sørensen's workspace six weeks in: no inventors, no ideas, a small imported portfolio, the activation emails that follow from that state.",
@@ -265,7 +298,7 @@ const oneUrgent = v0("v0/workspace-admin/one-urgent-review", "One idea waiting p
   U.admin.email, ADMIN, () => northwindBuild("v0/workspace-admin/one-urgent-review", SMALL, oneUrgentReview()));
 const largeQueue = v0("v0/workspace-admin/large-aging-queue", "Forty ideas waiting, several past the threshold",
   "A large aging queue: forty ideas awaiting review with waits from two days to ten weeks. The dashboard shows six and links to the rest.",
-  U.admin.email, ADMIN, () => northwindBuild("v0/workspace-admin/large-aging-queue", SMALL, largeAgingQueue()));
+  U.admin.email, ADMIN, () => reviewQueueEvidence(northwindBuild("v0/workspace-admin/large-aging-queue", SMALL, largeAgingQueue())));
 const noActionsDue = v0("v0/workspace-admin/no-actions-due", "Nothing due in the next 30 days",
   "Northwind's queue with a portfolio that has no upcoming due dates: the Actions box reads none due.",
   U.admin.email, ADMIN, () => northwindBuild("v0/workspace-admin/no-actions-due", { [NORTHWIND.id]: portfolio(180, "northwind-v1", NORTHWIND, 0), [BEACON.id]: SMALL[BEACON.id] }));
@@ -311,6 +344,23 @@ const authFailures = v0("v0/auth/failures", "Authentication failures",
   "The only V0 scenario that returns 401 on purpose: invalid login, expired session with a failed refresh, revoked access, SSO failure, unknown domain at signup.",
   U.admin.email, [U.admin.email], () => { const d = emptyDataV0({ authFails: true }); d.portfolios = SMALL; return d; });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const ideasListStates = ["drafts-only", "mixed", "long-titles"].map((slug) => v0(`v0/ideas/${slug}`, `Ideas list: ${slug}`, "Own and credited ideas with direct next steps.", U.inventor.email, [U.inventor.email], () => {
+  const specs: IdeaSpec[] = slug === "drafts-only" ? [
+    { invention: 0, author: U.inventor, state: "DRAFT", completion: 40, ageDays: 2 },
+    { invention: 1, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 4 },
+  ] : [
+    { invention: 0, author: U.inventor, state: "CHANGES_REQUESTED", ageDays: 1, reviewer: U.admin, comment: "Please explain how the adjustment loop responds when cable load changes.", evaluation: { state: "SUCCEEDED", score: 62 } },
+    { invention: 1, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 2, evaluation: { state: "RUNNING" } },
+    { invention: 2, author: U.coinventor, coInventors: [U.inventor], state: "LEGAL_REVIEW", ageDays: 3, evaluation: { state: "SUCCEEDED", score: 74 } },
+    { invention: 3, author: U.inventor, state: "SENT_TO_PHOTON", ageDays: 4, reviewer: U.admin },
+    { invention: 4, author: U.inventor, state: "REJECTED", ageDays: 5, reviewer: U.admin, comment: "The disclosed mechanism overlaps with the supplied reference. A revised distinction would help reconsideration." },
+    { invention: 5, author: U.inventor, state: "DRAFT", completion: 40, ageDays: 6 },
+  ];
+  const data = northwindBuild(`v0/ideas/${slug}`, SMALL, specs);
+  if (slug === "long-titles") data.ideas[0].title = "Self-tensioning cable harness with a load-responsive adjustment loop and independent reference setting for assemblies exposed to repeated mechanical movement";
+  return data;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

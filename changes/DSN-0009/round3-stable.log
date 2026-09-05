@@ -1,0 +1,14 @@
+same   surfaces-ideas-list--workspace-admin-pending--at-1280x720
+same   surfaces-ideas-list--workspace-admin-pending--at-1440x900
+same   surfaces-ideas-list--workspace-admin-pending--at-1366x768
+same   surfaces-ideas-list--workspace-admin-pending--at-1920x1080
+same   surfaces-ideas-list--workspace-admin-pending--at-640x360@2
+same   surfaces-ideas-list--workspace-admin-large-queue--at-1280x720
+same   surfaces-ideas-list--workspace-admin-large-queue--at-1440x900
+same   surfaces-ideas-list--workspace-admin-filtered-empty--at-1280x720
+same   surfaces-ideas-list--workspace-admin-filtered-empty--at-1440x900
+same   legacy-reference-screens-review-queue--committee
+same   legacy-reference-screens-review-queue--counsel
+same   legacy-reference-screens-review-queue--request-changes-dialog
+same   legacy-reference-screens-review-queue--empty
+shots: all stories rendered, stable within 40 pixels, no egress

@@ -63,6 +63,13 @@
       "type": "Internal answer fingerprint and revision / { revision, evaluated_at, is_current } or null",
       "finding": "BF-9",
       "reason": "DSN-0008 evaluator: preserve evaluation attribution and freshness after edits and resubmission. The mock captures the answer-text fingerprint and review revision when evaluation starts, compares saved answers when hydrating the draft, and exposes the date, revision and freshness. Save metadata alone does not make the evaluation stale. No raw fingerprint is rendered."
+    },
+    {
+      "entity": "Idea",
+      "field": "case_owners",
+      "type": "Array<{ id, name }> (V0 only)",
+      "finding": "BF-10",
+      "reason": "DSN-0009: Photon Ideas list needs Case Owner context beside each client. Derived from existing assigned client scope; no assignment or permission changes."
     }
   ],
   "collections": [

@@ -15,7 +15,9 @@ const config: StorybookConfig = {
   addons: ["@storybook/addon-docs", "@storybook/addon-a11y", "@storybook/addon-vitest", "msw-storybook-addon"],
   core: { disableTelemetry: true },
   viteFinal: async (cfg) => {
-    const merged = mergeConfig(cfg, { resolve: { alias: DESIGN_ALIASES } });
+    // Storybook copies staticDirs itself. A second Vite public copy races its
+    // mkdir on public/assets and intermittently aborts the required build.
+    const merged = mergeConfig(cfg, { resolve: { alias: DESIGN_ALIASES }, build: { copyPublicDir: false } });
     if (merged.server) delete (merged.server as { proxy?: unknown }).proxy;
     return merged;
   },

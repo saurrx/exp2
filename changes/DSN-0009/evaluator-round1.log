@@ -1,0 +1,811 @@
+2026-09-05T03:43:15.667617Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-09-05T03:43:15.667969Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+OpenAI Codex v0.153.2
+--------
+workdir: /Users/saurabh/PL/exp2
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a06fa9-d291-7b12-b60c-45af3b2e617c
+--------
+user
+---
+name: evaluator
+description: Fresh-context design evaluator. Grades one rendered V0 surface against its brief, the scorecard and the cognitive-load charter from screenshots, without seeing the builder's reasoning. Returns PASS or NEEDS_WORK.
+tools: Read, Glob, Grep, Bash
+---
+
+You are the reviewer of a Pulse V0 surface. You did not build it and you
+must not read the builder's reasoning; you judge only what is rendered and
+what the record claims.
+
+Read, in this order:
+1. `product-context/AGENTS.md` (design rules, boundaries, evaluation rules)
+2. `product-context/PERSONAS.md` for the persona named in the request
+3. The surface brief named in the request (`product-context/surfaces/<brief>.md`)
+4. `design/v0/COGNITIVE-LOAD.md`
+5. `product-context/DESIGN-SCORECARD.md`
+6. The change record `changes/DSN-xxxx/README.md` and every screenshot under
+   its `shots/` directory. Open each screenshot with the Read tool and look
+   at it. If a screenshot the brief's states require is missing, that is a
+   finding.
+
+Then run the cognitive-load roleplay yourself as the persona, on the
+1280×720 and 1440×900 screenshots of the default state, and compare your six
+answers with the builder's answers in the record. Score the scorecard
+categories 1–5 from the screenshots.
+
+Report in exactly this shape, nothing before the first line:
+
+```
+VERDICT: PASS | NEEDS_WORK
+SURFACE: <brief>  PERSONA: <persona>
+SCORECARD: product-fit N · hierarchy N · usability N · trust N · craft N · accessibility N · business N
+COGNITIVE LOAD: pass | fail — <one sentence>
+FINDINGS (most severe first, max 7):
+1. <element> — <what the persona had to read/remember/guess> — <fix>
+...
+STATES MISSING: <list or none>
+REFERENCE MATCH: <does it match the Workspace Admin Overview / Ideas queue language: yes | no — what differs>
+```
+
+PASS requires: every scorecard category ≥ 4 or an explained exception in the
+record; cognitive load pass; no product-boundary violation (fifth persona,
+badge outside Workspace Admin, Inventor seeing Actions/dates/rankings, score
+cutoff, evaluation gating submission, notification bell, chat assistant); no
+hard rule in COGNITIVE-LOAD.md broken; the three directions and the chosen
+tradeoff written in the record.
+
+Report only findings that affect the persona's task, trust, or a stated
+rule. Do not list style preferences. Do not propose new features.
+
+Surface: product-context/surfaces/ideas.md. Personas: Inventor, Workspace Admin, Case Owner, Photon Admin. Record: changes/DSN-0009/README.md. Read every PNG in changes/DSN-0009/shots (45). Follow the evaluator format and evaluate the rendered work independently. This is an evaluation only: do not edit files, run the autonomous goal, or read the builder's conversation. Use view_image to inspect images.
+
+warning: Under-development features enabled: token_budget. Under-development features are incomplete and may behave unpredictably. To suppress this warning, set `suppress_unstable_features_warning = true` in /Users/saurabh/.codex/config.toml.
+hook: SessionStart
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll read the evaluation criteria and inspect all 45 screenshots, then grade the rendered surface independently.
+
+exec
+/bin/zsh -lc 'cat CLAUDE.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Pulse V0 — agent context
+
+This repository is the Pulse V0 codebase: a full UI and UX redesign of Pulse
+for four personas (Inventor, Workspace Admin, Case Owner, Photon Admin),
+running on a Mock Service Worker backend under `mock/`. The mock is the
+backend for V0 design work: when a screen needs a route, field or state the
+mock does not model yet, add it to the mock (declare it in
+`mock/proposed-routes.json` / `mock/proposed-fields.json`) and build the
+screen against it.
+
+Read, in order: this file, `AGENTS.md`, `product-context/AGENTS.md` and the
+surface brief under `product-context/surfaces/` for the screen you are on.
+Before calling any screen ready, run `product-context/DESIGN-SCORECARD.md`
+and `design/v0/COGNITIVE-LOAD.md` against the rendered result.
+
+Authority, highest first:
+1. The user's explicit instructions in the current task (including
+   `STEER.md` during an autonomous run).
+2. `product-context/` — V0 product, business, persona, workflow, screen,
+   vocabulary and design truth (version 1.1.0). Never add a persona, role,
+   status, screen, metric or module it does not authorise.
+3. The reference screens: the Workspace Admin Overview
+   (`src/components/dashboard/WorkspaceAdminOverview.tsx`) and the Workspace
+   Admin Ideas queue (`src/components/review/ReviewQueueWorkspace.tsx`) as
+   they render on `main`. Every other screen is redesigned to match their
+   visual language: tokens, type, radius scale, 36px buttons, hairline
+   separation, two-pane list/detail where a list feeds a decision.
+4. `AGENTS.md` and `.claude/rules/` — how work is done in this repo.
+5. Legacy Pulse (`design/stories/legacy/`, `dev.photonpulse.ai`) — reference
+   only, removed as each V0 surface lands.
+6. External design resources — inspiration only.
+
+`docs/architecture/CONTEXT-RECONCILIATION.md` records where product context,
+mock and code disagree and how each was resolved. Read it before touching a
+surface it names.
+
+## History (why some files look like a fork)
+
+Until September 2026 this repository was a design fork of
+`photonlegal/pulse-frontend` that exported design changes back to production
+as portable patches. That model is retired: there is no upstream sync, no
+patch export, no portable/protected path classes and no behavioural
+fingerprint escalation. `tools/design/export.mjs`, `sync.mjs`,
+`fingerprint.mjs`, `paths.mjs`, `contract/` and the patch files under
+`changes/DSN-000[1-3]/` are historical and are not rules. The gates that
+still matter are listed in `AGENTS.md`.
+
+@AGENTS.md
+
+exec
+/bin/zsh -lc 'cat product-context/AGENTS.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Instructions for AI Design Work
+
+You are designing Pulse V0, a high-trust B2B intellectual-property workflow
+product. Read the required context before producing visual output or code.
+
+## Operating contract
+
+- Start with the persona, job, product object, consequence, and success metric.
+- Roleplay the persona before laying out the screen: what do they need to see
+  first, what do they decide here, what would they never read on this screen?
+- Resolve information architecture before styling.
+- Produce three meaningfully different directions for material new surfaces,
+  select the one with the lowest cognitive load for that persona and screen
+  (design/v0/COGNITIVE-LOAD.md), and record all three with the tradeoff. The
+  founder has pre-authorised this selection for the V0 run; stop and ask only
+  when a direction would change product behaviour, scope, permissions,
+  vocabulary or a reference screen.
+- Explain the hierarchy, tradeoffs, and elements deliberately omitted.
+- Build using the repository's real components, tokens, and supported stack.
+  The mock is the backend: extend it when a screen needs what the API lacks.
+- Render and inspect the real result. Code inspection is not visual review.
+- Cover every reachable state relevant to the active surface.
+- Run the design scorecard and the cognitive-load check after rendering and
+  address the largest gaps.
+- Prefer reduction and hierarchy over adding cards, labels, and decoration.
+
+## Product boundaries
+
+- There are four V0 personas: Inventor, Workspace Admin, Case Owner, Photon Admin.
+- Evaluation is optional, started by the inventor with a button, and advisory.
+  No score blocks submission.
+- Workspace Admin approval sends the idea to Photon Legal for filing.
+- Pulse contains no purchasing, checkout, billing, or service-price selection.
+- Drafting and filing legal work occur outside Pulse.
+- Inventors see the full company patent portfolio but no due dates or Actions.
+- Workspace Admins see Actions and dates but cannot import or edit patent data.
+- Case Owners and Photon Admins maintain patent and due-date data.
+- Trademark is later roadmap, not V0.
+- A general-purpose AI chat assistant is not V0.
+- There is no notification center or bell in V0; email is the durable channel.
+
+## Design rules
+
+- Pulse must feel calm, credible, premium, intelligent, human, precise,
+  encouraging, and professionally expressive.
+- The Workspace Admin Overview and the Workspace Admin Ideas queue are the
+  approved visual reference. Match their tokens, type, radius scale, button
+  sizes, hairline separation and two-pane list/detail pattern on every other
+  screen. Preserve Photon Legal's core brand colors.
+- Avoid old enterprise software, spreadsheet decoration, aqua/glass styling,
+  generic AI dashboards, loud color, childish illustration, and excessive motion.
+- One task leads on every screen. Supporting UI recedes.
+- Do not put data on a dashboard merely because it exists.
+- The patent world map is part of every V0 dashboard (all four home screens)
+  as the portfolio's geographic view. It never leads: work and next steps
+  come first, the map sits below them. Jurisdiction counts and filters also
+  belong in the Patent Portfolio.
+- Use noticeable but professional motion only to explain change, progress, or
+  successful completion.
+- Desktop and laptop only, but support common laptop widths and 200% browser zoom.
+
+## Evaluation rules
+
+- Use the term `prior art`, never `prior arts`.
+- Retain a numeric 0–10 patentability score. The score may carry one band
+  label (Highly novel, Moderately novel, Marginally novel, Closely matched,
+  Not evaluated) and, inside the draft, a live patentability signal that
+  reads the sections back before the full score exists.
+- Never communicate an approval cutoff or imply that a score guarantees a patent.
+- Present inventor results in this order: Assessment, What appears different,
+  How to strengthen. Put detailed prior art behind progressive disclosure.
+- State once that the result is AI-assisted and advisory. Present the substance
+  confidently, directly, and with evidence rather than timid repeated warnings.
+
+## Never
+
+- Invent a persona, permission, workflow stage, product module, or legal promise.
+- Turn an external reference into a copied visual system.
+- Optimize for visual novelty at the expense of task completion or trust.
+- Add a full-screen chatbot as a shortcut for designing the product.
+- Add a notification bell, cost module, trademark module, docketing
+  integration, or purchase flow to V0.
+- Put a navigation badge on anything but the Workspace Admin's pending reviews.
+- Rank named inventors where an Inventor can see it. The Workspace Admin
+  Overview's Top inventors list is the one authorised ranking.
+- Use real inventions, customer names, emails, patent data, credentials, or
+  call transcripts in fixtures, screenshots, or prompts.
+- Declare a design successful based only on an AI critic's score.
+
+## Completion requirements
+
+Before presenting a design as ready, verify it against
+`DESIGN-SCORECARD.md`, `design/v0/COGNITIVE-LOAD.md`, the relevant surface
+brief, accessibility requirements, all supported laptop widths, long content,
+empty/loading/error states, and the named business outcome.
+
+exec
+/bin/zsh -lc 'cat product-context/PERSONAS.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Personas and Jobs
+
+V0 has exactly four product personas. Do not import the six-role model from a
+previous implementation.
+
+## 1. Inventor
+
+### Who they are
+
+An employee, engineer, researcher, product builder, or technical leader who may
+have created something worth protecting. Patent work is not their daily job.
+
+### Job to be done
+
+Turn an idea and scattered supporting material into a disclosure that the
+company can review and Photon Legal can understand.
+
+### Context and anxiety
+
+- They may not know patent vocabulary.
+- They may not know what detail is sufficient.
+- A traditional questionnaire feels like work unrelated to their main job.
+- They fear saying something incorrectly or wasting time.
+- They may start with a deck, technical document, notes, code, or pasted text.
+
+### Desired feeling
+
+Inspired, guided, capable, reassured, and proud of contributing.
+
+### Success
+
+- Starts with almost no friction
+- Sees useful prefilled content quickly
+- Understands gaps without feeling judged
+- Completes and submits confidently
+- Understands the advisory evaluation
+- Knows what happens after submission
+
+### Permissions
+
+- Domain self-signup or invitation
+- Create and manage own/credited ideas
+- Add co-inventors
+- Upload or paste source material
+- Evaluate and re-evaluate
+- Submit at any score
+- Respond to requested changes and resubmit
+- View own idea timeline
+- View the complete company patent portfolio read-only
+- Cannot see due dates, Actions, clients, or administration
+
+## 2. Workspace Admin
+
+### Who they are
+
+Usually the General Counsel or legal leader, and sometimes the CTO, innovation
+leader, or members of an internal review/IP committee. A workspace may have
+several Workspace Admins.
+
+### Job to be done
+
+Encourage invention submissions, review them efficiently, decide which ideas
+should be filed, and maintain visibility over the company's program and patent
+portfolio.
+
+### Context and anxiety
+
+- Patent review is one responsibility among many.
+- A growing queue can become invisible in email or spreadsheets.
+- Decisions should be defensible without requiring a full internal IP team.
+- They need enough evidence to decide, not every available data point.
+
+### Desired feeling
+
+Focused, confident, decisive, and informed.
+
+### Success
+
+- Pending reviews are unmistakable
+- Oldest work and days waiting are visible
+- A decision can be made from one coherent screen
+- The consequence of approval is explicit
+- Portfolio and upcoming responsibilities are easy to understand
+
+### Permissions
+
+- See all ideas in the workspace
+- Submit own ideas
+- Submit on behalf of a selected real inventor
+- Review, request changes, reject, or approve for filing
+- Invite and manage workspace users
+- View the patent portfolio and patent details read-only
+- View and submit patent-event Actions
+- See due dates within Actions and patent details
+- Cannot import or directly edit patent/due-date records
+
+## 3. Case Owner
+
+### Who they are
+
+A Photon Legal team member responsible for a set of assigned client companies.
+
+### Job to be done
+
+Keep assigned clients onboarded, supported, and moving from approved ideas to
+organized Photon Legal work while maintaining accurate portfolio visibility.
+
+### Desired feeling
+
+Prepared, responsive, and in control.
+
+### Success
+
+- Sees which assigned client needs attention
+- Receives approved ideas as clear briefs
+- Can find attachments and review history immediately
+- Can maintain portfolio and dates without crossing client boundaries
+- Can process assigned Actions without hunting
+
+### Permissions
+
+- Assigned clients only
+- Help onboard clients
+- Add Workspace Admins and invite inventors
+- View assigned-client ideas, portfolio, Actions, and dates
+- Receive approved ideas
+- Import and manually update assigned-client patents and due dates
+- Process assigned-client Action requests
+- Enter client view when authorized
+- Does not normally make the client's internal review decision
+
+## 4. Photon Admin
+
+### Who they are
+
+A Photon Legal administrator with firm-wide operational responsibility.
+
+### Job to be done
+
+Configure clients and access, allocate Case Owners, maintain data quality, and
+ensure firm-wide client work is visible and controlled.
+
+### Desired feeling
+
+Calm, informed, precise, and confident that nothing is being missed.
+
+### Success
+
+- Client ownership and access are clear
+- Unassigned or stuck work is visible
+- Firm-level queues prioritize action over vanity metrics
+- Data corrections are possible and auditable
+
+### Permissions
+
+- See all clients and their V0 data
+- Create and configure clients
+- Assign Case Owners
+- Manage Photon users and access
+- View all approved ideas, portfolios, dates, and Actions
+- Import and manually update all client patents and due dates
+- Process Action requests
+- Does not normally replace the client's Workspace Admin review
+
+
+exec
+/bin/zsh -lc 'cat product-context/surfaces/ideas.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Ideas List
+
+## Variants
+
+Inventor, Workspace Admin, Case Owner, Photon Admin.
+
+## Job by persona
+
+- Inventor: find own drafts/submissions and their next step.
+- Workspace Admin: clear pending reviews.
+- Case Owner: find approved ideas from assigned clients.
+- Photon Admin: oversee ideas sent to Photon across clients.
+
+## Hierarchy rules
+
+- Columns and default sort change with the persona's job.
+- Workspace Admin pending review sorts oldest first and shows days waiting.
+- Inventor emphasizes status, last update, score, and next action.
+- Photon views include client and ownership context.
+- Row opens the record directly; avoid an unnecessary preview step.
+
+## Navigation badge
+
+Only Workspace Admin pending-review count receives a badge.
+
+## States
+
+Empty, drafts only, mixed statuses, long titles, large queue, filtered empty,
+loading, error, requested changes, evaluation running.
+
+
+exec
+/bin/zsh -lc 'cat design/v0/COGNITIVE-LOAD.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Cognitive-load charter
+
+Every V0 screen is judged by one question: **how much does this persona have
+to read, compare and remember before they can do the one thing they came
+here to do?** The answer depends on the persona and the screen, so the check
+is a roleplay, not a number. The agent and the evaluator both run it; a
+screen ships only when both pass it.
+
+## The roleplay (run it before designing and again on the render)
+
+Become the persona. Use the scenario's name, their job, and the moment that
+brought them here (the surface brief's *Job* and the persona's *triggering
+situation* in PERSONAS.md). Then answer, in writing, in the change record:
+
+1. **First glance (3 seconds).** What did I see first? Is it the thing I came
+   for? If my eye landed on a metric, a map, a card border or a label before
+   the task, the hierarchy is wrong.
+2. **The one thing.** What is the single action this screen exists for, for
+   me, now? Is it the most visually dominant control? Is its consequence
+   obvious from its label?
+3. **What I had to read to get there.** List every element I read or skipped
+   before acting. Each one is a cost. Which could be removed, merged, moved
+   below the fold, or shown only on demand without losing anything I needed?
+4. **What I had to remember.** Did I have to hold a number, a status or a
+   name in my head while moving between two places on the screen (or two
+   screens)? Put those side by side or remove one.
+5. **What I never need here.** Name the elements that serve another persona,
+   another moment, or nobody. They go.
+6. **What I'd be anxious about.** Anything unclear about what happens next,
+   who owns it, or whether my work is saved? That gets one plain sentence,
+   not a warning box.
+
+## Persona defaults (starting assumptions, overridden by the brief)
+
+- **Inventor** — occasional user, no patent vocabulary, often arriving with
+  material already written. Wants: where is my idea, what happens next, how
+  do I start one. Never needs: firm metrics, due dates, Actions, rankings of
+  colleagues, evaluation evidence before the conclusion. Tolerates the least
+  density of the four.
+- **Workspace Admin** — decision-maker, scans daily. Wants: what needs my
+  decision, how old is it, is the programme moving. Reads tables well but
+  decides from a brief, not a questionnaire. Tolerates a dense overview
+  (the reference screen) because every tile answers "so what do I do".
+- **Case Owner** — operator with several clients. Wants: which client needs
+  me today, the next date, the next action. Needs client scope visible at all
+  times; everything else can be one click away.
+- **Photon Admin** — controller. Wants exceptions, ownership gaps and incoming
+  work. Reads dense lists if grouped; never needs vanity totals.
+
+## Hard rules (fail regardless of persona)
+
+- One primary action per screen, visually dominant. Destructive actions live
+  behind a menu or a confirmation.
+- No element exists only because the data exists. A metric without a next
+  step, comparison or consequence is decoration.
+- Conclusion before evidence: score → meaning → what differs → evidence on
+  demand. This order holds on every surface that shows an evaluation.
+- No card around a grouping that whitespace, a rule or a heading can hold.
+  The reference screens use cards for tiles that are read as units; copy
+  that, not a card per block.
+- No horizontal scroll at the five review widths. A table that needs it has
+  too many default columns.
+- No lifecycle stage shown as reached when it is not (a draft is not
+  "Submitted").
+- No repeated score, status or title on the same screen.
+- Progressive disclosure for anything longer than a paragraph that is not the
+  task: disclosure sections, prior art, history, attachments.
+- Copy names the object and the consequence (`Send to Photon Legal`, not
+  `Approve`); no boilerplate repeated per block; the advisory note appears once.
+- The Inventor sees no ranking of named people, no due dates, no Actions.
+- A navigation badge exists only for the Workspace Admin's pending reviews.
+
+## Direction selection
+
+When three directions are on the table, the one with the lowest cognitive
+load for **this persona on this screen** wins unless it fails the brief's
+hierarchy or a product boundary. "Lowest load" means: fewest elements read
+before the primary action, fewest things to remember, fewest decisions the
+persona has to make that Pulse could make for them. Write the comparison in
+the change record as a table; the evaluator reads that table.
+
+## Evaluator verdict
+
+PASS only when the roleplay answers are written, the six answers show nothing
+the persona had to read or remember that the screen could have spared them,
+and every hard rule holds on the rendered screenshots at 1280×720 and
+1440×900. Otherwise NEEDS_WORK with the specific element and the specific
+persona cost.
+
+exec
+/bin/zsh -lc 'cat product-context/DESIGN-SCORECARD.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Pulse Design Scorecard
+
+Score each category 1–5 after inspecting the rendered interface. Explain every
+score below 4 and address the largest gaps before presenting the design.
+
+The score is a critique aid, not proof of user or business success.
+
+## Product fit
+
+- Is the persona and job explicit?
+- Is the screen's reason for existing obvious?
+- Does the interface preserve V0 permissions and workflow?
+- Is the intended business behavior named?
+- Has roadmap scope stayed out of V0?
+
+## Hierarchy
+
+- Is one primary task unmistakable?
+- Does secondary UI recede?
+- Is metric scope clear: personal, workspace, client, or firm?
+- Is prime space used for something actionable or motivating?
+- Can the screen be understood quickly?
+
+## Usability
+
+- Are next steps and consequences explicit?
+- Can the user recover without losing work?
+- Are loading, empty, error, dense, and long-content states coherent?
+- Does navigation preserve context?
+- Are complex details progressively disclosed?
+
+## Trust
+
+- Are evaluation conclusions explained by evidence?
+- Is advisory AI labelled once without timid repetition?
+- Are important actions attributable and auditable?
+- Does the product avoid guarantees or false objectivity?
+- Does the design feel appropriate for confidential IP work?
+
+## Craft
+
+- Are typography, spacing, borders, icons, and alignment deliberate?
+- Are controls and states consistent?
+- Does anything look like a generic AI-generated SaaS template?
+- Has every card, label, metric, and animation earned its place?
+- Is the Photon Legal identity recognizable without overwhelming the task?
+
+## Accessibility and resilience
+
+- Keyboard, focus, semantics, contrast, and zoom?
+- Reduced-motion equivalent?
+- Long titles, large totals, missing data, and localization?
+- No information conveyed by color alone?
+- No internal IDs or raw system language?
+
+## Business
+
+- Which behavior should improve?
+- What metric detects it?
+- What guardrail prevents a hollow improvement?
+- Does the design reduce friction in the submission-to-filing revenue loop?
+- Is there a simpler intervention with equal impact?
+
+
+exec
+/bin/zsh -lc 'cat changes/DSN-0009/README.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# DSN-0009 — Ideas list
+
+Status: in progress. Branch: `codex/dsn-0009-ideas-list`.
+
+## Intent
+Inventors find own/credited drafts and submissions, understand the next step and start an idea. Case Owners find received ideas for assigned clients; Photon Admin oversees received ideas across clients. Each row opens the existing record directly. Workspace Admin keeps the approved queue and receives V0 stories only.
+
+## Three directions
+| Direction | Leads / recedes | Persona adaptation | Cognitive cost and tradeoff | Choice |
+|---|---|---|---|---|
+| A · Task list | Compact direct-opening rows; title, state and next step; optional filters | Inventor: update and advisory score. Photon: client and owner, oldest received first | One stable scan path; no group selection or status reconstruction; columns reflow at zoom | Selected |
+| B · Status lanes | Ideas grouped by existing status | Inventor: with you/review/Photon. Photon: received/filed grouping | Makes distribution visible but requires scanning several lanes; status groups cost laptop width and zoom height | Rejected |
+| C · Recent activity | Recency groups and change descriptions | Inventor: last updates. Photon: most recent handoffs | Reassures on change, but readers must reconstruct current status and older received work recedes | Rejected |
+
+All three low-fidelity renders use synthetic content and link rows directly to records. Task list has the lowest reading and recall cost for these jobs. The reference queue is not redesigned.
+
+## Persona frame and cognitive-load check
+Object: one idea, either the Inventor's own/credited disclosure or a record received by Photon. Consequence: a row opens the existing detail route; drafts continue through its existing disclosure redirect. Primary action starts an idea for Inventor and opens the first visible received record for Photon roles. The Workspace Admin continues to decide in the reference queue.
+
+| Roleplay | Inventor · Anika | Case Owner · Devika / Photon Admin · Tobias | Workspace Admin · Leah |
+|---|---|---|---|
+| First glance | Own ideas and the start action; then title, state, update and score | Received work, client and Case Owner beside the record | Existing oldest-first queue and selected brief |
+| One thing | Start an idea; existing rows describe their next step | Open the first relevant filing brief | Send to Photon Legal after review |
+| Read / skip | Title and next step; filters when looking for something; detailed evidence stays in the record | Client, ownership and submission age; no inventor score columns | List title/age, selected brief and decision |
+| Remember | No score or state across panels; each is adjacent to its idea | No client/owner lookup on another screen | Selected title remains above its brief |
+| Never need here | Density/card toggles, decorative score chips, duplicate menu, nonfunctional Delete, report popup, due dates or Actions | Draft authoring, unapproved ideas or evaluation detail before opening a brief | An extra preview before the existing decision pane |
+| Anxiety resolved | One advisory note; next owner named; evaluation running/failed/stale is explicit | Current client and Case Owner are named; unassigned is stated rather than blank | At zoom, queue selection returns to the same brief and keeps the decision visible |
+
+The task list passes the charter at the four laptop sizes. At 200% zoom, filters are disclosed through Filters and sort; rows reflow, navigation remains available, and the primary action stays in the header. The reference queue's existing two panes switch at zoom through Choose idea / Back to brief. No permission or decision mutation changed.
+
+## What moved and what stayed
+- Rebuilt the existing `IdeasContent` view in place around direct-opening rows, neutral text, hairline separation and existing token/primitives. Removed the alternate card/density presentation, inline report popup, unsupported Duplicate and nonfunctional Delete menu entries. No authorized permission affordance depended on those menu entries.
+- Preserved `/ideas`, `/ideas/:id`, the existing draft redirect, `fetch_ideas`, client lookup, draft/score endpoints, and the shared adapter/auth/query hooks. Corrected the local draft query to read the response envelope and key drafts by current idea IDs. Evaluation status is fetched from the existing endpoint and polled while running; no simulated progress.
+- Inventor default is Recently updated. Photon default is Sent to Photon Legal, Oldest submitted, using the API's submission timestamp and naming it accurately. All received ideas includes filed records. These views do not offer unapproved drafts; the underlying client access is unchanged.
+- Search is URL-encoded; sort and page are reflected in the URL. Browser Back restores search and results. Error recovery retains filters. Draft/evaluation fetch failure is distinct from Not evaluated.
+- BF-10 adds V0 `Idea.case_owners`, derived from existing Case Owner assignments. No new endpoint, permission, status or persona. Three focused V0 scenarios supply drafts-only, mixed (including requested changes and running evaluation), and long titles; existing scenarios supply the other states.
+- **Reference defect fixed:** the Workspace Admin queue overflowed at 640×360@2 and clipped its decision pane. A compact queue/brief switch and navigation menu now expose the same controls at that size. Desktop two-pane styling and review data/mutations remain intact. `WorkspaceAdminOverview` was not edited.
+
+## States and evidence
+All eleven intended IDs exist under `Surfaces/Ideas list` and select a `v0/` scenario. Every story has 1280×720 and 1440×900 baselines; four persona defaults additionally have 1366×768, 1920×1080 and 640×360@2. Baselines and supplemental interaction screenshots are copied in `shots/`.
+
+| Story suffix (`surfaces-ideas-list--`) | Scenario / state |
+|---|---|
+| inventor-empty | v0/inventor/first-run |
+| inventor-drafts-only | v0/ideas/drafts-only |
+| inventor-mixed | v0/ideas/mixed; requested changes, evaluation running, credited review, sent, rejected, draft |
+| workspace-admin-pending | v0/workspace-admin/queue |
+| workspace-admin-large-queue | v0/workspace-admin/large-aging-queue |
+| workspace-admin-filtered-empty | v0/workspace-admin/queue, real search interaction |
+| case-owner | v0/case-owner/my-work |
+| photon-admin | v0/photon-admin/firm |
+| long-titles | v0/ideas/long-titles |
+| loading | v0/ideas/mixed with list latency |
+| error | v0/ideas/mixed with list failure and retry |
+
+Supplemental browser evidence: every persona at all five sizes has a visible primary action and no document overflow; zoom navigation, first-row reflow, reference queue selection, Inventor filtered-empty recovery and Case Owner client filtering. Full mock app checks prove direct detail navigation for Inventor and both Photon roles, plus browser Back preserving search. All probes blocked egress and recorded zero outbound requests.
+
+Legacy retirement: deleted the four `Legacy reference/Screens/Ideas` stories and their four tracked baselines. No remaining QA journey step exercises the replaced Inventor/Photon Ideas list. The remaining legacy review-queue journey steps belong to the next Review decision surface and are retained for that change.
+
+## Scorecard
+| Category | Score | Evidence |
+|---|---|---|
+| Product fit | 4 | Persona-specific columns, approved received scope, direct record routes |
+| Hierarchy | 4 | One primary action; each row keeps title/state/next step together; filters recede at zoom |
+| Usability | 4 | Search, client/status/sort, paging, preserved URL, loading and explicit retry |
+| Trust | 4 | Numeric 0–10 score with one band; real evaluation status; named ownership; advisory once |
+| Craft | 4 | Reference type, token colors, small controls, neutral rows and hairlines |
+| Accessibility | 4 | Keyboard links/controls, visible focus, zoom navigation and reflow; focused axe zero |
+| Business | 4 | Faster retrieval and filing handoff; submission remains available without evaluation |
+
+Success signal: retrieval-to-record and return-to-draft completion should improve; completed submissions remain the guardrail. No new analytics or metric was added, and these scores are a design critique rather than measured user outcomes.
+
+## Validation
+- Full story suite: 263/263 pass; V0 semantic suite: 38/38 pass.
+- Typecheck, role lint, generated tokens, design build, Storybook build and required selected gates pass (7/7).
+- Scoped screenshots stable within the existing 40-pixel tolerance, no egress.
+- Focused axe: eight list contexts, zero findings. Full app navigation and 20 persona/viewport geometry probes pass.
+- Initial build/test failures from a missing skeleton import and deleting a legacy file during build were corrected before the passing run.
+- Product context, adapter, shared hooks, auth, analytics, dependencies and Workspace Admin Overview are unchanged.
+
+## Known compromises / follow-ups
+- Photon ordering uses the available submission timestamp, labelled Oldest submitted; a separate receipt timestamp is not invented.
+- The reference review content, decision failure states and source-field completeness are the next DSN-0010 scope. This change fixes its demonstrated zoom defect only.
+- Existing dashboard date-window forwarding is retained; date-window contract reconciliation is outside this list visual change.
+
+## Independent evaluator
+Pending fresh-context review. Coverage dsn remains null until PASS.
+
+Final visual inspection: all four persona defaults opened at all five sizes. The empty, drafts-only, long-title, loading, error, filtered-empty and large-queue renders were also opened. At zoom, the first Inventor idea now exposes its status and score immediately; Case Owner/client attribution remains in the row. There are 34 story baselines plus 11 supplemental screenshots (45 PNGs total). Reload ideas is secondary to the persistent start action, avoiding two primary controls on the error state.
+
+exec
+/bin/zsh -lc 'rg --files changes/DSN-0009/shots | sort' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+changes/DSN-0009/shots/case-owner-client-filter-1280x720.png
+changes/DSN-0009/shots/case-owner-first-row-640x360@2.png
+changes/DSN-0009/shots/case-owner-navigation-640x360@2.png
+changes/DSN-0009/shots/inventor-filtered-empty-1280x720.png
+changes/DSN-0009/shots/inventor-mixed-first-row-640x360@2.png
+changes/DSN-0009/shots/inventor-mixed-navigation-640x360@2.png
+changes/DSN-0009/shots/photon-admin-first-row-640x360@2.png
+changes/DSN-0009/shots/photon-admin-navigation-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--error--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--error--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-drafts-only--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-drafts-only--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-empty--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-empty--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--loading--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--loading--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--long-titles--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--long-titles--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-filtered-empty--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-filtered-empty--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-large-queue--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-large-queue--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-640x360@2.png
+changes/DSN-0009/shots/workspace-admin-pending-choose-640x360@2.png
+changes/DSN-0009/shots/workspace-admin-pending-navigation-640x360@2.png
+changes/DSN-0009/shots/workspace-admin-pending-selected-640x360@2.png
+
+exec
+/bin/zsh -lc 'rg --files changes/DSN-0009/shots | sort' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+changes/DSN-0009/shots/case-owner-client-filter-1280x720.png
+changes/DSN-0009/shots/case-owner-first-row-640x360@2.png
+changes/DSN-0009/shots/case-owner-navigation-640x360@2.png
+changes/DSN-0009/shots/inventor-filtered-empty-1280x720.png
+changes/DSN-0009/shots/inventor-mixed-first-row-640x360@2.png
+changes/DSN-0009/shots/inventor-mixed-navigation-640x360@2.png
+changes/DSN-0009/shots/photon-admin-first-row-640x360@2.png
+changes/DSN-0009/shots/photon-admin-navigation-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--case-owner--at-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--error--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--error--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-drafts-only--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-drafts-only--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-empty--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-empty--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--inventor-mixed--at-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--loading--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--loading--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--long-titles--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--long-titles--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--photon-admin--at-640x360@2.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-filtered-empty--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-filtered-empty--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-large-queue--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-large-queue--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1280x720.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1366x768.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1440x900.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-1920x1080.png
+changes/DSN-0009/shots/surfaces-ideas-list--workspace-admin-pending--at-640x360@2.png
+changes/DSN-0009/shots/workspace-admin-pending-choose-640x360@2.png
+changes/DSN-0009/shots/workspace-admin-pending-navigation-640x360@2.png
+changes/DSN-0009/shots/workspace-admin-pending-selected-640x360@2.png
+
+codex
+The lists keep status, ownership, and next steps together at laptop widths. The zoom navigation screenshots show faint menu text overlapping page content; I’m checking the remaining Workspace Admin views and state coverage.
+
+codex
+VERDICT: NEEDS_WORK
+SURFACE: ideas.md  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 2 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, status and ownership support retrieval, but the independent roleplay finds repeated reading and unresolved review evidence that contradict the record’s claimed pass.
+FINDINGS (most severe first, max 7):
+
+1. Zoom navigation, all personas — menu labels appear faint and overlap underlying titles, ownership, and evaluation text, forcing readers to disentangle destinations from content — render an opaque, legible menu above page content and capture its settled state.
+2. Workspace Admin brief — “A short inventor-written summary…” supplies no substantive summary, while the mechanism is missing and the assessment asserts novelty; Leah must open further evidence before understanding the proposed invention — render meaningful synthetic disclosure content and a consistent assessment before claiming decision readiness.
+3. Workspace Admin selected record — its score repeats in the queue and assessment, and its title repeats across the queue, heading, assessment, and summary; Leah rereads the same information, violating the charter’s explicit repetition rule — remove redundant score/title occurrences while preserving selection context.
+4. Inventor first-run empty state — search, status, and sort precede the explanation despite there being no ideas to retrieve; the Inventor must skip controls irrelevant to starting — hide retrieval controls for the genuinely empty first-run state.
+
+STATES MISSING: none — all ten brief states are represented across the 45 inspected PNGs.
+REFERENCE MATCH: no — desktop typography, restrained color, hairlines, and review panes broadly match; the overlapping, faint zoom navigation does not preserve the reference’s legibility.
+hook: Stop
+hook: Stop Completed
+tokens used
+97,212
+VERDICT: NEEDS_WORK
+SURFACE: ideas.md  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 2 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, status and ownership support retrieval, but the independent roleplay finds repeated reading and unresolved review evidence that contradict the record’s claimed pass.
+FINDINGS (most severe first, max 7):
+
+1. Zoom navigation, all personas — menu labels appear faint and overlap underlying titles, ownership, and evaluation text, forcing readers to disentangle destinations from content — render an opaque, legible menu above page content and capture its settled state.
+2. Workspace Admin brief — “A short inventor-written summary…” supplies no substantive summary, while the mechanism is missing and the assessment asserts novelty; Leah must open further evidence before understanding the proposed invention — render meaningful synthetic disclosure content and a consistent assessment before claiming decision readiness.
+3. Workspace Admin selected record — its score repeats in the queue and assessment, and its title repeats across the queue, heading, assessment, and summary; Leah rereads the same information, violating the charter’s explicit repetition rule — remove redundant score/title occurrences while preserving selection context.
+4. Inventor first-run empty state — search, status, and sort precede the explanation despite there being no ideas to retrieve; the Inventor must skip controls irrelevant to starting — hide retrieval controls for the genuinely empty first-run state.
+
+STATES MISSING: none — all ten brief states are represented across the 45 inspected PNGs.
+REFERENCE MATCH: no — desktop typography, restrained color, hairlines, and review panes broadly match; the overlapping, faint zoom navigation does not preserve the reference’s legibility.

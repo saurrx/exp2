@@ -1,0 +1,4 @@
+INVENTOR row opens detail directly; browser Back restores search and result
+CASE_OWNER primary action opens the first received idea directly
+PHOTON_ADMIN primary action opens the first received idea directly
+navigation checks passed; egress 0

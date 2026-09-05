@@ -19,7 +19,7 @@ Tobias Berg must keep ownership and incoming client work under control across Ph
 | C · Daily operations digest | A short narrative explains today's highest-priority gap; category disclosures follow | Calm orientation; speeds a small daily check | Work becomes harder to scan when exceptions grow, and the narrative repeats queue facts. |
 
 ## Validation status
-Implementation, all required checks and independent evaluation pass. Coverage records DSN-0017. The pre-authorized merge is the remaining completion step.
+Implementation, all required checks and independent evaluation pass. Coverage records DSN-0017. Merged into main with --no-ff as 29e5f6c and pushed.
 
 ## Implementation and preserved boundaries
 The existing Index route and dashboard query feed a presentational PhotonAdminDashboard. Ownership gaps lead, then approved ideas (oldest waiting first), urgent client instructions/dates, configuration and failed imports. Each selected brief brings client, Case Owner, reference, age/date and a specific record-opening action together. Selection survives navigation in the URL. A secondary Refresh operations control uses the existing refetch callback after work on another route; it resolves the five-minute cache without changing query policy.
@@ -73,3 +73,5 @@ Known compromises: BF-15 remains a mock proposal until backend verification. The
 Final required serial gate: **7/7 pass**, including typecheck, tokens, V0 semantic/coverage and all story interactions (gates-required-final.log). Role lint passes (roles-final.log). Coverage now lists all 12 stories and the nine actual V0 scenarios and records BF-15 as conceptual.
 
 Post-ledger V0 verification: **53/53 pass** (v0-final.log).
+
+Merged recap: DSN-0017 landed on main as 29e5f6c; coverage is 14/17. Next surface is DSN-0018 Clients and onboarding.

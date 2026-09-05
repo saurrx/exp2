@@ -61,3 +61,22 @@ Cognitive-load check: first glance identifies the selected invention and invento
 Validation: full stories 271/271, focused review stories 12/12 after the capture-only adjustment; selected gates 6/6 (typecheck, role labels, tokens, V0, coverage and runtime graph); design and Storybook builds pass. Eight settled focused axe contexts have zero findings. Sixteen supplemental viewport/state checks pass; retry actually persists the retained reason, attachment download retains the brief, and the full-app evaluation link opens the existing detail route while preserving queue context, all without egress. Final screenshot stability evidence follows. The informational isolation probe still demonstrates shared-cookie contamination; tests remain serial. The broad roles substring initially also selected legacy layout QA; that unintended run was stopped and the exact lint:roles gate was run instead. No unresolved surface gate failure is waived.
 
 Final capture evidence: `shots3.log` passes every changed/reference capture except the known still-typing retry at 1280; `shots4.log` supersedes all six reason-dialog captures and passes twice with the unchanged 40-pixel tolerance. All 27 review baselines are copied under shots, plus 17 supplemental views. Supplemental activity's original capitalized locator timed out after all sixteen viewport/state checks passed; the corrected case-insensitive locator passes in `activity.log` and its screenshot is included. Final default renders were reopened at all five sizes and the retry frame now visibly includes the complete reason and inline error. No source changes followed these captures.
+
+## Evaluator round 1 — NEEDS_WORK
+```text
+VERDICT: NEEDS_WORK
+SURFACE: review-decision.md  PERSONA: Workspace Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 3 · trust 4 · craft 4 · accessibility 3 · business 4
+COGNITIVE LOAD: fail — My six default-state answers at 1280×720 and 1440×900 agree with the record, but the concurrent outcome repeats its status and long-disclosure review becomes cramped at 200% zoom.
+FINDINGS (most severe first, max 7):
+
+1. Long disclosure at 200% zoom — the fixed title, attribution, tabs and decision footer leave roughly 55 CSS pixels for disclosure content, forcing the Admin to read and remember fragments — allow the title and attribution to scroll away so expanded answers have usable reading space.
+2. Concurrent-decision banner — “Sent to Photon Legal by Noor Rahman” immediately repeats as “Sent to Photon Legal for filing,” adding redundant reading and breaking the no-repeated-status hard rule — combine outcome, actor and filing consequence into one sentence.
+
+STATES MISSING: none
+REFERENCE MATCH: yes — preserves the approved two-pane queue, restrained typography, hairline separation and dominant filing action.
+```
+
+Round 2 corrections: at compact widths, the brief header and content share the scroll region while the existing decision footer remains sticky. The title and attribution can scroll away to release reading space. The outcome omits a boilerplate filing comment that merely repeats its status; useful recorded comments remain. Desktop composition and decision routes are unchanged.
+
+Round 2 verification: full stories 271/271, gates 6/6, both builds, all changed-story captures stable within the unchanged 40-pixel tolerance (`shots5.log`), eight focused axe contexts zero findings, and all sixteen supplemental geometry/state checks pass. The additional zoom reading capture shows full paragraphs after the title scrolls away; the concurrent banner contains one outcome/actor line. There are now 45 PNGs. A final ordering guard keeps the pending dialog open until the refreshed outcome is available; focused review stories remain 12/12, with saved/competing/retry captures rechecked against the rebuilt result. No change to the API paths or permissions.

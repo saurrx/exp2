@@ -1,0 +1,44 @@
+   note surfaces-ideas-list--workspace-admin-pending--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-ideas-list--workspace-admin-pending--at-1280x720
+wrote  surfaces-ideas-list--workspace-admin-pending--at-1440x900
+wrote  surfaces-ideas-list--workspace-admin-pending--at-1366x768
+wrote  surfaces-ideas-list--workspace-admin-pending--at-1920x1080
+wrote  surfaces-ideas-list--workspace-admin-pending--at-640x360@2
+   note surfaces-ideas-list--workspace-admin-large-queue--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-ideas-list--workspace-admin-large-queue--at-1280x720
+wrote  surfaces-ideas-list--workspace-admin-large-queue--at-1440x900
+   note surfaces-ideas-list--workspace-admin-filtered-empty--at-1280x720: 4 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-ideas-list--workspace-admin-filtered-empty--at-1280x720
+wrote  surfaces-ideas-list--workspace-admin-filtered-empty--at-1440x900
+   note surfaces-review-decision--typical--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-review-decision--typical--at-1280x720
+wrote  surfaces-review-decision--typical--at-1440x900
+wrote  surfaces-review-decision--typical--at-1366x768
+wrote  surfaces-review-decision--typical--at-1920x1080
+wrote  surfaces-review-decision--typical--at-640x360@2
+wrote  surfaces-review-decision--no-evaluation--at-1280x720
+wrote  surfaces-review-decision--no-evaluation--at-1440x900
+   note surfaces-review-decision--partial-evaluation--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-review-decision--partial-evaluation--at-1280x720
+wrote  surfaces-review-decision--partial-evaluation--at-1440x900
+wrote  surfaces-review-decision--long-disclosure--at-1280x720
+wrote  surfaces-review-decision--long-disclosure--at-1440x900
+wrote  surfaces-review-decision--missing-detail--at-1280x720
+wrote  surfaces-review-decision--missing-detail--at-1440x900
+wrote  surfaces-review-decision--approve-confirmation--at-1280x720
+   note surfaces-review-decision--approve-confirmation--at-1440x900: 6 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-review-decision--approve-confirmation--at-1440x900
+wrote  surfaces-review-decision--request-changes--at-1280x720
+wrote  surfaces-review-decision--request-changes--at-1440x900
+wrote  surfaces-review-decision--reject--at-1280x720
+wrote  surfaces-review-decision--reject--at-1440x900
+wrote  surfaces-review-decision--decision-in-progress--at-1280x720
+wrote  surfaces-review-decision--decision-in-progress--at-1440x900
+wrote  surfaces-review-decision--concurrent-decision-completed--at-1280x720
+wrote  surfaces-review-decision--concurrent-decision-completed--at-1440x900
+wrote  surfaces-review-decision--success--at-1280x720
+wrote  surfaces-review-decision--success--at-1440x900
+wrote  surfaces-review-decision--failure-retry--at-1280x720
+   note surfaces-review-decision--failure-retry--at-1440x900: 4 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-review-decision--failure-retry--at-1440x900
+shots: all stories rendered, stable within 40 pixels, no egress

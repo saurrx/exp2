@@ -32,4 +32,8 @@ wrote  surfaces-ideas-list--loading--at-1280x720
 wrote  surfaces-ideas-list--loading--at-1440x900
 wrote  surfaces-ideas-list--error--at-1280x720
 wrote  surfaces-ideas-list--error--at-1440x900
+wrote  legacy-reference-screens-review-queue--committee
+wrote  legacy-reference-screens-review-queue--counsel
+wrote  legacy-reference-screens-review-queue--request-changes-dialog
+wrote  legacy-reference-screens-review-queue--empty
 shots: all stories rendered, stable within 40 pixels, no egress

@@ -1,0 +1,5 @@
+same   legacy-reference-screens-review-queue--committee
+same   legacy-reference-screens-review-queue--counsel
+same   legacy-reference-screens-review-queue--request-changes-dialog
+same   legacy-reference-screens-review-queue--empty
+shots: all stories rendered, stable within 40 pixels, no egress

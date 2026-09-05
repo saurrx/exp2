@@ -250,9 +250,42 @@ const ideaDetailStates = ["draft", "evaluated", "submitted", "under-review", "ch
     return db;
   }));
 
+/** DSN-0009: meaningful, source-consistent review evidence for queue states. */
+function reviewQueueEvidence(data: Data): Data {
+  for (const idea of data.ideas) {
+    const draft = data.drafts.find((draft) => draft.idea_id === idea.id);
+    if (!draft) continue;
+    const thermal = idea.title.startsWith("Thermal drift");
+    const path = idea.title.startsWith("Collision-aware");
+    const answers = draft.answers as Record<string, any>;
+    const source = thermal ? {
+      problem: "Position readings drift as the encoder warms during a shift. A temperature reading at the motor does not describe the sensing element's recent thermal history.",
+      solution: "A temperature sensor beside the encoder tracks recent heating and cooling. The controller uses that history to adjust the position signal continuously while the robot moves.",
+      novelty: "Local thermal history drives the correction, rather than a fixed lookup table or a remote temperature reading. The inventor proposes testing repeated heating and cooling cycles to quantify the difference.",
+    } : path ? {
+      problem: "A robot makes abrupt steering corrections when its planned route passes close to obstacles. Repeated corrections slow the route and can disturb the carried load.",
+      solution: "A learned clearance map estimates available space around the route. The planner smooths changes in curvature using that map before sending the path to the motion controller.",
+      novelty: "The proposed distinction is using learned clearance estimates during smoothing, without building a separate obstacle model. Comparative route measurements would help establish its effect.",
+    } : { problem: answers.problem, solution: answers.solution, novelty: answers.novelty };
+    Object.assign(answers, source);
+    for (const section of answers.__meta_data || []) for (const question of section.questions || []) if (source[question.id as keyof typeof source]) question.answer = source[question.id as keyof typeof source];
+    idea.body = source.novelty;
+    const report = draft.report as any;
+    if (report?.scoringResult) {
+      const distinction = thermal ? "using local thermal history in the correction" : path ? "using learned clearance during path smoothing" : "combining the passive element with the correction loop";
+      report.scoringResult.summary = (draft.score ?? 0) < 40
+        ? `The returned references overlap closely with the disclosed mechanism. The distinction in ${distinction} needs a clearer comparison and supporting measurements.`
+        : (draft.score ?? 0) >= 80
+          ? `The returned references share the underlying system but do not describe ${distinction}. This is the main distinction identified by the search; comparative measurements would strengthen the disclosure.`
+          : `The returned references share several features. The proposed difference is ${distinction}; its effect and implementation need a more specific explanation.`;
+    }
+  }
+  return data;
+}
+
 const workspaceAdminQueue = v0("v0/workspace-admin/queue", "Workspace Admin queue at Northwind",
   "Seven scored ideas awaiting the one review stage, oldest 56 days, one submitted on behalf of an inventor by the admin, one resubmitted after changes. Five contributing inventors, two Workspace Admins, and deadlines with contextual dates.",
-  U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => northwindBuild("v0/workspace-admin/queue"));
+  U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => reviewQueueEvidence(northwindBuild("v0/workspace-admin/queue")));
 
 const workspaceAdminEmpty = v0("v0/workspace-admin/empty", "New workspace at Beacon, no inventors yet",
   "Elin Sørensen's workspace six weeks in: no inventors, no ideas, a small imported portfolio, the activation emails that follow from that state.",
@@ -265,7 +298,7 @@ const oneUrgent = v0("v0/workspace-admin/one-urgent-review", "One idea waiting p
   U.admin.email, ADMIN, () => northwindBuild("v0/workspace-admin/one-urgent-review", SMALL, oneUrgentReview()));
 const largeQueue = v0("v0/workspace-admin/large-aging-queue", "Forty ideas waiting, several past the threshold",
   "A large aging queue: forty ideas awaiting review with waits from two days to ten weeks. The dashboard shows six and links to the rest.",
-  U.admin.email, ADMIN, () => northwindBuild("v0/workspace-admin/large-aging-queue", SMALL, largeAgingQueue()));
+  U.admin.email, ADMIN, () => reviewQueueEvidence(northwindBuild("v0/workspace-admin/large-aging-queue", SMALL, largeAgingQueue())));
 const noActionsDue = v0("v0/workspace-admin/no-actions-due", "Nothing due in the next 30 days",
   "Northwind's queue with a portfolio that has no upcoming due dates: the Actions box reads none due.",
   U.admin.email, ADMIN, () => northwindBuild("v0/workspace-admin/no-actions-due", { [NORTHWIND.id]: portfolio(180, "northwind-v1", NORTHWIND, 0), [BEACON.id]: SMALL[BEACON.id] }));

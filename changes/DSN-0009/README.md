@@ -34,7 +34,7 @@ The task list passes the charter at the four laptop sizes. At 200% zoom, filters
 - Inventor default is Recently updated. Photon default is Sent to Photon Legal, Oldest submitted, using the API's submission timestamp and naming it accurately. All received ideas includes filed records. These views do not offer unapproved drafts; the underlying client access is unchanged.
 - Search is URL-encoded; sort and page are reflected in the URL. Browser Back restores search and results. Error recovery retains filters. Draft/evaluation fetch failure is distinct from Not evaluated.
 - BF-10 adds V0 `Idea.case_owners`, derived from existing Case Owner assignments. No new endpoint, permission, status or persona. Three focused V0 scenarios supply drafts-only, mixed (including requested changes and running evaluation), and long titles; existing scenarios supply the other states.
-- **Reference defect fixed:** the Workspace Admin queue overflowed at 640×360@2 and clipped its decision pane. A compact queue/brief switch and navigation menu now expose the same controls at that size. Desktop two-pane styling and review data/mutations remain intact. `WorkspaceAdminOverview` was not edited.
+- **Reference defect fixed:** the Workspace Admin queue overflowed at 640×360@2 and clipped its decision pane. A compact queue/brief switch and navigation menu now expose the same controls at that size. Desktop two-pane arrangement and review mutations remain intact; later evaluator corrections to content and duplication are recorded below. `WorkspaceAdminOverview` was not edited.
 
 ## States and evidence
 All eleven intended IDs exist under `Surfaces/Ideas list` and select a `v0/` scenario. Every story has 1280×720 and 1440×900 baselines; four persona defaults additionally have 1366×768, 1920×1080 and 640×360@2. Baselines and supplemental interaction screenshots are copied in `shots/`.
@@ -55,7 +55,7 @@ All eleven intended IDs exist under `Surfaces/Ideas list` and select a `v0/` sce
 
 Supplemental browser evidence: every persona at all five sizes has a visible primary action and no document overflow; zoom navigation, first-row reflow, reference queue selection, Inventor filtered-empty recovery and Case Owner client filtering. Full mock app checks prove direct detail navigation for Inventor and both Photon roles, plus browser Back preserving search. All probes blocked egress and recorded zero outbound requests.
 
-Legacy retirement: deleted the four `Legacy reference/Screens/Ideas` stories and their four tracked baselines. No remaining QA journey step exercises the replaced Inventor/Photon Ideas list. The remaining legacy review-queue journey steps belong to the next Review decision surface and are retained for that change.
+Legacy retirement: deleted the four `Legacy reference/Screens/Ideas` stories and their four baselines and four stale actual captures. No remaining QA journey step exercises the replaced Inventor/Photon Ideas list. The remaining legacy review-queue journey steps belong to the next Review decision surface and are retained for that change.
 
 ## Scorecard
 | Category | Score | Evidence |
@@ -80,10 +80,38 @@ Success signal: retrieval-to-record and return-to-draft completion should improv
 
 ## Known compromises / follow-ups
 - Photon ordering uses the available submission timestamp, labelled Oldest submitted; a separate receipt timestamp is not invented.
-- The reference review content, decision failure states and source-field completeness are the next DSN-0010 scope. This change fixes its demonstrated zoom defect only.
+- Decision failure states remain the next DSN-0010 scope. This change also corrects the reference content/repetition defects found by the evaluator, as recorded below.
 - Existing dashboard date-window forwarding is retained; date-window contract reconciliation is outside this list visual change.
 
 ## Independent evaluator
 Pending fresh-context review. Coverage dsn remains null until PASS.
 
 Final visual inspection: all four persona defaults opened at all five sizes. The empty, drafts-only, long-title, loading, error, filtered-empty and large-queue renders were also opened. At zoom, the first Inventor idea now exposes its status and score immediately; Case Owner/client attribution remains in the row. There are 34 story baselines plus 11 supplemental screenshots (45 PNGs total). Reload ideas is secondary to the persistent start action, avoiding two primary controls on the error state.
+
+
+## Evaluator round 1 — NEEDS_WORK
+```text
+VERDICT: NEEDS_WORK
+SURFACE: ideas.md  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 2 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, status and ownership support retrieval, but the independent roleplay finds repeated reading and unresolved review evidence that contradict the record’s claimed pass.
+FINDINGS (most severe first, max 7):
+
+1. Zoom navigation, all personas — menu labels appear faint and overlap underlying titles, ownership, and evaluation text, forcing readers to disentangle destinations from content — render an opaque, legible menu above page content and capture its settled state.
+2. Workspace Admin brief — “A short inventor-written summary…” supplies no substantive summary, while the mechanism is missing and the assessment asserts novelty; Leah must open further evidence before understanding the proposed invention — render meaningful synthetic disclosure content and a consistent assessment before claiming decision readiness.
+3. Workspace Admin selected record — its score repeats in the queue and assessment, and its title repeats across the queue, heading, assessment, and summary; Leah rereads the same information, violating the charter’s explicit repetition rule — remove redundant score/title occurrences while preserving selection context.
+4. Inventor first-run empty state — search, status, and sort precede the explanation despite there being no ideas to retrieve; the Inventor must skip controls irrelevant to starting — hide retrieval controls for the genuinely empty first-run state.
+
+STATES MISSING: none — all ten brief states are represented across the 45 inspected PNGs.
+REFERENCE MATCH: no — desktop typography, restrained color, hairlines, and review panes broadly match; the overlapping, faint zoom navigation does not preserve the reference’s legibility.
+```
+
+## Round 2 corrections
+- Navigation menus explicitly use opaque token colors and respect reduced motion. Supplemental screenshots now wait for the settled menu and its dismissal. The first captures caught the transition before it settled.
+- The reference queue now reads canonical problem/solution question IDs as well as its older IDs. It avoids placeholder inventor summaries and consumes meaningful synthetic evidence for the pending and large queue scenarios. The assessment describes the returned overlap/difference consistently with the band, without repeating the title. No review mutation or decision rule changed.
+- The selected queue row shows its reference/selection cue instead of repeating the detail title and score. Other rows retain their scan columns; the compact queue shows the selected title when the brief is hidden. This is the evaluator-exposed repetition defect in the approved reference, not a new queue direction.
+- Genuinely empty Inventor first-run state omits retrieval controls. Search/filter-empty recovery still exposes them.
+
+Final verification and evaluator round 2 pending.
+
+Round 2 validation: full stories 263/263, V0 38/38, selected gates 7/7, both builds and refreshed stable screenshots pass. All twenty primary-action/overflow probes pass, zoom filters open and close, and eight focused axe contexts have no findings. Settled navigation captures were reopened and show opaque legible menus. Required Storybook build twice failed with a public-assets mkdir race; `.storybook/main.ts` now disables Vite’s duplicate public-directory copy while retaining Storybook staticDirs. The next build passed. The initial unchanged-desktop comparison log predates the evaluator’s repetition/content corrections; remaining legacy review baselines are refreshed for those documented defects.

@@ -2,6 +2,13 @@
   "_doc": "Future backend contracts the V0 mock models so an approved experience can be designed before the backend has it. Each entry names the backend finding in docs/architecture/CONTEXT-RECONCILIATION.md. The mock honours these only when a scenario sets flags.v0; the Legacy reference tier keeps refusing what the backend refuses. A design record that depends on one of these is `conceptual` until the contract lands and the field moves into contract/.",
   "fields": [
     {
+      "entity": "Dashboard",
+      "field": "inventor_home",
+      "type": "{ pipeline: { draft, review, changes, sent, filed, declined }, company: { submitted_this_quarter, reached_filing } } (numeric counts, GET /v1/dashboard, V0 Inventor only)",
+      "finding": "BF-6",
+      "reason": "DSN-0005: personal pipeline is counted across all own/credited ideas by the server, never from a list page. Company momentum contains only aggregate counts within the Inventor's company: submissions in the current calendar quarter and ideas that reached filing across all time. No named ranking or other inventors' idea details are exposed."
+    },
+    {
       "entity": "Idea",
       "field": "submitted_by_id",
       "type": "string | null",

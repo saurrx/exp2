@@ -90,6 +90,21 @@ export const dashboardHandlers = [
     const v0 = db.flags.v0 ? v0Aggregates(ideas, patents, scope) : {};
     return {
       ...v0,
+      // BF-6: only collective company counts cross the Inventor's idea scope.
+      ...(db.flags.v0 && u?.role === "INVENTOR" ? { inventor_home: {
+        pipeline: {
+          draft: ideas.filter((i) => i.state === "DRAFT").length,
+          review: ideas.filter((i) => i.state === "LEGAL_REVIEW").length,
+          changes: ideas.filter((i) => i.state === "CHANGES_REQUESTED").length,
+          sent: ideas.filter((i) => i.state === "SENT_TO_PHOTON").length,
+          filed: ideas.filter((i) => i.state === "FILED").length,
+          declined: ideas.filter((i) => i.state === "REJECTED").length,
+        },
+        company: {
+          submitted_this_quarter: db.ideas.filter((i) => i.client_id === u.client_id && within(i.submitted_at, quarterStart(clock.now()), clock.now() + 1)).length,
+          reached_filing: db.ideas.filter((i) => i.client_id === u.client_id && i.state === "FILED").length,
+        },
+      } } : {}),
       pipeline: null,
       patents: { granted: n("GRANTED"), applied: n("APPLIED"), examination: n("EXAMINATION"), inactive: n("EXPIRED", "WITHDRAWN", "REJECTED", "ABANDONED", "NONPAYMENT"), total: patents.length },
       top_clients: clients.map((c) => ({ id: c.id, name: c.name, total_patents: patents.filter((p) => p.client_id === c.id).length })).sort((a, b) => b.total_patents - a.total_patents).slice(0, 5),

@@ -94,9 +94,13 @@
       ],
       "scenarios": [
         "v0/inventor/first-run",
-        "v0/inventor/portfolio",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/inventor/no-ideas",
+        "v0/inventor/active-draft",
+        "v0/inventor/several-statuses",
+        "v0/inventor/requested-changes",
+        "v0/inventor/recent-submission",
+        "v0/inventor/evaluation-available",
+        "v0/shape/slow"
       ],
       "states": {
         "loading": "skeleton that resembles the final composition",
@@ -116,8 +120,8 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "unwired",
-      "backendNotes": "Collective momentum (submissions this quarter, ideas that reached filing) needs workspace counts by period; GET /v1/dashboard-style aggregates exist for pipeline counts, a period breakdown is not exposed today.",
+      "backendImpact": "conceptual",
+      "backendNotes": "BF-6: inventor_home server aggregates for the complete personal pipeline and anonymous company momentum are implemented in the V0 mock and declared in mock/proposed-fields.json. The existing dashboard query and adapter pass them through.",
       "storyIds": [
         "surfaces-inventor-home--first-run",
         "surfaces-inventor-home--invited-inactive",
@@ -138,7 +142,7 @@
         "equal-weight card grid",
         "named inventor ranking"
       ],
-      "dsn": null
+      "dsn": "DSN-0005"
     },
     {
       "brief": "surfaces/start-idea.md",

@@ -21,6 +21,7 @@ import { toast } from "@/lib/toast";
 import { motion } from "framer-motion";
 import { isOutsideCounselRole } from "@/lib/roleAccess";
 import WorkspaceAdminOverview from "../components/dashboard/WorkspaceAdminOverview";
+import InventorHomeContext from "../components/dashboard/InventorHomeContext";
 
 const DAY_MS = 86400000;
 
@@ -428,9 +429,12 @@ const LegacyIndex = () => {
         <div className="mb-6 grid grid-cols-12 gap-6">
           {isInventor ? (
             <>
-              <div className="col-span-12 xl:col-span-8">
+              <div className="col-span-12">
                 <MyIdeas
                   ideas={myIdeas}
+                  loading={isLoadingIdeas}
+                  hasError={isQueueError}
+                  onRetry={() => refetchIdeas()}
                   onSubmit={() => setIsSubmitModalOpen(true)}
                   onOpenIdea={(id) => navigate(`/ideas/${id}`)}
                   onViewAll={() => navigate("/ideas")}
@@ -441,21 +445,12 @@ const LegacyIndex = () => {
                         `/api/v1/idea/send-latest-draft-to-ihc/${id}`,
                         {},
                       );
-                      refetchIdeas();
+                      await Promise.all([refetchIdeas(), refetchDashboard()]);
                     } catch {
-                      toast.error("Failed to send");
+                      toast.error("Your idea wasn’t submitted. Your draft is still saved.");
+                      throw new Error("Idea submission failed");
                     }
                   }}
-                />
-              </div>
-              <div className="col-span-12 xl:col-span-4">
-                <IdeaPipeline
-                  title="My pipeline"
-                  submitted={myIdeas.filter((i) => i.status !== "IN_DRAFT").length}
-                  reviewPending={myIdeas.filter((i) => ["UNDER_REVIEW", "SENT_TO_IHC"].includes(i.status)).length}
-                  sentToOC={myIdeas.filter((i) => i.status === "SEND_TO_OC").length}
-                  filed={myIdeas.filter((i) => i.status === "FILED").length}
-                  granted={myIdeas.filter((i) => i.IdeaPatentLink?.some((l: any) => l?.patent?.status === "GRANTED")).length}
                 />
               </div>
             </>
@@ -558,6 +553,18 @@ const LegacyIndex = () => {
             </>
           )}
 
+          {isInventor ? <InventorHomeContext
+            summary={data?.data?.inventor_home}
+            loading={isLoading}
+            hasError={isDashboardError}
+            onRetry={() => { refetchDashboard(); }}
+            onPatents={() => navigate("/patents")}
+            total={totalPatents}
+            granted={Number(data?.data?.granted_patents) || 0}
+            pending={Number(data?.data?.pending_patents) || 0}
+            jurisdictions={data?.data?.patents_by_jurisdiction?.length ?? 0}
+            onExpandMap={() => setIsPatentDialogOpen(true)}
+          /> : <>
           {/* Portfolio intelligence */}
           <div className="col-span-12 h-[384px] xl:col-span-4">
             <PortfolioComposition
@@ -585,6 +592,7 @@ const LegacyIndex = () => {
               />
             </div>
           </div>
+          </>}
         </div>
 
         {/* Due dates — admin surface; inventors have no deadline ownership */}

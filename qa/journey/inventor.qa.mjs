@@ -78,33 +78,7 @@ const heading = () => page.locator('h1').last();
 const readinessPct = () => page.locator('span.font-mono:visible').filter({ hasText: /^\d+%$/ }).last();
 
 try {
-  /**
-   * The dashboard's own submit affordance, for an inventor who HAS ideas.
-   *
-   * This step exists because that button was removed by mistake and shipped.
-   * The instruction was one bullet under a heading that read "The Screen where
-   * Inventor has NOT submitted any ideas"; it was applied unconditionally, so
-   * an inventor with ideas lost the only way to start another from that card —
-   * the large "Submit your first idea" call to action renders in the EMPTY
-   * state and not for them. Nothing failed, because nothing asserted it.
-   *
-   * The demo inventor always has ideas, so this asserts the state that exists
-   * here. The empty state is not reachable on demo without deleting their whole
-   * corpus, and a journey that did that would be worse than the gap it closes.
-   */
-  await j.step('the dashboard offers an inventor with ideas a way to start one', async () => {
-    await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
-    const card = page.locator('div').filter({ hasText: /^My ideas/ }).last();
-    const recent = await page.getByText(/^My ideas$/).count();
-    assert(recent > 0, 'the inventor dashboard has no "My ideas" card at all');
-    const submit = page.getByRole('button', { name: /Submit Idea/i });
-    assert(await submit.count() > 0,
-      'the inventor dashboard offers no "Submit Idea" button — it was removed once ' +
-      'by applying an empty-state instruction to every state');
-    return `${await submit.count()} submit affordance(s) on the dashboard`;
-  });
-
+  // Home start coverage moved to Surfaces/Inventor home (DSN-0005).
   await j.step('create idea from the ideas page', async () => {
     await page.goto(`${BASE}/ideas`, { waitUntil: 'networkidle' });
     await page.getByRole('button', { name: /Submit an Idea|Submit your first idea/i }).first().click();

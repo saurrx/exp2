@@ -1,10 +1,15 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { PageHeader } from "@/components/DashboardChrome";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ArrowDown, ArrowRight, ArrowUp, ChevronDown, RotateCcw, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -1001,173 +1006,112 @@ const daysAgo = (date?: string) => {
 type MyIdea = {
   id: string;
   title: string;
+  reference_number?: string;
   status?: string;
   score?: number | null;
   submission_date?: string;
   IdeaPatentLink?: { patent?: { id?: string; application_number?: string } }[];
 };
 
-const SubmitIdeaButton = ({
-  onClick,
-  children = "+ Submit Idea",
-  large = false,
-}: {
-  onClick: () => void;
-  children?: React.ReactNode;
-  large?: boolean;
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`shrink-0 whitespace-nowrap rounded-sm bg-[#F9B418] font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700] ${
-      large ? "px-5 py-2.5 text-sm" : "px-3.5 py-1.5 text-[13px]"
-    }`}
-  >
-    {children}
-  </button>
-);
+const inventorStep = (idea: MyIdea) => {
+  switch (idea.status) {
+    case "IN_DRAFT": return typeof idea.score === "number"
+      ? { state: "Evaluation available", meaning: "Your assessment is ready. You can submit for review at any score.", action: "Review idea" }
+      : { state: "In draft", meaning: "Continue your disclosure when you’re ready.", action: "Continue draft" };
+    case "UPDATE_REQUEST": return { state: "Changes requested", meaning: "Your Workspace Admin has feedback for you to address.", action: "Review feedback" };
+    case "SENT_TO_IHC":
+    case "UNDER_REVIEW": return { state: "In review", meaning: "Your Workspace Admin has the next step. No action needed from you.", action: "View status" };
+    case "SEND_TO_OC": return { state: "Sent to Photon Legal", meaning: "Photon Legal is preparing the next steps for filing.", action: "View status" };
+    case "FILED": return { state: "Filed", meaning: "Your idea has reached patent filing.", action: "View filing" };
+    case "REJECT_BY_IHC": return { state: "Not proceeding", meaning: "Your Workspace Admin has recorded the decision and its reason.", action: "View decision" };
+    default: return { state: "Idea saved", meaning: "Open your idea to see its latest status.", action: "View idea" };
+  }
+};
 
-const MyIdeas = ({
-  ideas,
-  onSubmit,
-  onOpenIdea,
-  onViewAll,
-  onOpenPatent,
-  onSendIdea,
-}: {
-  /** The current user's ideas, newest first. */
+const MyIdeas = ({ ideas, onSubmit, onOpenIdea, onViewAll, onOpenPatent, onSendIdea, loading = false, hasError = false, onRetry }: {
   ideas: MyIdea[];
   onSubmit: () => void;
   onOpenIdea: (id: string) => void;
   onViewAll: () => void;
   onOpenPatent: (patentId: string) => void;
-  /** Sends a scored-but-unsent idea's draft into review. */
-  onSendIdea?: (id: string) => void;
+  onSendIdea?: (id: string) => Promise<void>;
+  loading?: boolean;
+  hasError?: boolean;
+  onRetry?: () => void;
 }) => {
-  const recent = ideas.slice(0, 5);
-  const newestDays = daysAgo(ideas[0]?.submission_date);
-  const isStale = newestDays !== null && newestDays > 30;
-
+  const [sending, setSending] = React.useState<MyIdea | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [sendError, setSendError] = React.useState(false);
+  const priority = (idea: MyIdea) => idea.status === "UPDATE_REQUEST" ? 0 : idea.status === "IN_DRAFT" ? 1 : 2;
+  const recent = [...ideas].sort((a, b) => priority(a) - priority(b)).slice(0, 5);
   return (
-    <div className={`${CARD_CLASS} flex h-full min-h-[280px] flex-col`}>
-      <div className="flex items-center justify-between gap-3">
-        <StatLabel>My ideas</StatLabel>
-        {/* Removed only from the EMPTY state, which is what "remove the submit
-            idea from the top right box" was about — that screen already carries
-            a large "Submit your first idea" call to action below, and two
-            buttons for one action is the clutter. An inventor who HAS ideas has
-            no other way to start one from this card, so it stays for them. */}
-        {recent.length > 0 && <SubmitIdeaButton onClick={onSubmit} />}
-      </div>
-
-      {recent.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 py-6 text-center">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#727272"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
-            <path d="M9 18h6" />
-            <path d="M10 22h4" />
-          </svg>
-          <div className="text-sm font-semibold text-[#0C0C0C]">
-            Every patent starts as a rough idea.
-          </div>
-          <div className="max-w-[300px] text-xs leading-[18px] text-[#727272]">
-            Upload notes, slides, or just type a title. Either one is enough to
-            start.
-          </div>
-          <div className="mt-2">
-            <SubmitIdeaButton onClick={onSubmit} large>
-              Submit your first idea
-            </SubmitIdeaButton>
-          </div>
+    <section data-inventor-home aria-labelledby="inventor-ideas-heading" className="min-w-0">
+      <PageHeader title="Home" actions={<>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="md:hidden">Navigation <ChevronDown aria-hidden="true" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild><Link to="/">Home</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link to="/ideas">My ideas</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link to="/patents">Patents</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link to="/profile">Profile</Link></DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button size="sm" onClick={onSubmit}>Submit an idea <ArrowRight aria-hidden="true" /></Button>
+      </>} />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 id="inventor-ideas-heading" className="text-2xl font-semibold tracking-tight text-[var(--pulse-ink)]">My ideas</h2>
+          <p className="mt-2 max-w-prose text-sm text-[var(--pulse-ink-muted)]">Start a draft with your notes. You choose when to submit for review.</p>
         </div>
-      ) : (
-        <>
-          {isStale && (
-            <div className="mt-3 rounded-xs bg-[#F9B418]/10 px-3 py-2 text-xs text-[#7E5A00]">
-              It's been a while since your last idea — got something brewing?
-            </div>
-          )}
-          <div className="mt-2 flex flex-1 flex-col justify-start">
-            {recent.map((idea, i) => {
-              const linkedPatent = idea.IdeaPatentLink?.[0]?.patent;
-              const d = daysAgo(idea.submission_date);
-              // Recovery state: scored but never sent to the committee.
-              const scoredUnsent =
-                idea.status?.toUpperCase() === "IN_DRAFT" &&
-                typeof idea.score === "number";
-              return (
-                <div
-                  key={idea.id}
-                  className={`flex items-center gap-3 py-2 ${
-                    i > 0 ? "border-t border-[#F5F5F5]" : ""
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => onOpenIdea(idea.id)}
-                    className="min-w-0 flex-1 truncate text-left text-[13px] font-medium text-[#0C0C0C] hover:underline"
-                    title={idea.title}
-                  >
-                    {idea.title}
-                  </button>
-                  {linkedPatent?.application_number && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenPatent(linkedPatent.id!)}
-                      className="shrink-0 whitespace-nowrap font-mono text-xs text-[#4351C0] hover:underline"
-                      title="Open linked patent"
-                    >
-                      → {linkedPatent.application_number}
-                    </button>
-                  )}
-                  {scoredUnsent ? (
-                    <>
-                      <span className="shrink-0 whitespace-nowrap text-xs text-[#727272]">
-                        Scored {((idea.score as number) / 10).toFixed(1)}/10 —
-                        not yet sent
-                      </span>
-                      {onSendIdea && (
-                        <button
-                          type="button"
-                          onClick={() => onSendIdea(idea.id)}
-                          className="shrink-0 rounded-sm bg-[#F9B418] px-2.5 py-1 text-xs font-semibold text-[#0C0C0C] hover:bg-[#DA9700]"
-                        >
-                          Send
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <IdeaStatusChip status={idea.status} />
-                      <span className="w-[112px] shrink-0 whitespace-nowrap text-right text-xs tabular-nums text-[#727272]">
-                        {d === null ? "" : d === 0 ? "updated today" : `updated ${d}d ago`}
-                      </span>
-                    </>
-                  )}
+      </div>
+      <div className="mt-6 min-h-80">
+        {hasError ? <div role="alert" className="flex min-h-64 flex-col items-start justify-center gap-3 border-y border-[var(--pulse-line)]">
+          <h3 className="text-base font-semibold">Your ideas couldn’t be loaded</h3>
+          <p className="text-sm text-[var(--pulse-ink-muted)]">Try again, or start a new idea above.</p>
+          <Button size="sm" variant="outline" onClick={onRetry}>Retry ideas</Button>
+        </div> : loading ? <div role="status" aria-label="Loading your ideas" className="space-y-6 py-4">
+          {[0, 1, 2].map((n) => <div key={n} className="space-y-3"><span aria-hidden="true" className="block rounded-sm bg-muted motion-safe:animate-pulse h-5 w-2/3" /><span aria-hidden="true" className="block rounded-sm bg-muted motion-safe:animate-pulse h-4 w-1/2" /></div>)}
+        </div> : recent.length === 0 ? <div className="flex min-h-80 flex-col items-start justify-center border-y border-[var(--pulse-line)] py-8">
+          <h3 className="text-xl font-semibold text-[var(--pulse-ink)]">Every idea starts somewhere.</h3>
+          <p className="mt-3 max-w-prose text-base text-[var(--pulse-ink-secondary)]">A rough note, a technical document or a few slides is enough to begin.</p>
+          <p className="mt-3 text-sm text-[var(--pulse-ink-muted)]">Your drafts and review updates will appear here.</p>
+        </div> : <ul aria-label="Your ideas" className="divide-y divide-[var(--pulse-line)] border-y border-[var(--pulse-line)]">
+          {recent.map((idea) => {
+            const step = inventorStep(idea);
+            const patent = idea.IdeaPatentLink?.[0]?.patent;
+            return <li key={idea.id} className="flex min-w-0 flex-col justify-between gap-4 py-5 sm:flex-row sm:items-center">
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--pulse-ink-muted)]">
+                  {idea.reference_number && <span>{idea.reference_number}</span>}
+                  <span className="font-medium text-[var(--pulse-ink-secondary)]">{step.state}</span>
                 </div>
-              );
-            })}
-          </div>
-          <button
-            type="button"
-            onClick={onViewAll}
-            className="mt-3 self-start text-xs font-medium text-[#444444] hover:text-[#0C0C0C] hover:underline"
-          >
-            View all my ideas →
-          </button>
-        </>
-      )}
-    </div>
+                <h3 className="break-words text-base font-semibold text-[var(--pulse-ink)]">{idea.title}</h3>
+                <p className="mt-1 text-sm text-[var(--pulse-ink-muted)]">{step.meaning}</p>
+              </div>
+              <div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-end">
+                <Button variant="ghost" size="sm" onClick={() => patent?.id ? onOpenPatent(patent.id) : onOpenIdea(idea.id)} aria-label={`${step.action}: ${idea.title}`}>
+                  {step.action}<ArrowRight aria-hidden="true" />
+                </Button>
+                {idea.status === "IN_DRAFT" && typeof idea.score === "number" && onSendIdea && <Button variant="outline" size="sm" onClick={() => { setSending(idea); setSendError(false); }}>Submit for review</Button>}
+              </div>
+            </li>;
+          })}
+        </ul>}
+        {!loading && !hasError && ideas.length > 0 && <Button variant="link" size="sm" className="mt-3 px-0" onClick={onViewAll}>View all my ideas <ArrowRight aria-hidden="true" /></Button>}
+      </div>
+      <Dialog open={!!sending} onOpenChange={(open) => { if (!open && !busy) setSending(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Submit this idea for review?</DialogTitle><DialogDescription>Your Workspace Admin will review your disclosure and decide the next step. Evaluation is advisory; every score can be submitted.</DialogDescription></DialogHeader>
+          <p className="text-sm font-medium">{sending?.title}</p>
+          {sendError && <p role="alert" className="text-sm text-destructive">Your idea wasn’t submitted. Your draft is still saved. Try again.</p>}
+          <DialogFooter><Button variant="outline" disabled={busy} onClick={() => setSending(null)}>Keep editing</Button><Button disabled={busy} onClick={async () => {
+            if (!sending || !onSendIdea) return;
+            setBusy(true); setSendError(false);
+            try { await onSendIdea(sending.id); setSending(null); } catch { setSendError(true); } finally { setBusy(false); }
+          }}>{busy ? "Submitting…" : "Submit for review"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 };
 

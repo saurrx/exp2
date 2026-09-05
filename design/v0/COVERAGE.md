@@ -17,7 +17,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 
 | Surface | Personas | Routes | Scenarios | Story ids | Backend impact | DSN |
 |---|---|---|---|---|---|---|
-| Inventor home | Inventor | `/` | 4 | 10 | unwired |  |
+| Inventor home | Inventor | `/` | 8 | 10 | conceptual | DSN-0005 |
 | Start an idea | Inventor, Workspace Admin | `/ideas`, `/ideas/:id/draft` | 5 | 11 | conceptual |  |
 | Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired |  |
 | Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 4 | 12 | none |  |
@@ -35,21 +35,21 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 209 intended stories, 17 V0 scenarios; backend impact conceptual on 3, unwired on 6, none on 8.
+17 surfaces, 209 intended stories, 23 V0 scenarios; backend impact conceptual on 4, unwired on 5, none on 8.
 
 ## Inventor home
 
-Brief: `product-context/surfaces/inventor-home.md` · Storybook title: `Surfaces/Inventor home` · DSN: none yet
+Brief: `product-context/surfaces/inventor-home.md` · Storybook title: `Surfaces/Inventor home` · DSN: DSN-0005
 
 - **Personas:** Inventor
 - **User goal:** Start an idea or understand what happened to existing ideas.
 - **Business goal:** Increase submission starts and inventor participation.
 - **Routes:** `/` (Inventor) — production's inventor dashboard route
-- **Required scenarios:** `v0/inventor/first-run`, `v0/inventor/portfolio`, `v0/shape/slow`, `v0/shape/failure`
+- **Required scenarios:** `v0/inventor/first-run`, `v0/inventor/no-ideas`, `v0/inventor/active-draft`, `v0/inventor/several-statuses`, `v0/inventor/requested-changes`, `v0/inventor/recent-submission`, `v0/inventor/evaluation-available`, `v0/shape/slow`
 - **States:** loading — skeleton that resembles the final composition; empty — no ideas yet: Submit an idea leads, momentum shows the workspace; success — ideas with statuses and next steps, one active draft to continue; error — ideas unavailable, Submit an idea still works; permission — not applicable: every inventor reaches home
 - **Surface-specific states:** first-run, invited-inactive, no-ideas, active-draft, several-statuses, requested-changes, recent-submission, evaluation-available
 - **Navigation badge:** none
-- **Backend impact:** unwired — Collective momentum (submissions this quarter, ideas that reached filing) needs workspace counts by period; GET /v1/dashboard-style aggregates exist for pipeline counts, a period breakdown is not exposed today.
+- **Backend impact:** conceptual — BF-6: inventor_home server aggregates for the complete personal pipeline and anonymous company momentum are implemented in the V0 mock and declared in mock/proposed-fields.json. The existing dashboard query and adapter pass them through.
 - **Intended story ids:** `surfaces-inventor-home--first-run`, `surfaces-inventor-home--invited-inactive`, `surfaces-inventor-home--no-ideas`, `surfaces-inventor-home--active-draft`, `surfaces-inventor-home--several-statuses`, `surfaces-inventor-home--requested-changes`, `surfaces-inventor-home--recent-submission`, `surfaces-inventor-home--evaluation-available`, `surfaces-inventor-home--loading`, `surfaces-inventor-home--error`
 - **Excluded here:** due dates, Actions, firm administration, generic patent totals, equal-weight card grid, named inventor ranking
 

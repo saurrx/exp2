@@ -1,0 +1,8 @@
+VERDICT: PASS
+SURFACE: inventor-home  PERSONA: Inventor
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, my six roleplay answers agree with the record: the task leads, starting is clear, rows pair ideas with next steps, nothing requires cross-panel memory, excluded content is absent, and review ownership is explicit.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none
+REFERENCE MATCH: yes — Typography, amber primary action, restrained navy accents, compact controls and hairline separation match the reference language; the simpler list suits the Inventor’s task.

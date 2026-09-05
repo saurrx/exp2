@@ -1,6 +1,6 @@
 # DSN-0005 — Inventor home
 
-Status: in progress.
+Status: approved; awaiting merge.
 
 ## Persona and intent
 
@@ -91,10 +91,23 @@ Hard-rule check: one primary action; no repeated individual score/title/status; 
 - `npm run build:design`, `npm run storybook:build`: pass.
 - Screenshots: 23/23 written, no egress.
 - Browser layout measurements: document/main scroll widths fit at 1280, 1366, 1440, 1920 and 640 CSS pixels (200% device scale).
-- Selected gate runner: 7/7 passed (including 214/214 story tests); final coverage update will be checked again before merge.
+- Selected gate runner: 7/7 passed again after the final source and coverage updates (including 214/214 story tests).
 
 ## Evaluator iteration
 
-Round 1 returned NEEDS_WORK: task hierarchy and cognitive load passed, but navigation was absent at 200% zoom and the start action scrolled away. The complete verdict is in `evaluator-round-1.txt`. Both were corrected through the existing page-header slot and dropdown primitive. All 23 baselines were regenerated. Supplemental screenshots now show the persistent action while scrolled and the open navigation menu at 200%. `layout-check.txt` records no horizontal overflow, a viewport-sized scroll area, a visible primary action at the bottom of the page, and no egress at all five widths. The second fresh-context verdict is pending.
+Round 1 returned NEEDS_WORK: task hierarchy and cognitive load passed, but navigation was absent at 200% zoom and the start action scrolled away. The complete verdict is in `evaluator-round-1.txt`. Both were corrected through the existing page-header slot and dropdown primitive. All 23 baselines were regenerated. Supplemental screenshots now show the persistent action while scrolled and the open navigation menu at 200%. `layout-check.txt` records no horizontal overflow, a viewport-sized scroll area, a visible primary action at the bottom of the page, and no egress at all five widths. Round 2 returned PASS with all categories at 4, cognitive load passed, no findings and no missing states.
 
 Known compromises: existing downstream start/disclosure/detail screens are scheduled separately. The home keeps their routes. Map expansion retains the existing dialog. The prototype's invited persona is represented by the existing mock session; real invitation acceptance remains the authentication surface. This is not a claim of measured business uplift or a user study.
+
+## Final fresh-context verdict
+
+```text
+VERDICT: PASS
+SURFACE: inventor-home  PERSONA: Inventor
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, my six roleplay answers agree with the record: the task leads, starting is clear, rows pair ideas with next steps, nothing requires cross-panel memory, excluded content is absent, and review ownership is explicit.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none
+REFERENCE MATCH: yes — Typography, amber primary action, restrained navy accents, compact controls and hairline separation match the reference language; the simpler list suits the Inventor’s task.
+```

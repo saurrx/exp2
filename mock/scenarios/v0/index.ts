@@ -4,6 +4,7 @@ import { clock } from "../../runtime/clock";
 import { buildIdeas, emptyData, portfolio, rngFor, seedOperations, type Data, type IdeaSpec } from "../build";
 import { generatePortfolio } from "../portfolio";
 import { BEACON, NORTHWIND, ORBITAL, V0_ACCESS, V0_ALL_USERS, V0_CLIENTS, V0_USERS as U } from "./personas";
+import { disclosureSections, storedDisclosure } from "../../../src/components/ideas/disclosureMaterial";
 import { outboxFor } from "./emails";
 
 /**
@@ -175,6 +176,23 @@ const homeChanges = homeScenario("requested-changes", "Inventor responding to re
 const homeRecent = homeScenario("recent-submission", "Inventor after submission", [{ invention: 0, author: U.inventor, state: "LEGAL_REVIEW", ageDays: 0 }]);
 const homeEvaluation = homeScenario("evaluation-available", "Inventor with an evaluation ready", [{ invention: 0, author: U.inventor, state: "DRAFT", ageDays: 2, completion: 100, evaluation: { state: "SUCCEEDED", score: 23 } }]);
 
+// DSN-0006 disclosure states use the same deterministic idea builder and canonical questionnaire.
+const disclosureScenario = (slug: string, completion: number, evaluation?: IdeaSpec["evaluation"], changes = false) => v0(`v0/disclosure/${slug}`, `Disclosure: ${slug}`,
+  "Synthetic disclosure state for source review, saving and optional evaluation.", U.inventor.email, [U.inventor.email, U.admin.email], () => {
+    const db = northwindBuild(`v0/disclosure/${slug}`, SMALL, [{ invention: 0, author: U.inventor, state: changes ? "CHANGES_REQUESTED" : "DRAFT", ageDays: 2, completion, evaluation, ...(changes ? { reviewer: U.admin, comment: "Please explain how the calibration step can be repeated." } : {}) }]);
+    const draft = db.drafts[0];
+    const meta = disclosureSections(draft.answers.__meta_data as any[]);
+    if (completion === 100) meta.find((s) => s.id === "advantages")!.questions[0].answer = "The synthetic fixture combines the passive element with closed-loop correction without an external reference signal.";
+    if (completion === 0) meta.forEach((s) => s.questions.forEach((q) => { q.answer = ""; }));
+    if (slug === "partially-prefilled" || slug === "unsupported-gaps") meta.forEach((s) => s.questions.forEach((q) => { if (q.answer) q.provenance = "ai"; if (q.id === "adv1") q.answer = ""; }));
+    draft.answers = storedDisclosure(meta);
+    draft.version = 0;
+    if (changes) draft.history = [{ revision: 1, answers: JSON.parse(JSON.stringify(draft.answers)), submitted_at: draft.created_at }];
+    if (slug === "evaluation-stale") draft.updated_at = "2026-09-03T08:00:00.000Z";
+    return db;
+  });
+const disclosureStates = [disclosureScenario("empty", 0), disclosureScenario("partially-prefilled", 40), disclosureScenario("unsupported-gaps", 80), disclosureScenario("complete", 100), disclosureScenario("evaluation-running", 100, { state: "RUNNING" }), disclosureScenario("evaluation-result", 100, { state: "SUCCEEDED", score: 23 }), disclosureScenario("evaluation-stale", 100, { state: "SUCCEEDED", score: 62 }), disclosureScenario("requested-changes", 100, undefined, true)];
+
 const workspaceAdminQueue = v0("v0/workspace-admin/queue", "Workspace Admin queue at Northwind",
   "Seven scored ideas awaiting the one review stage, oldest 56 days, one submitted on behalf of an inventor by the admin, one resubmitted after changes. Five contributing inventors, two Workspace Admins, and deadlines with contextual dates.",
   U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => northwindBuild("v0/workspace-admin/queue"));
@@ -236,6 +254,6 @@ const authFailures = v0("v0/auth/failures", "Authentication failures",
   "The only V0 scenario that returns 401 on purpose: invalid login, expired session with a failed refresh, revoked access, SSO failure, unknown domain at signup.",
   U.admin.email, [U.admin.email], () => { const d = emptyDataV0({ authFails: true }); d.portfolios = SMALL; return d; });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

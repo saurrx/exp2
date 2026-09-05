@@ -222,7 +222,7 @@
         "decorative upload animation",
         "AI inventing missing facts"
       ],
-      "dsn": null
+      "dsn": "DSN-0006"
     },
     {
       "brief": "surfaces/disclosure-workspace.md",
@@ -298,7 +298,7 @@
         "nagging when submitting without evaluation",
         "AI-authored novelty"
       ],
-      "dsn": null
+      "dsn": "DSN-0006"
     },
     {
       "brief": "surfaces/evaluation.md",

@@ -1,25 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  ClipboardPaste,
-  FileText,
-  Upload,
-  X,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Upload, X, ArrowRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import API_CONFIG from "@/lib/apiConfig";
-import ideaDraftQuestions from "@/lib/IdeaDraftQuestion";
-import { useTheme } from "@/hooks/useTheme";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import API_CONFIG, { rawApi } from "@/lib/apiConfig";
+import { extractDocumentText } from "@/lib/documentText";
+import useUserCookie from "@/hooks/use-auth";
 import { track } from "@/lib/analytics";
+import { disclosureSections, storedDisclosure, supportedPrefill } from "./disclosureMaterial";
 
 interface IdeaSubmissionModalProps {
   open: boolean;
@@ -27,347 +17,106 @@ interface IdeaSubmissionModalProps {
   refetchIdeas: () => void;
 }
 
-/**
- * Minimum-friction idea capture, sectioned like a disclosure intake form:
- * title, optional document uploads, an "or" divider, optional pasted
- * content, one full-width primary action. The current user becomes primary
- * inventor server-side; co-inventors are collected later in the draft
- * workspace. Pulse tokens throughout: 2px radii, #E8E8E8 hairlines, amber
- * only on the primary action.
- */
-const IdeaSubmissionModal: React.FC<IdeaSubmissionModalProps> = ({
-  open,
-  onOpenChange,
-  refetchIdeas,
-}) => {
-  const { theme } = useTheme();
+const IdeaSubmissionModal: React.FC<IdeaSubmissionModalProps> = ({ open, onOpenChange, refetchIdeas }) => {
   const navigate = useNavigate();
+  const { user } = useUserCookie();
   const [title, setTitle] = useState("");
   const [sourceFiles, setSourceFiles] = useState<File[]>([]);
   const [sourceText, setSourceText] = useState("");
-  const [contextMode, setContextMode] = useState<"files" | "text" | null>(
-    null,
-  );
   const [isDragOver, setIsDragOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [stage, setStage] = useState("");
+  const [inventorId, setInventorId] = useState("");
+  const [duplicateAccepted, setDuplicateAccepted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Retain successful create steps so retrying a later failure does not create another idea.
+  const createdRef = useRef<{ ideaId?: string; draftId?: string }>({});
+  const onBehalf = user?.role === "LEGAL_COUNSEL";
+  const { data: roster } = useQuery({ queryKey: ["start_idea_inventors", user?.client_id], enabled: open && onBehalf && !!user?.client_id,
+    queryFn: async () => (await rawApi.get(`/v1/ideas/colleagues?client_id=${user?.client_id}`)).data });
+  const { data: existingIdeas } = useQuery({ queryKey: ["start_idea_duplicates"], enabled: open,
+    queryFn: async () => (await rawApi.get("/v1/ideas")).data });
+  const duplicate = (Array.isArray(existingIdeas) ? existingIdeas : []).find((idea: any) => idea.title?.trim().toLowerCase() === title.trim().toLowerCase() && idea.id !== createdRef.current.ideaId);
 
-  const hasSource = sourceFiles.length > 0 || sourceText.trim().length > 0;
+  useEffect(() => { if (open) track("idea_create_opened"); }, [open]);
+  const resetForm = () => { setTitle(""); setSourceFiles([]); setSourceText(""); setError(null); setStage(""); setInventorId(""); setDuplicateAccepted(false); createdRef.current = {}; };
 
-  // Modal opened — a funnel entry point. No content, just the event.
-  useEffect(() => {
-    if (open) track("idea_create_opened");
-  }, [open]);
-
-  const resetForm = () => {
-    setTitle("");
-    setSourceFiles([]);
-    setSourceText("");
-    setContextMode(null);
-  };
-
-  // Creates the idea + a fresh draft. `silent` is the close-with-title path:
-  // no navigation, a single "Saved to drafts" toast.
   const { isPending: isCreatingIdea, mutateAsync: createIdea } = useMutation({
     mutationKey: ["create_idea"],
-    // All form values are passed explicitly — reading component state here
-    // races with the form reset on close.
-    mutationFn: async ({
-      silent,
-      ideaTitle,
-      prefill,
-    }: {
-      silent: boolean;
-      ideaTitle: string;
-      prefill: any;
-    }) => {
-      // Primary inventor is set server-side from the session — sent empty
-      // deliberately.
-      const response = await API_CONFIG.post("/api/v1/idea/create", {
-        title: ideaTitle,
-        inventors: [],
-      });
-      if (response.status !== 201) throw new Error("Failed to create idea");
-
-      const res = await API_CONFIG.post("/api/v1/idea/create-new/draft", {
-        idea_id: response?.data?.data?.id,
-        meta_data: ideaDraftQuestions,
-        // Existing autofill pipeline input; provenance is tagged so review
-        // can distinguish inventor-provided source material.
-        prefill,
-      });
-
-      // Idea + draft created — opaque ids only, never the title or source text.
-      track("idea_created", { idea_id: response?.data?.data?.id });
-
-      refetchIdeas();
-      if (silent) {
-      } else {
-        navigate(
-          `/ideas/${res?.data?.data?.idea_id}/draft?draftId=${res?.data?.data?.id}`,
-        );
+    mutationFn: async ({ silent }: { silent: boolean }) => {
+      setError(null);
+      setStage("Reading your material…");
+      const parts = [sourceText.trim()];
+      for (const file of sourceFiles) parts.push((await extractDocumentText(file)).text);
+      const text = parts.filter(Boolean).join("\n\n");
+      setStage("Saving your draft…");
+      if (!createdRef.current.ideaId) {
+        const response = onBehalf
+          ? { data: { data: (await rawApi.post("/v1/ideas", { title: title.trim(), inventor_id: inventorId })).data } }
+          : await API_CONFIG.post("/api/v1/idea/create", { title: title.trim(), inventors: [] });
+        createdRef.current.ideaId = response.data.data.id;
       }
-      return res?.data?.data;
+      if (!createdRef.current.draftId) {
+        const res = await API_CONFIG.post("/api/v1/idea/create-new/draft", {
+          idea_id: createdRef.current.ideaId,
+          answers: storedDisclosure(disclosureSections(), { text, files: sourceFiles.map((file) => file.name) }),
+        });
+        createdRef.current.draftId = res.data.data.id;
+      }
+      if (text && !silent) {
+        setStage("Organising supported answers…");
+        const response = await API_CONFIG.post(`/api/v1/idea/autofill/${createdRef.current.draftId}`, { text });
+        const meta = supportedPrefill([], response.data.data?.answers ?? {});
+        // The existing draft API stores the questionnaire and source together.
+        await rawApi.patch(`/v1/drafts/${createdRef.current.draftId}`, { answers: storedDisclosure(meta, { text, files: sourceFiles.map((file) => file.name) }) });
+      }
+      track("idea_created", { idea_id: createdRef.current.ideaId });
+      refetchIdeas();
+      if (!silent) navigate(`/ideas/${createdRef.current.ideaId}/draft?draftId=${createdRef.current.draftId}`);
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Error creating idea", {
-        position: "top-center",
-      });
-    },
+    onError: (err: any) => setError(err?.response?.data?.message || err?.message || "Could not create the disclosure. Your material is still here; try again."),
   });
-
-  const buildPrefill = () =>
-    hasSource
-      ? {
-          source: "inventor-provided",
-          file_names: sourceFiles.map((f) => f.name),
-          text: sourceText.trim() || null,
-        }
-      : null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || isCreatingIdea) return;
-    await createIdea({
-      silent: false,
-      ideaTitle: title.trim(),
-      prefill: buildPrefill(),
-    });
-    resetForm();
+  const finish = async (silent: boolean) => {
+    try { await createIdea({ silent }); resetForm(); onOpenChange(false); } catch { /* Material stays in the open dialog. */ }
+  };
+  const handleOpenChange = (next: boolean) => {
+    if (next) { onOpenChange(true); return; }
+    if (isCreatingIdea) return;
+    if (title.trim() && (!onBehalf || inventorId)) { void finish(true); return; }
+    // Closing an untitled intake retains its material for the next open.
     onOpenChange(false);
   };
-
-  // Closing never loses a typed title: silently save it as a draft.
-  const handleOpenChange = (next: boolean) => {
-    if (!next && title.trim() && !isCreatingIdea) {
-      createIdea({
-        silent: true,
-        ideaTitle: title.trim(),
-        prefill: buildPrefill(),
-      });
-    }
-    if (!next) resetForm();
-    onOpenChange(next);
-  };
-
-  const acceptFiles = (list: FileList | null | undefined) => {
-    if (!list) return;
-    const next: File[] = [];
-    Array.from(list).forEach((file) => {
-      if (!/\.(pdf|docx|pptx)$/i.test(file.name)) {
-        toast.error(`${file.name}: use a .pdf, .docx, or .pptx file`, {
-          position: "top-center",
-        });
-        return;
-      }
-      if (
-        !sourceFiles.some((f) => f.name === file.name) &&
-        !next.some((f) => f.name === file.name)
-      ) {
-        next.push(file);
-      }
-    });
-    if (next.length) {
-      setSourceFiles((prev) => [...prev, ...next]);
-      setContextMode("files");
+  const acceptFiles = (files: FileList | null) => {
+    if (!files) return;
+    setError(null);
+    for (const file of Array.from(files)) {
+      if (!/\.(pdf|docx|txt|md)$/i.test(file.name)) { setError("Use PDF, DOCX, TXT or Markdown. For slides, use the “Paste notes or describe your idea” field."); continue; }
+      setSourceFiles((prev) => prev.some((f) => f.name === file.name) ? prev : [...prev, file]);
     }
   };
 
-  const dark = theme === "dark";
-  const muted = dark ? "text-neutral-500" : "text-[#727272]";
-  const ink = dark ? "text-neutral-100" : "text-[#0C0C0C]";
-  const hairline = dark ? "bg-[#cccccc20]" : "bg-[#E8E8E8]";
-  const fieldBorder = dark ? "border-white/10" : "border-[#E8E8E8]";
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className={`${
-          dark ? "bg-[#080808] border-[#cccccc20]" : "bg-white"
-        } max-h-[88vh] overflow-hidden rounded-lg p-0 font-sans sm:max-w-[600px]`}
-      >
-        <DialogHeader className="px-7 pb-5 pt-7">
-          <DialogTitle
-            className={`font-sans text-2xl font-semibold tracking-[-0.025em] ${
-              dark ? "text-neutral-100" : "text-zinc-900"
-            }`}
-          >
-            Start an idea
-          </DialogTitle>
-        </DialogHeader>
-
-        <form className="flex min-h-0 flex-col" onSubmit={handleSubmit}>
-          <div className="min-h-0 space-y-6 overflow-y-auto px-7 pb-7">
-            <div>
-              <label
-                htmlFor="idea-title"
-                className={`mb-2 flex items-center gap-2 text-sm font-medium ${ink}`}
-              >
-                Working title
-                <span className={`text-xs font-normal ${muted}`}>Required</span>
-              </label>
-              <Input
-                autoFocus
-                name="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={`h-12 w-full rounded-sm border bg-transparent px-3.5 text-[15px] outline-none focus-visible:border-[#4351C0] focus-visible:ring-2 focus-visible:ring-[#4351C0]/10 ${fieldBorder} ${
-                  dark
-                    ? "text-neutral-100 placeholder:text-neutral-500"
-                    : "text-neutral-900 placeholder:text-neutral-400"
-                }`}
-                type="text"
-                id="idea-title"
-                placeholder="What would you call it if you were telling a colleague?"
-              />
-            </div>
-
-            <section className={`border-t pt-5 ${dark ? "border-white/10" : "border-[#E8E8E8]"}`}>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className={`text-sm font-semibold ${ink}`}>
-                    Already have something written?
-                    <span className={`ml-2 font-normal ${muted}`}>Optional</span>
-                  </h3>
-                  <p className={`mt-1 text-xs ${muted}`}>
-                    Slides, notes, a sketch, or anything relevant. We turn it into a
-                    draft. You don't start from a blank page.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  aria-pressed={contextMode === "files"}
-                  onClick={() => setContextMode(contextMode === "files" ? null : "files")}
-                  className={`flex h-10 items-center justify-center gap-2 rounded-sm border text-[13px] font-medium transition-colors ${
-                    contextMode === "files"
-                      ? dark
-                        ? "border-white/30 bg-white/10 text-white"
-                        : "border-[#C8C8C8] bg-[#F5F5F5] text-[#0C0C0C]"
-                      : dark
-                        ? "border-white/10 text-neutral-300 hover:border-white/25"
-                        : "border-[#E8E8E8] text-[#444444] hover:border-[#C8C8C8] hover:bg-[#FAFAFA]"
-                  }`}
-                >
-                  <Upload className="h-4 w-4" /> Upload files
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={contextMode === "text"}
-                  onClick={() => setContextMode(contextMode === "text" ? null : "text")}
-                  className={`flex h-10 items-center justify-center gap-2 rounded-sm border text-[13px] font-medium transition-colors ${
-                    contextMode === "text"
-                      ? dark
-                        ? "border-white/30 bg-white/10 text-white"
-                        : "border-[#C8C8C8] bg-[#F5F5F5] text-[#0C0C0C]"
-                      : dark
-                        ? "border-white/10 text-neutral-300 hover:border-white/25"
-                        : "border-[#E8E8E8] text-[#444444] hover:border-[#C8C8C8] hover:bg-[#FAFAFA]"
-                  }`}
-                >
-                  <ClipboardPaste className="h-4 w-4" /> Paste notes
-                </button>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.pptx"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  acceptFiles(e.target.files);
-                  e.target.value = "";
-                }}
-              />
-
-              {contextMode === "files" && (
-                <div className="mt-3 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setIsDragOver(true);
-                    }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragOver(false);
-                      acceptFiles(e.dataTransfer.files);
-                    }}
-                    className={`flex w-full items-center justify-center gap-2 rounded-md border border-dashed px-4 py-5 text-sm transition-colors ${
-                      isDragOver
-                        ? "border-[#4351C0] bg-[#4351C0]/5 text-[#4351C0]"
-                        : dark
-                          ? "border-white/20 text-neutral-300 hover:border-white/35"
-                          : "border-[#C8C8C8] text-[#444444] hover:bg-[#FAFAFA]"
-                    }`}
-                  >
-                    <Upload className="h-4 w-4" />
-                    Drop files here or choose files
-                    <span className={`text-xs ${muted}`}>PDF, DOCX, PPTX</span>
-                  </button>
-                  {sourceFiles.map((file) => (
-                    <div
-                      key={file.name}
-                      className={`flex h-10 items-center gap-2 rounded-sm border px-3 text-sm ${fieldBorder} ${ink}`}
-                    >
-                      <FileText className={`h-4 w-4 shrink-0 ${muted}`} />
-                      <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSourceFiles((files) =>
-                            files.filter((item) => item.name !== file.name),
-                          )
-                        }
-                        className={`grid h-7 w-7 place-items-center ${muted} hover:text-[#0C0C0C] dark:hover:text-neutral-200`}
-                        aria-label={`Remove ${file.name}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {contextMode === "text" && (
-                <textarea
-                  autoFocus
-                  rows={4}
-                  value={sourceText}
-                  onChange={(e) => setSourceText(e.target.value)}
-                  placeholder="Paste an email, meeting notes, or a rough description…"
-                  className={`mt-3 w-full resize-none rounded-sm border bg-transparent px-3.5 py-3 text-sm outline-none focus-visible:border-[#4351C0] focus-visible:ring-2 focus-visible:ring-[#4351C0]/10 ${fieldBorder} ${
-                    dark
-                      ? "text-neutral-100 placeholder:text-neutral-500"
-                      : "text-neutral-900 placeholder:text-neutral-400"
-                  }`}
-                />
-              )}
-            </section>
+  return <Dialog open={open} onOpenChange={handleOpenChange}>
+    <DialogContent data-start-idea className="flex max-h-full flex-col overflow-hidden p-0 sm:max-w-xl">
+      <DialogHeader className="shrink-0 px-6 pb-3 pt-6"><DialogTitle className="text-xl">Start an idea</DialogTitle><DialogDescription>Start with what you already have. Pulse organises it into a disclosure for you to review.</DialogDescription></DialogHeader>
+      <form className="flex min-h-0 flex-col" onSubmit={(e) => { e.preventDefault(); if (title.trim() && (!onBehalf || inventorId) && !isCreatingIdea) void finish(false); }}>
+        <div className="min-h-0 space-y-4 overflow-y-auto px-6 pb-5">
+          <div onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragOver(false); }} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); acceptFiles(e.dataTransfer.files); }} className={`rounded-md border border-dashed p-4 ${isDragOver ? "border-pl-blue bg-pl-blue-tint" : "border-pl-border-strong bg-pl-bg-subtle"}`}>
+            <label htmlFor="idea-material" className="text-sm font-medium">{isDragOver ? "Drop your document here" : "Paste notes or describe your idea"}</label>
+            <textarea autoFocus id="idea-material" rows={4} value={sourceText} onChange={(e) => setSourceText(e.target.value)} className="ph-no-capture mt-2 w-full resize-y rounded-sm border border-pl-border bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="A rough description, meeting notes or an existing write-up…" />
+            <div className="mt-2 flex flex-wrap items-center gap-3"><Button size="sm" variant="outline" type="button" onClick={() => fileInputRef.current?.click()}><Upload />Upload document</Button><span className="text-xs text-pl-text-3">PDF, DOCX, TXT, Markdown</span></div>
+            <input aria-label="Upload source document" ref={fileInputRef} type="file" multiple accept=".pdf,.docx,.txt,.md" className="hidden" onChange={(e) => { acceptFiles(e.target.files); e.target.value = ""; }} />
+            {sourceFiles.map((file) => <div key={file.name} className="mt-2 flex min-w-0 items-center justify-between gap-2 text-sm"><span className="truncate">{file.name}</span><Button type="button" size="sm" variant="ghost" aria-label={`Remove ${file.name}`} onClick={() => setSourceFiles((files) => files.filter((f) => f !== file))}><X /></Button></div>)}
           </div>
-
-          <div className={`h-[1px] w-full ${hairline}`} />
-          <div className="flex items-center justify-between gap-4 px-7 py-4">
-            <p className={`text-xs ${muted}`}>
-              {title.trim() ? "Everything can be edited later." : "Enter a title to continue."}
-            </p>
-            <button
-              type="submit"
-              className="inline-flex h-11 min-w-[150px] items-center justify-center gap-2 rounded-sm bg-[#F9B418] px-5 text-sm font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700] disabled:cursor-not-allowed disabled:bg-[#FDF3DC] disabled:text-[#9C9C9C]"
-              disabled={!title.trim() || isCreatingIdea}
-            >
-              {isCreatingIdea ? "Saving…" : "Save Idea"}
-              {!isCreatingIdea && <ArrowRight className="h-4 w-4" />}
-            </button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+          <div><label htmlFor="idea-title" className="text-sm font-medium">Working title <span className="ml-2 font-normal text-pl-text-3">Required</span></label><Input id="idea-title" name="title" value={title} onChange={(e) => { setTitle(e.target.value); setDuplicateAccepted(false); }} className="mt-2" placeholder="What would you call it when telling a colleague?" required /></div>
+          {onBehalf && <div><label htmlFor="primary-inventor" className="text-sm font-medium">Inventor</label><select id="primary-inventor" value={inventorId} onChange={(e) => setInventorId(e.target.value)} required className="mt-2 h-10 w-full rounded-sm border border-pl-border bg-background px-3 text-sm"><option value="">Choose the inventor</option>{(roster ?? []).map((person: any) => <option key={person.id} value={person.id}>{person.name}</option>)}</select><p className="mt-1 text-xs text-pl-text-3">You will be recorded separately as Submitted by.</p></div>}
+          {duplicate && !duplicateAccepted && <div role="status" className="rounded-sm bg-pl-amber-tint p-3 text-sm"><p>An idea with this title already exists: {duplicate.reference || duplicate.reference_number}.</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" variant="outline" type="button" onClick={() => { resetForm(); onOpenChange(false); navigate(`/ideas/${duplicate.id}`); }}>Open existing idea</Button><Button size="sm" variant="ghost" type="button" onClick={() => setDuplicateAccepted(true)}>Create a separate idea</Button></div></div>}
+          <p className="text-xs text-pl-text-3">Material stays in your workspace. Only supported answers are prefilled; you supply what makes the idea different. You can also start with just a title.</p>
+          {isCreatingIdea && <p role="status" className="text-sm text-pl-blue-text motion-safe:animate-pulse">{stage}</p>}
+          {error && <p role="alert" className="text-sm text-pl-red-text">{error}</p>}
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-pl-border px-6 py-4"><p className="text-xs text-pl-text-3">Creates a draft. Review comes later.</p><Button size="sm" type="submit" disabled={!title.trim() || isCreatingIdea || (onBehalf && !inventorId) || (!!duplicate && !duplicateAccepted)}>{isCreatingIdea ? "Preparing disclosure…" : "Continue to disclosure"}<ArrowRight /></Button></div>
+      </form>
+    </DialogContent>
+  </Dialog>;
 };
-
 export default IdeaSubmissionModal;

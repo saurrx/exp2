@@ -19,14 +19,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
 import EvaluationProgress from "@/components/ideas/EvaluationProgress";
-import API_CONFIG from "@/lib/apiConfig";
+import API_CONFIG, { rawApi } from "@/lib/apiConfig";
 import { extractDocumentText } from "@/lib/documentText";
 import { track } from "@/lib/analytics";
 import ideaDraftQuestions from "@/lib/IdeaDraftQuestion";
+import { disclosureSections, supportedPrefill, storedDisclosure } from "./disclosureMaterial";
 import useUserCookie from "@/hooks/use-auth";
-import { useTheme } from "@/hooks/useTheme";
 import CoInventorsField from "@/components/ideas/CoInventorsField";
-import StatusTimeline from "@/components/ideas/StatusTimeline";
+import { PageHeader } from "@/components/DashboardChrome";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
  * Sectioned copilot workspace for the inventor draft flow. Converts the
@@ -107,34 +109,8 @@ const COACH_PROMPTS = [
   "What would a competitor find hardest to copy?",
 ];
 
-const PROVENANCE_CHIP: Record<
-  Provenance,
-  { label: string; marker: string; text: string }
-> = {
-  ai: { label: "AI-drafted", marker: "#4351C0", text: "#333F99" },
-  edited: { label: "Edited", marker: "#F9B418", text: "#7E5A00" },
-  you: { label: "Written by you", marker: "#1E7B4D", text: "#155C3B" },
-};
-
-const ProvenanceChip = ({ p }: { p: Provenance }) => {
-  const meta = PROVENANCE_CHIP[p];
-  return (
-    <span
-      className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xs px-2 py-0.5"
-      style={{ backgroundColor: `${meta.marker}14` }}
-    >
-      <span
-        className="h-[6px] w-[6px] shrink-0"
-        style={{ backgroundColor: meta.marker }}
-      />
-      <span
-        className="font-mono text-xs font-semibold uppercase tracking-[0.05em]"
-        style={{ color: meta.text }}
-      >
-        {meta.label}
-      </span>
-    </span>
-  );
+const PROVENANCE_CHIP: Record<Provenance, { label: string }> = {
+  ai: { label: "AI-drafted" }, edited: { label: "Edited" }, you: { label: "Written by you" },
 };
 
 // Coarse size band — an enum, never the exact byte count.
@@ -155,7 +131,7 @@ const noveltyBand = (raw: unknown): string | undefined => {
 };
 
 const savedLabel = (savedAt: Date | null) => {
-  if (!savedAt) return null;
+  if (!savedAt || Number.isNaN(savedAt.getTime())) return null;
   const mins = Math.floor((Date.now() - savedAt.getTime()) / 60000);
   if (mins < 1) return "Saved just now";
   if (mins < 60) return `Saved ${mins}m ago`;
@@ -166,13 +142,14 @@ const savedLabel = (savedAt: Date | null) => {
 };
 
 const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
-  const { theme } = useTheme();
-  const dark = theme === "dark";
   const navigate = useNavigate();
   const { user } = useUserCookie();
   const queryClient = useQueryClient();
   const location = useLocation();
-  const draftId = new URLSearchParams(location.search).get("draftId") || "";
+  const routeDraftId = new URLSearchParams(location.search).get("draftId") || "";
+  const { data: draftList } = useQuery({ queryKey: ["workspace_drafts", ideaId], enabled: !!ideaId && !routeDraftId,
+    queryFn: async () => (await API_CONFIG.get(`/api/v1/idea/fetch-drafts/${ideaId}`)).data });
+  const draftId = routeDraftId || draftList?.data?.[0]?.id || "";
 
   const [sections, setSections] = useState<any[]>([]);
   const [provenance, setProvenance] = useState<Record<string, Provenance>>({});
@@ -189,6 +166,16 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   // why". See pulse-backend draft-assist.ts.
   type FieldReview = { verdict: string; message: string; example?: string };
   const [proposals, setProposals] = useState<Record<string, FieldReview>>({});
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "error" | "conflict">("saved");
+  const [sourceError, setSourceError] = useState<string | null>(null);
+  const [conflictDraft, setConflictDraft] = useState<any>(null);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [online, setOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener("online", update); window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
   const [finishNote, setFinishNote] = useState<string | null>(null);
   const [showCoInvPrompt, setShowCoInvPrompt] = useState(false);
   const [draftingField, setDraftingField] = useState<string | null>(null);
@@ -202,8 +189,10 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   const scoreAnnouncedRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
-  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const loadedRef = useRef(false);
+  const versionRef = useRef(0);
+  const recoveryKey = `pulse-disclosure:${user?.id}:${draftId}`;
 
   // Tick every 30s so "Saved 2m ago" stays honest.
   useEffect(() => {
@@ -211,7 +200,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
     return () => clearInterval(t);
   }, []);
 
-  const { data: draftData } = useQuery({
+  const { data: draftData, isError: draftLoadError, refetch: reloadDraft } = useQuery({
     queryKey: ["single_draft", draftId],
     enabled: !!draftId,
     queryFn: async () =>
@@ -226,10 +215,13 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   });
 
   const idea = ideaData?.data;
+  const { data: reviewFeedback } = useQuery({ queryKey: ["disclosure_review_feedback", ideaId], enabled: !!ideaId && idea?.state === "CHANGES_REQUESTED",
+    queryFn: async () => { const transitions = (await rawApi.get(`/v1/ideas/${ideaId}/transitions`)).data; return [...transitions].reverse().find((entry: any) => entry.to_state === "CHANGES_REQUESTED")?.comment ?? null; } });
 
   useEffect(() => {
     if (draftData && !loadedRef.current) {
       loadedRef.current = true;
+      versionRef.current = draftData.data.version ?? 0;
       track("draft_opened", { idea_id: ideaId });
       // Fall back to the default questionnaire when a draft has no (or
       // empty) meta_data, so the workspace never renders without sections.
@@ -238,21 +230,24 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
         draftData.data.meta_data.length > 0
           ? draftData.data.meta_data
           : ideaDraftQuestions;
-      setSections(JSON.parse(JSON.stringify(meta)));
+      let recovered: any = null;
+      try { recovered = JSON.parse(sessionStorage.getItem(recoveryKey) || "null"); } catch { /* A missing local copy is harmless. */ }
+      setSections(disclosureSections(recovered?.sections ?? meta));
+      if (recovered) { versionRef.current = recovered.version; setSaveState("error"); }
       const prov: Record<string, Provenance> = {};
-      (Array.isArray(draftData?.data?.meta_data) ? draftData.data.meta_data : []).forEach((s: any) =>
+      disclosureSections(meta).forEach((s: any) =>
         s.questions.forEach((q: any) => {
           if (q.provenance) prov[q.id] = q.provenance;
           else if (q.answer?.trim()) prov[q.id] = "you";
         }),
       );
-      setProvenance(prov);
-      if (draftData?.data?.updatedAt) setSavedAt(new Date(draftData.data.updatedAt));
+      setProvenance(recovered?.provenance ?? prov);
+      if ((draftData?.data?.updatedAt ?? draftData?.data?.updated_at)) setSavedAt(new Date(draftData.data.updatedAt ?? draftData.data.updated_at));
       const log = draftData?.data?.CheckDraftSoreLog?.[0];
       if (
         log?.createdAt &&
-        draftData?.data?.updatedAt &&
-        new Date(draftData.data.updatedAt).getTime() >
+        (draftData?.data?.updatedAt ?? draftData?.data?.updated_at) &&
+        new Date(draftData.data.updatedAt ?? draftData.data.updated_at).getTime() >
           new Date(log.createdAt).getTime() + 2000
       ) {
         setDirtySinceScore(true);
@@ -274,7 +269,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
     (sectionId: string) => {
       if (sectionId === "attachments") return attachments.length > 0;
       const s = sections.find((x) => x.id === sectionId);
-      return !!s && s.questions.every((q: any) => q.answer?.trim());
+      return !!s && s.questions.filter((q: any) => FIELD_META[q.id]?.required).every((q: any) => q.answer?.trim());
     },
     [sections, attachments.length],
   );
@@ -334,7 +329,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   // thin line where a prominent card used to be, and the thing it was meant to
   // replace it with was never seen. After autofill the slim bar is right: the
   // offer has been taken and repeating it is noise.
-  const slimBanner = autofillRan;
+  const slimBanner = autofillRan || answered > 2;
 
   /* --------------------------------- saving --------------------------------- */
 
@@ -353,17 +348,29 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
           provenance: prov[q.id] ?? null,
         })),
       }));
-      await API_CONFIG.post(`/api/v1/idea/update/draft/${draftId}`, {
-        meta_data: meta,
-        completion_percentage: pct,
-      });
-      setSavedAt(new Date());
+      setSaveState("saving");
+      const recovery = JSON.stringify({ sections: next, provenance: prov, version: versionRef.current });
+      try { sessionStorage.setItem(recoveryKey, recovery); } catch { /* Keep editing if browser storage is unavailable. */ }
+      try {
+        const response = await API_CONFIG.post(`/api/v1/idea/update/draft/${draftId}`, {
+          answers: { ...storedDisclosure(meta), __completion: pct, __expected_version: versionRef.current },
+        });
+        versionRef.current = response.data.data.version ?? versionRef.current;
+        setSavedAt(new Date());
+        setSaveState("saved");
+        if (sessionStorage.getItem(recoveryKey) === recovery) sessionStorage.removeItem(recoveryKey);
+      } catch (error: any) {
+        setSaveState(error?.response?.status === 409 ? "conflict" : "error");
+        throw error;
+      }
     },
-    [draftId],
+    [draftId, recoveryKey],
   );
 
   const persist = useCallback(
     (next: any[], prov: Record<string, Provenance>, pct: number) => {
+      setSaveState("saving");
+      try { sessionStorage.setItem(recoveryKey, JSON.stringify({ sections: next, provenance: prov, version: versionRef.current })); } catch { /* In-memory editing remains available. */ }
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
         const field = pendingFieldRef.current;
@@ -385,7 +392,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
           .catch(() => toast.error("Autosave failed"));
       }, 800);
     },
-    [saveNow, ideaId],
+    [saveNow, ideaId, recoveryKey],
   );
 
   const setAnswer = (qid: string, value: string, viaAI = false) => {
@@ -427,6 +434,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
 
   const runAutofill = async (payload: { file?: File; text?: string }) => {
     setIsAutofilling(true);
+    setSourceError(null);
     try {
       // A dropped file is read HERE and only its text travels — see
       // lib/documentText.ts on why the document itself never leaves the
@@ -443,12 +451,12 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
             char_count: source.length,
           });
         } catch (err: any) {
-          toast.error(err?.message ?? "That file could not be read");
+          setSourceError(err?.message ?? "That file could not be read. Paste its text or choose another file.");
           return;
         }
       }
       if (source.length < 40) {
-        toast.error("A few sentences at least — there has to be something to read.");
+        setSourceError("Add a few sentences so Pulse has enough material to organise.");
         return;
       }
       // The questionnaire's structure lives in the DRAFT, and the server fills
@@ -456,12 +464,12 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
       // the novelty section to get it written. A draft nobody has typed into
       // yet has never been saved, so it carries no structure at all: save it
       // first, or the server correctly answers "no questionnaire to fill".
-      await saveNow(sections, provenance, completion).catch(() => undefined);
+      await saveNow(sections, provenance, completion);
       const res = await API_CONFIG.post(`/api/v1/idea/autofill/${draftId}`, { text: source });
-      const filled: Record<string, string> = res?.data?.data?.answers ?? {};
+      const filled: Record<string, string> = Object.fromEntries(supportedPrefill([], res?.data?.data?.answers ?? {}).flatMap((s) => s.questions).filter((q) => q.answer).map((q) => [q.id, q.answer]));
       const filledCount = Object.keys(filled).length;
       if (!filledCount) {
-        toast.error(
+        setSourceError(
           res?.data?.data?.source === "unavailable"
             ? "The drafting assistant is unavailable right now — your text is safe, try again in a moment."
             : "Nothing in that text answered these questions. Try a fuller description.",
@@ -473,7 +481,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
           ...s,
           questions: s.questions.map((q: any) =>
             // Never overwrite what the inventor already wrote.
-            q.answer?.trim() || !filled[q.id] ? q : { ...q, answer: filled[q.id] },
+            FIELD_META[q.id]?.core || q.answer?.trim() || !filled[q.id] ? q : { ...q, answer: filled[q.id] },
           ),
         }));
         setProvenance((pp) => {
@@ -497,6 +505,8 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
         return next;
       });
       setAutofillRan(true);
+      setPasteOpen(false);
+      setPasteText("");
       // Count of fields filled + the source kind — never the text or the answers.
       track("draft_autofill_used", {
         idea_id: ideaId,
@@ -509,13 +519,9 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
         `${filledCount} ${filledCount === 1 ? "section" : "sections"} pre-filled — review each one. Novelty is yours to write.`,
       );
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ?? "Could not pre-fill from that text",
-      );
+      setSourceError(err?.response?.data?.message ?? "Could not organise this material. Your text is still here; try again.");
     } finally {
       setIsAutofilling(false);
-      setPasteOpen(false);
-      setPasteText("");
     }
   };
 
@@ -679,6 +685,8 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
 
   const { mutate: sendToCommittee, isPending: isSending } = useMutation({
     mutationFn: async () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      await saveNow(sections, provenance, completion);
       await API_CONFIG.post(
         `/api/v1/idea/send-to-ihc/${draftId}/${user?.client_id}`,
         { stale: dirtySinceScore },
@@ -707,7 +715,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
     );
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (missingRequired.length > 0) {
       setFinishNote(
         `${incompleteSections.length} section${incompleteSections.length === 1 ? "" : "s"} to go — or upload a document and we'll pre-fill them.`,
@@ -716,7 +724,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
       return;
     }
     setFinishNote(null);
-    startScoring();
+    try { if (saveTimer.current) clearTimeout(saveTimer.current); await saveNow(sections, provenance, completion); startScoring(); } catch { /* Save recovery stays visible. */ }
   };
 
   const handleSend = () => {
@@ -724,12 +732,12 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
     // the gap between this and idea_submitted IS the submit stall — a person who
     // reaches this point and does not finish is the one worth knowing about.
     track("idea_submit_opened", { idea_id: ideaId });
-    if (coInventorCount === 0 && !showCoInvPrompt) {
-      setShowCoInvPrompt(true);
+    if (missingRequired.length) {
+      setFinishNote("Complete the required answers before submitting for review.");
+      scrollToSection(incompleteSections[0]);
       return;
     }
-    setShowCoInvPrompt(false);
-    sendToCommittee();
+    setConfirmSubmit(true);
   };
 
   // One-time CTA pulse the moment required completion hits 100% (state B).
@@ -743,797 +751,106 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
     }
   }, [requiredComplete, scored]);
 
-  /* ---------------------------------- tokens ---------------------------------- */
-
-  const ink = dark ? "text-neutral-100" : "text-[#0C0C0C]";
-  const muted = dark ? "text-neutral-500" : "text-[#727272]";
-  const card = dark
-    ? "border-[#cccccc20] bg-[#0e0e0e]"
-    : "border-[#E8E8E8] bg-white";
-  const fieldCls = `w-full resize-y rounded-sm border bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-[#F9B418] ${
-    dark
-      ? "border-white/10 text-neutral-100 placeholder:text-neutral-500"
-      : "border-[#E8E8E8] text-neutral-900 placeholder:text-neutral-400"
-  }`;
-
   /* ---------------------------------- render ---------------------------------- */
+  const requestedChanges = idea?.status === "CHANGES_REQUESTED" || idea?.state === "CHANGES_REQUESTED";
+  const saveMessage = !online ? "Offline · your answers remain here" : saveState === "saving" ? "Saving…" : saveState === "conflict" ? "Another revision was saved. Your answers remain here." : saveState === "error" ? "Could not save. Your answers remain here." : savedLabel(savedAt) || "Autosaves as you type";
+  const fieldCls = "w-full resize-y rounded-sm border border-pl-border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+  const assessment = scoreMeta?.scoringResult;
+  const differences: string[] = assessment?.distinctDifferences ?? [];
+  const recommendations: any[] = assessment?.recommendations ?? [];
+  const disclosureSuggestion = (suggestion: any) => String(typeof suggestion === "string" ? suggestion : suggestion.text)
+    .replace(/^Claim the combination of (.+)\.$/, "Explain how $1 work together.")
+    .replace(/^Add dependent claims on (.+)\.$/, "Describe $1 and how it contributes to your idea.");
+  const evidence: any[] = assessment?.closestMatches ?? [];
+  const liveSignal = !answers.prob1?.trim() ? "Describe the problem your idea addresses." : !answers.sol1?.trim() ? "Your problem is described. Explain how your idea solves it." : !answers.adv1?.trim() ? "Your problem and approach are described. Add what makes your idea different, in your own words." : "Your problem, approach and distinguishing idea are described. Evaluation can compare them with prior art.";
+  const editable = !idea || ((idea.author_id ?? idea.created_by_id) === user?.id || (user?.role === "LEGAL_COUNSEL" && idea.submitted_by_id === user.id)) && ["DRAFT", "CHANGES_REQUESTED"].includes(idea.state ?? (idea.status === "IN_DRAFT" ? "DRAFT" : idea.status === "UPDATE_REQUEST" ? "CHANGES_REQUESTED" : ""));
+  if (idea && !editable) return <div data-disclosure-workspace className="min-h-0 flex-1 overflow-y-auto p-6"><PageHeader title="Invention disclosure" /><h1 className="text-xl font-semibold">{idea.title}</h1><p className="mt-2 text-sm text-pl-text-3">This disclosure is read-only. Review its status on the idea page.</p><Button size="sm" variant="outline" className="mt-3" onClick={() => navigate(`/ideas/${ideaId}`)}>View idea</Button><div className="mt-5 divide-y divide-pl-border">{sections.map((section) => <details key={section.id} className="py-3"><summary className="cursor-pointer font-medium">{section.title}</summary>{section.questions.filter((q: any) => q.answer).map((q: any) => <p key={q.id} className="mt-3 text-sm">{q.answer}</p>)}</details>)}</div></div>;
 
   return (
-    <div className={`pulse-product-page flex h-[calc(100dvh-4rem)] min-h-0 flex-col font-sans ${dark ? "bg-black" : "bg-[var(--pulse-canvas)]"}`}>
-      {/* ---- Header ---- */}
-      <div
-        className={`border-b px-6 py-5 ${
-          dark ? "border-[#cccccc20] bg-[#0a0a0a]" : "border-[#E8E8E8] bg-white"
-        }`}
-      >
-        <div className="mx-auto w-full max-w-[1200px]">
-          <div className={`text-sm ${muted}`}>
-            Ideas <span className="mx-1.5">/</span>{" "}
-            {/* The workspace reference (DEMO07), never the row id. A uuid
-                cannot be read down a phone or matched to a paper file, and
-                this is the first identity a new idea shows its author.
-                `reference_number` is on the idea from the moment it is
-                created — ideas.service writes it in the same insert. */}
-            {idea?.reference_number || idea?.title || ""}
-          </div>
-          <h1 className={`mt-4 truncate text-2xl font-semibold tracking-[-0.025em] ${ink}`}>
-            {idea?.title || "Working submission"}
-          </h1>
-          <div className={`mt-2 flex flex-wrap items-center gap-2 text-xs ${muted}`}>
-            <span className="inline-flex h-7 items-center gap-1.5 rounded-xs border border-[var(--pulse-line)] bg-white px-2.5 font-medium text-[#484E59]">
-              <span className="h-[7px] w-[7px] bg-[#727272]" /> In draft
-            </span>
-            {savedAt && <span>· {savedLabel(savedAt)}</span>}
-          </div>
-        </div>
-      </div>
-
-      {idea && <StatusTimeline idea={idea} showStatusLine={false} showTimings={false} />}
-
-      {/* ---- Body ---- */}
-      <div className="min-h-0 flex-1 overflow-y-auto pb-8">
-        <div className="mx-auto w-full max-w-[1160px] px-6 py-8">
-          {/* "Start from what you already have" — full width, in the row
-              the "Keep building" banner used to occupy. It was capped at
-              64% inside <main>, which is narrow for a card whose whole job
-              is to be taken up before the questionnaire is touched. */}
-        {slimBanner ? (
-          <div
-            className={`mb-5 flex items-center justify-between gap-3 rounded-md border px-4 py-2.5 ${card}`}
-          >
-            <span className={`text-[13px] ${muted}`}>
-              <Sparkles className="mr-1.5 inline h-3.5 w-3.5 text-[#F9B418]" />
-              {autofillRan
-                ? "Pre-filled from your material — review each section. Novelty is yours to write."
-                : "Have a write-up? Pre-fill the rest of this draft."}
-            </span>
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className={`text-[13px] font-medium underline-offset-2 hover:underline ${ink}`}
-                disabled={isAutofilling}
-              >
-                Upload
-              </button>
-              <button
-                type="button"
-                onClick={() => setPasteOpen((v) => !v)}
-                className={`text-[13px] font-medium underline-offset-2 hover:underline ${ink}`}
-                disabled={isAutofilling}
-              >
-                Paste text
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mb-5 rounded-md border border-[#F9B418]/60 bg-[#F9B418]/5 p-5">
-            <div className="flex items-start gap-3">
-              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[#F9B418]" />
-              <div className="min-w-0 flex-1">
-                <div className={`text-base font-semibold ${ink}`}>
-                  Start from what you already have
-                </div>
-                <p className={`mt-0.5 text-[13px] ${muted}`}>
-                  Upload a document or paste text and we'll pre-fill the
-                  sections below. Review and edit before submission.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isAutofilling}
-                    className="inline-flex items-center gap-1.5 rounded-sm bg-[#F9B418] px-3.5 py-2 text-[13px] font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700] disabled:opacity-50"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {isAutofilling ? "Analyzing..." : "Upload document"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPasteOpen((v) => !v)}
-                    disabled={isAutofilling}
-                    className={`inline-flex items-center gap-1.5 rounded-sm border px-3.5 py-2 text-[13px] font-medium transition-colors ${
-                      dark
-                        ? "border-white/15 text-neutral-300 hover:border-white/30"
-                        : "border-[#C8C8C8] text-[#444444] hover:bg-[#F5F5F5]"
-                    }`}
-                  >
-                    Paste text
-                  </button>
-                </div>
-                <p className={`mt-2 text-xs ${muted}`}>
-                  Read here in your browser: PDF, DOCX, TXT. For slides or
-                  an old .doc, paste the text.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.docx,.txt,.md"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) runAutofill({ file: f });
-            e.target.value = "";
-          }}
-        />
-        {pasteOpen && (
-          <div className={`mb-5 rounded-md border p-4 ${card}`}>
-            <textarea
-              rows={5}
-              value={pasteText}
-              onChange={(e) => setPasteText(e.target.value)}
-              placeholder="Paste anything — an email, meeting notes, a rough description. We'll structure it for you."
-              className={`ph-no-capture ${fieldCls}`}
-            />
-            <div className="mt-2 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setPasteOpen(false)}
-                className={`px-3 py-1.5 text-[13px] font-medium ${muted} hover:${ink}`}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={!pasteText.trim() || isAutofilling}
-                onClick={() => runAutofill({ text: pasteText.trim() })}
-                className="rounded-sm bg-[#F9B418] px-3.5 py-1.5 text-[13px] font-semibold text-[#0C0C0C] hover:bg-[#DA9700] disabled:opacity-50"
-              >
-                {isAutofilling ? "Analyzing..." : "Pre-fill from text"}
-              </button>
-            </div>
-          </div>
-        )}
-
-          <div className="mt-6 flex flex-col items-start gap-6 lg:flex-row">
-        {/* Left rail: progress + outline */}
-        <aside className="hidden">
-          <div className="mb-4">
-            <div className={`mb-1 flex justify-between text-xs ${muted}`}>
-              <span className="font-medium uppercase tracking-[0.05em]">Completion</span>
-              <span className="font-mono" style={{ fontVariantNumeric: "tabular-nums" }}>
-                {completion}%
-              </span>
-            </div>
-            <div className={`h-1.5 w-full rounded-full ${dark ? "bg-neutral-800" : "bg-neutral-200"}`}>
-              <div
-                className="h-1.5 rounded-full bg-[#F9B418] transition-all"
-                style={{ width: `${completion}%` }}
-              />
-            </div>
-          </div>
-          <nav className="space-y-0.5">
-            {outline.map((o) => {
-              const done = sectionComplete(o.id);
-              const active = openSection === o.id;
-              return (
-                <button
-                  key={o.id}
-                  type="button"
-                  onClick={() => scrollToSection(o.id)}
-                  className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] transition-colors ${
-                    active
-                      ? `font-semibold ${ink} ${dark ? "bg-white/5" : "bg-white"}`
-                      : `${muted} hover:${ink}`
-                  }`}
-                >
-                  {o.id === "attachments" && !done ? (
-                    // Optional section: no required-looking empty circle.
-                    <span className="w-4 shrink-0" />
-                  ) : (
-                    <span
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                        done
-                          ? "border-[#1E7B4D] bg-[#1E7B4D]"
-                          : dark
-                            ? "border-neutral-700"
-                            : "border-[#C8C8C8]"
-                      }`}
-                    >
-                      {done && <Check className="h-3 w-3 text-white" />}
-                    </span>
-                  )}
-                  <span className="flex-1">{o.title}</span>
-                  {o.id === "attachments" && (
-                    <span className={`text-xs ${muted}`}>optional</span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
-
-        {/* Main column */}
-        <main className="w-full min-w-0 lg:w-[64%]">
-
-          {/* Sections */}
-          <div className="space-y-3">
-            {sections.map((s) => {
-              const open = openSection === s.id;
-              const done = sectionComplete(s.id);
-              return (
-                <section
-                  key={s.id}
-                  ref={(el) => (sectionRefs.current[s.id] = el as HTMLDivElement | null)}
-                  className={`rounded-md border ${card}`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenSection(open ? "" : s.id)}
-                    aria-expanded={open}
-                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
-                  >
-                    <span className="flex items-center gap-2.5">
-                      <span className={`text-base font-semibold ${ink}`}>
-                        {SECTION_TITLES[s.id] || s.title}
-                      </span>
-                      {done && (
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#1E7B4D]">
-                          <Check className="h-3 w-3 text-white" />
-                        </span>
-                      )}
-                    </span>
-                    <ChevronDown
-                      className={`h-4 w-4 shrink-0 text-[#727272] transition-transform ${open ? "" : "-rotate-90"}`}
-                    />
-                  </button>
-                  {open && (
-                    <div className="space-y-5 px-5 pb-5">
-                      {s.questions.map((q: any) => {
-                        const meta: {
-                          label: string;
-                          helper: string;
-                          required?: boolean;
-                          core?: boolean;
-                        } = FIELD_META[q.id] ?? { label: q.text, helper: "" };
-                        return (
-                          <div key={q.id}>
-                            <div className="mb-1 flex flex-wrap items-center gap-2">
-                              <label
-                                htmlFor={`f-${q.id}`}
-                                className={`text-[13px] font-medium ${ink}`}
-                              >
-                                {meta.label}
-                                {meta.required && (
-                                  <span className={`ml-1 font-normal ${muted}`}>
-                                    (required)
-                                  </span>
-                                )}
-                              </label>
-                            </div>
-                            <p className={`mb-1.5 text-xs ${muted}`}>
-                              {meta.helper}
-                            </p>
-                            {meta.core && (
-                              <div
-                                className={`mb-2 rounded-sm border px-3 py-2.5 text-xs ${card} ${muted}`}
-                              >
-                                <ul className="list-disc space-y-1 pl-4">
-                                  {COACH_PROMPTS.map((p) => (
-                                    <li key={p}>{p}</li>
-                                  ))}
-                                </ul>
-                                <div className="mt-2 flex items-center gap-1.5">
-                                  <Lock className="h-3 w-3 shrink-0" />
-                                  In your own words — this is the record of your
-                                  conception, so AI won't write it for you.
-                                </div>
-                              </div>
-                            )}
-                            <div className="relative">
-                              <textarea
-                                id={`f-${q.id}`}
-                                rows={3}
-                                value={q.answer}
-                                onChange={(e) => {
-                                  setAnswer(q.id, e.target.value);
-                                  e.target.style.height = "auto";
-                                  e.target.style.height = `${e.target.scrollHeight + 2}px`;
-                                }}
-                                ref={(el) => {
-                                  // Grow to fit pre-filled/AI content on mount.
-                                  if (el && el.scrollHeight > el.clientHeight) {
-                                    el.style.height = `${el.scrollHeight + 2}px`;
-                                  }
-                                }}
-                                placeholder="Type here..."
-                                className={`ph-no-capture ${fieldCls} ${meta.core ? "" : "pb-9"}`}
-                              />
-                              {!meta.core && (
-                                <button
-                                  type="button"
-                                  disabled={draftingField === q.id}
-                                  onClick={() => draftField(q.id, q.text)}
-                                  className={`absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-sm px-2 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
-                                    dark
-                                      ? "bg-[#0e0e0e] text-neutral-300 hover:bg-white/10"
-                                      : "bg-white text-[#444444] hover:bg-[#F5F5F5]"
-                                  }`}
-                                >
-                                  <Sparkles className="h-3.5 w-3.5 text-[#F9B418]" />
-                                  {draftingField === q.id
-                                    ? "Reading..."
-                                    : "Review this"}
-                                </button>
-                              )}
-                            </div>
-                            {proposals[q.id] && (() => {
-                              const review = proposals[q.id];
-                              // Three verdicts, three different things to show:
-                              // a nudge with nothing to accept, a note plus a
-                              // rewrite built from the inventor's own words, or
-                              // a compliment that offers no edit at all.
-                              const tone =
-                                review.verdict === "good"
-                                  ? { bg: "#1E7B4D", label: "Reads well" }
-                                  : review.verdict === "unusable"
-                                    ? { bg: "#B3261E", label: "Not there yet" }
-                                    : review.verdict === "refused"
-                                      ? { bg: "#7D7D7D", label: "Yours to write" }
-                                      : review.verdict === "unavailable"
-                                        ? { bg: "#7D7D7D", label: "Unavailable" }
-                                        : { bg: "#4351C0", label: "One thing to add" };
-                              const dismiss = () =>
-                                setProposals((p) => {
-                                  const n = { ...p };
-                                  delete n[q.id];
-                                  return n;
-                                });
-                              return (
-                                <div
-                                  className="ph-no-capture mt-2 rounded-sm px-3 py-2.5"
-                                  style={{ backgroundColor: `${tone.bg}0F` }}
-                                >
-                                  <div className="mb-1 flex items-center gap-1.5">
-                                    <Sparkles className="h-3 w-3" style={{ color: tone.bg }} />
-                                    <span
-                                      className="font-mono text-xs font-semibold uppercase tracking-[0.05em]"
-                                      style={{ color: tone.bg }}
-                                    >
-                                      {tone.label}
-                                    </span>
-                                  </div>
-                                  <p className={`text-[13px] leading-relaxed ${ink}`}>
-                                    {review.message}
-                                  </p>
-                                  {review.example && (
-                                    <div
-                                      className={`mt-2 rounded-sm border px-3 py-2 text-[13px] leading-relaxed ${
-                                        dark
-                                          ? "border-white/10 bg-white/[0.04] text-neutral-300"
-                                          : "border-[#E8E8E8] bg-white text-[#444444]"
-                                      }`}
-                                    >
-                                      {review.example}
-                                    </div>
-                                  )}
-                                  <div className="mt-2 flex items-center gap-2">
-                                    {review.example && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setAnswer(q.id, review.example!, true);
-                                          dismiss();
-                                        }}
-                                        className="rounded-sm bg-[#F9B418] px-3 py-1 text-xs font-semibold text-[#0C0C0C] hover:bg-[#DA9700]"
-                                      >
-                                        Replace my answer
-                                      </button>
-                                    )}
-                                    <button
-                                      type="button"
-                                      onClick={dismiss}
-                                      className={`px-2 py-1 text-xs font-medium ${muted} hover:underline`}
-                                    >
-                                      {review.example ? "Keep mine" : "Dismiss"}
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
-              );
-            })}
-
-            {/* Attachments */}
-            <section
-              ref={(el) => (sectionRefs.current["attachments"] = el as HTMLDivElement | null)}
-              className={`rounded-md border ${card}`}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setOpenSection(openSection === "attachments" ? "" : "attachments")
-                }
-                aria-expanded={openSection === "attachments"}
-                className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
-              >
-                <span className="flex items-center gap-2.5">
-                  <span className={`text-base font-semibold ${ink}`}>
-                    Attachments
-                  </span>
-                  {attachments.length > 0 && (
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#1E7B4D]">
-                      <Check className="h-3 w-3 text-white" />
-                    </span>
-                  )}
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 shrink-0 text-[#727272] transition-transform ${
-                    openSection === "attachments" ? "" : "-rotate-90"
-                  }`}
-                />
-              </button>
-              {openSection === "attachments" && (
-                <div className="space-y-3 px-5 pb-5">
-                  <p className={`text-xs ${muted}`}>
-                    Diagrams, test data, or write-ups that support the
-                    disclosure.
-                  </p>
-                  {attachments.map((f: any) => (
-                    <div
-                      key={f.id}
-                      className={`flex h-10 items-center gap-2 rounded-sm border px-3 text-sm ${
-                        dark ? "border-white/10" : "border-[#E8E8E8]"
-                      } ${ink}`}
-                    >
-                      <FileText className="h-4 w-4 shrink-0 text-[#727272]" />
-                      <span className="truncate">{f.original_name}</span>
-                    </div>
-                  ))}
-                  <input
-                    ref={attachInputRef}
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.length)
-                        uploadAttachment(Array.from(e.target.files));
-                      e.target.value = "";
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => attachInputRef.current?.click()}
-                    className={`inline-flex items-center gap-1.5 rounded-sm border px-3.5 py-2 text-[13px] font-medium transition-colors ${
-                      dark
-                        ? "border-white/15 text-neutral-300 hover:border-white/30"
-                        : "border-[#C8C8C8] text-[#444444] hover:bg-[#F5F5F5]"
-                    }`}
-                  >
-                    <Plus className="h-4 w-4" /> Add files
-                  </button>
-                </div>
-              )}
-            </section>
-          </div>
-        </main>
-
-        {/* Right rail: preliminary signal */}
-        <aside className="w-full shrink-0 space-y-4 lg:sticky lg:top-4 lg:w-[36%]">
-          <div className={`rounded-md border p-5 ${card}`}>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <div className={`text-xs font-medium uppercase tracking-[0.05em] ${muted}`}>
-                  Submission readiness
-                </div>
-                <div className={`mt-1 text-sm font-semibold ${ink}`}>
-                  {missingRequired.length === 0
-                    ? "Ready for evaluation"
-                    : `${missingRequired.length} required field${missingRequired.length === 1 ? "" : "s"} remaining`}
-                </div>
-              </div>
-              <span className={`font-mono text-sm font-semibold ${ink}`}>{completion}%</span>
-            </div>
-            <div className={`mt-3 h-1.5 w-full rounded-full ${dark ? "bg-neutral-800" : "bg-neutral-200"}`}>
-              <div
-                className="h-1.5 rounded-full bg-[#F9B418] transition-all"
-                style={{ width: `${completion}%` }}
-              />
-            </div>
-            <nav className="mt-4 space-y-1">
-              {outline.map((item) => {
-                const done = sectionComplete(item.id);
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => scrollToSection(item.id)}
-                    className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] transition-colors hover:bg-[var(--pulse-surface-subtle)] ${muted}`}
-                  >
-                    {item.id === "attachments" && !done ? (
-                      <span className="w-4 shrink-0" />
-                    ) : (
-                      <span
-                        className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border ${
-                          done
-                            ? "border-[#1E7B4D] bg-[#1E7B4D]"
-                            : "border-[var(--pulse-line-strong)]"
-                        }`}
-                      >
-                        {done && <Check className="h-3 w-3 text-white" />}
-                      </span>
-                    )}
-                    <span className="flex-1">{item.title}</span>
-                    {item.id === "attachments" && <span className="text-xs">optional</span>}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className={`rounded-md border p-4 ${card}`}>
-            <div
-              className={`text-xs font-medium uppercase tracking-[0.05em] ${muted}`}
-            >
-              {scored ? "Patentability score" : "Patentability signal"}
-            </div>
-            {scored ? (
-              <>
-                <div
-                  className={`mt-2 text-2xl font-semibold ${ink}`}
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                >
-                  {score10?.toFixed(1)}
-                  <span className={`ml-1 text-sm font-normal ${muted}`}>
-                    /10
-                  </span>
-                </div>
-                {dirtySinceScore && (
-                  <span
-                    className="mt-2 inline-flex items-center gap-1.5 rounded-xs px-2 py-0.5"
-                    style={{ backgroundColor: "#F9B41814" }}
-                  >
-                    <span className="h-[6px] w-[6px] bg-[#F9B418]" />
-                    <span className="font-mono text-xs font-semibold uppercase tracking-[0.05em] text-[#7E5A00]">
-                      Scored before your latest edits
-                    </span>
-                  </span>
-                )}
-                {scoreMeta?.scoringResult?.summary && (
-                  <p className={`mt-3 text-xs leading-relaxed ${muted}`}>
-                    {scoreMeta.scoringResult.summary}
-                  </p>
-                )}
-              </>
-            ) : scoringActive ? (
-              <div className="mt-2">
-                <EvaluationProgress
-                    compact
-                    evaluationId={runningEvaluationId}
-                    reference={idea?.reference_number}
-                  />
-              </div>
-            ) : (
-              <>
-                {signal ? (
-                  <>
-                    {/* No grade before the search has run: the rail names the
-                        FIELD it is reading and says something true about it.
-                        Every number under here was either counted in this
-                        workspace or comes from the fixed facts list — see
-                        pulse-backend preliminary-signal.ts. */}
-                    {signal.field && (
-                      <div
-                        className={`mt-2 font-mono text-[11px] uppercase tracking-[0.05em] ${muted}`}
-                      >
-                        {signal.field}
-                      </div>
-                    )}
-                    <div className={`mt-1 text-[15px] font-semibold leading-snug ${ink}`}>
-                      {signal.headline}
-                    </div>
-                    {signal.note && (
-                      <p className={`mt-1.5 text-xs leading-relaxed ${muted}`}>
-                        {signal.note}
-                      </p>
-                    )}
-                    {(signal.facts ?? []).length > 0 && (
-                      <ul className="mt-2.5 space-y-1.5">
-                        {(signal.facts as string[]).map((f, i) => (
-                          <li
-                            key={i}
-                            className={`flex gap-2 text-[11px] leading-relaxed ${muted}`}
-                          >
-                            <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-[#F9B418]" />
-                            <span>{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </>
-                ) : (
-                  <p className={`mt-2 text-xs leading-relaxed ${muted}`}>
-                    Write a couple of sections and this panel will read them
-                    back to you.
-                  </p>
-                )}
-                <p
-                  className={`mt-3 border-t pt-2 text-xs ${muted} ${dark ? "border-[#cccccc20]" : "border-[#F5F5F5]"}`}
-                >
-                  The full score out of 10 is calculated when you finish.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div className={`rounded-md border p-5 ${card}`}>
-            <div className={`text-xs font-medium uppercase tracking-[0.05em] ${muted}`}>
-              Contributors
-            </div>
-            <div className="mt-3">
-              <CoInventorsField ideaId={ideaId} />
-            </div>
-          </div>
-        </aside>
-          </div>
-        </div>
-      </div>
-
-      {/* ---- Footer CTA ---- */}
-      <div
-        className={`z-20 shrink-0 border-t px-6 py-3 ${
-          dark ? "border-[#cccccc20] bg-[#0a0a0a]" : "border-[#E8E8E8] bg-white"
-        }`}
-      >
-        {/* Low-score coaching panel (state C, score < 4) */}
-        {scored && score10! < 4 && strengthenTips.length > 0 && (
-          <div
-            className={`mb-3 rounded-md border px-4 py-3 ${
-              dark ? "border-[#cccccc20] bg-[#0e0e0e]" : "border-[#E8E8E8] bg-[#FAFAFA]"
-            }`}
-          >
-            <div className={`text-[13px] font-semibold ${ink}`}>
-              What would strengthen this
-            </div>
-            <ul className={`mt-1 list-disc space-y-0.5 pl-4 text-xs ${muted}`}>
-              {strengthenTips.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+    <div data-disclosure-workspace className="pulse-product-page flex flex-1 min-h-0 flex-col bg-background font-sans text-foreground">
+      <PageHeader title="Invention disclosure" />
+      <div className="min-h-0 flex-1 overflow-y-auto lg:flex lg:flex-col lg:overflow-hidden">
+      <header className="shrink-0 border-b border-pl-border px-6 py-2 lg:py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="min-w-0 text-[13px]">
-            {showCoInvPrompt ? (
-              <span className={`flex flex-wrap items-center gap-2 ${ink}`}>
-                Anyone else contribute? Add co-inventors in the header above.
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  className="font-medium underline underline-offset-2"
-                >
-                  Skip
-                </button>
-              </span>
-            ) : scored ? (
-              score10! >= 7 ? (
-                <span className={ink}>
-                  Strong signal. Send it for review.
-                </span>
-              ) : score10! >= 4 ? (
-                <span className={muted}>
-                  Send for review{" "}
-                  <button
-                    type="button"
-                    onClick={() => scrollToSection(weakestSectionId)}
-                    className={`font-medium underline underline-offset-2 ${ink}`}
-                  >
-                    or strengthen it first
-                  </button>
-                </span>
-              ) : (
-                <span className={muted}>
-                  A low score never blocks sending — but strengthening first
-                  usually pays off.
-                </span>
-              )
-            ) : finishNote ? (
-              <span className={muted}>{finishNote}</span>
-            ) : (
-              <span className={muted}>
-                Autosaves as you type
-                {savedAt ? ` · ${savedLabel(savedAt)}` : ""}
-              </span>
-            )}
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2">
-            {scored && dirtySinceScore && (
-              <button
-                type="button"
-                onClick={() => startScoring()}
-                disabled={isScoring || scoringActive}
-                className={`rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 ${
-                  dark
-                    ? "border-white/15 text-neutral-300 hover:border-white/30"
-                    : "border-[#C8C8C8] text-[#444444] hover:bg-[#F5F5F5]"
-                }`}
-              >
-                {scoringActive ? "Scoring..." : "Re-run score"}
-              </button>
-            )}
-
-            {!scored ? (
-              <button
-                type="button"
-                onClick={handleFinish}
-                disabled={isScoring || scoringActive}
-                className={`rounded-sm bg-[#F9B418] px-5 py-2.5 text-sm font-semibold text-[#0C0C0C] transition-all hover:bg-[#DA9700] disabled:opacity-60 ${
-                  pulseNow
-                    ? "shadow-[0_0_0_6px_rgba(249,180,24,0.35)]"
-                    : "shadow-none"
-                }`}
-                style={{ transition: "box-shadow 0.6s ease" }}
-              >
-                {isScoring || scoringActive
-                  ? "Scoring..."
-                  : "Evaluate submission"}
-              </button>
-            ) : score10! < 4 ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  disabled={isSending}
-                  className={`rounded-sm border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 ${
-                    dark
-                      ? "border-white/15 text-neutral-300 hover:border-white/30"
-                      : "border-[#C8C8C8] text-[#444444] hover:bg-[#F5F5F5]"
-                  }`}
-                >
-                  {isSending ? "Sending..." : "Send for review"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollToSection(weakestSectionId)}
-                  className="rounded-sm bg-[#F9B418] px-5 py-2.5 text-sm font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700]"
-                >
-                  Strengthen submission
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSend}
-                disabled={isSending}
-                className="rounded-sm bg-[#F9B418] px-5 py-2.5 text-sm font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700] disabled:opacity-60"
-              >
-                {isSending ? "Sending..." : "Send for review"}
-              </button>
-            )}
-          </div>
+          <Button size="sm" variant="ghost" onClick={async () => {
+            try { if (saveTimer.current) clearTimeout(saveTimer.current); await saveNow(sections, provenance, completion); navigate("/ideas"); } catch { /* Keep the draft open when saving fails. */ }
+          }}>← My ideas</Button>
+          {saveState !== "error" && saveState !== "conflict" && <p role="status" className="text-xs text-pl-text-3">{saveMessage}</p>}
         </div>
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h1 title={idea?.title} className="min-w-0 truncate text-base font-semibold lg:text-xl">{idea?.title || "Invention disclosure"}</h1>
+          <span className="text-xs text-pl-text-3">{idea?.reference_number} · {requestedChanges ? "Changes requested" : "In draft"}</span>
+        </div>
+        {idea?.submitted_by && <p className="mt-2 text-xs text-pl-text-3">Inventor: {idea.author?.name} · Submitted by: {idea.submitted_by.name}</p>}
+      </header>
+
+      <div className="min-h-0 px-6 py-5 lg:flex-1 lg:overflow-y-auto">
+        {!draftData ? draftLoadError ? <div role="alert"><p>Could not load this disclosure.</p><Button size="sm" variant="outline" onClick={() => reloadDraft()}>Try again</Button></div> : <p role="status">Loading disclosure…</p> : <>
+          {requestedChanges && <div className="mb-5 border-l-2 border-pl-blue pl-4"><h2 className="text-sm font-semibold">Update your disclosure</h2><p className="mt-1 text-sm text-pl-text-2">Address the review feedback, then submit this revision for review.</p>{reviewFeedback && <blockquote className="mt-2 text-sm">{reviewFeedback}</blockquote>}</div>}
+          {(saveState === "error" || saveState === "conflict") && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-sm bg-pl-red-tint p-3 text-sm text-pl-red-text"><p>{saveMessage}</p>{saveState === "conflict" ? <Button variant="outline" size="sm" onClick={async () => { try { setConflictDraft((await API_CONFIG.get(`/api/v1/idea/single-draft/${draftId}`)).data.data); } catch { setFinishNote("Could not load the latest revision. Your answers remain here."); } }}>Compare latest revision</Button> : <Button variant="outline" size="sm" onClick={() => saveNow(sections, provenance, completion).catch(() => undefined)}>Retry save</Button>}</div>}
+          <div className="grid min-w-0 gap-8 lg:grid-cols-3">
+            <div className="min-w-0 lg:col-span-2">
+              <section className="mb-5 border-b border-pl-border pb-5" aria-label="Start from existing material">
+                {slimBanner ? <details open={pasteOpen || isAutofilling || !!sourceError}>
+                  <summary className="cursor-pointer text-sm font-medium">{autofillRan ? "Material organised · review the prefilled answers" : "Add material to this disclosure"}</summary>
+                  <p className="mt-2 text-sm text-pl-text-3">Only supported answers are prefilled. What makes it different stays yours to write.</p>
+                  <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" disabled={isAutofilling} onClick={() => fileInputRef.current?.click()}><Upload />Upload document</Button><Button size="sm" variant="ghost" onClick={() => setPasteOpen(true)}>Paste text</Button></div>
+                </details> : <>
+                  <h2 className="text-lg font-semibold">Start from what you already have</h2>
+                  <p className="mt-1 text-sm text-pl-text-2">Bring notes or a document. Pulse organises supported answers; you review and fill the gaps.</p>
+                  <div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="outline" disabled={isAutofilling} onClick={() => fileInputRef.current?.click()}><Upload />Upload document</Button><Button size="sm" variant="outline" onClick={() => setPasteOpen(true)}>Paste text</Button><Button size="sm" variant="ghost" onClick={() => scrollToSection(sections[0]?.id)}>Write manually</Button></div>
+                  <p className="mt-2 text-xs text-pl-text-3">PDF, DOCX, TXT or Markdown. For slides, paste the text.</p>
+                </>}
+                <input ref={fileInputRef} type="file" accept=".pdf,.docx,.txt,.md" className="hidden" aria-label="Upload source document" onChange={(e) => { const file = e.target.files?.[0]; if (file) runAutofill({ file }); e.target.value = ""; }} />
+                {pasteOpen && <div className="mt-3"><label htmlFor="draft-source" className="text-sm font-medium">Your source material</label><textarea id="draft-source" rows={4} value={pasteText} onChange={(e) => setPasteText(e.target.value)} className={`ph-no-capture mt-2 ${fieldCls}`} placeholder="Paste notes or an existing description" /><div className="mt-2 flex gap-2"><Button size="sm" variant="outline" disabled={isAutofilling || !pasteText.trim()} onClick={() => runAutofill({ text: pasteText })}>Organise material</Button><Button size="sm" variant="ghost" onClick={() => setPasteOpen(false)}>Close</Button></div></div>}
+                {isAutofilling && <p role="status" className="mt-3 text-sm text-pl-blue-text motion-safe:animate-pulse">Reading your material and matching it to the disclosure…</p>}
+                {sourceError && <p role="alert" className="mt-3 text-sm text-pl-red-text">{sourceError}</p>}
+              </section>
+              <div className="divide-y divide-pl-border">
+                {sections.map((s) => {
+                  const open = openSection === s.id;
+                  return <section key={s.id} ref={(el) => { sectionRefs.current[s.id] = el; }} className="scroll-mt-4 py-2">
+                    <button type="button" aria-expanded={open} onClick={() => setOpenSection(open ? "" : s.id)} className="flex w-full items-center justify-between gap-3 rounded-sm py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      <span className="text-base font-semibold">{SECTION_TITLES[s.id] || s.title}</span><span className="flex items-center gap-3 text-xs text-pl-text-3">{s.questions.some((q: any) => FIELD_META[q.id]?.required) ? sectionComplete(s.id) ? "Required answers complete" : "Required answers remaining" : "Optional"}<ChevronDown className={`size-4 ${open ? "" : "-rotate-90"}`} /></span>
+                    </button>
+                    {open && <div className="space-y-5 pb-4">{s.questions.map((q: any) => {
+                      const meta = FIELD_META[q.id] ?? { label: q.text || q.question, helper: "", required: false, core: q.id === "novelty" };
+                      const review = proposals[q.id];
+                      return <div key={q.id}>
+                        <div className="sticky top-0 z-10 flex flex-wrap items-baseline justify-between gap-2 bg-background py-1"><label htmlFor={`f-${q.id}`} className="text-sm font-medium">{meta.label}<span className="ml-2 font-normal text-pl-text-3">{meta.required ? "Required" : "Optional"}</span></label>{provenance[q.id] && <span className="text-xs text-pl-text-3">{PROVENANCE_CHIP[provenance[q.id]].label}</span>}</div>
+                        <p className="mb-2 mt-1 text-xs text-pl-text-3">{meta.helper}</p>
+                        {meta.core && <p className="mb-2 text-xs text-pl-text-2">Write this in your own words: what did you conceive that existing approaches do not do?</p>}
+                        <textarea id={`f-${q.id}`} rows={4} value={q.answer || ""} onChange={(e) => setAnswer(q.id, e.target.value)} className={`ph-no-capture ${fieldCls}`} />
+                        {!meta.core && <Button size="sm" variant="ghost" disabled={draftingField === q.id} onClick={() => draftField(q.id, q.text)}>{draftingField === q.id ? "Reading…" : "Review this answer"}</Button>}
+                        {review && <div className="mt-2 rounded-sm bg-pl-blue-tint p-3 text-sm"><p>{review.message}</p>{review.example && <p className="mt-2">{review.example}</p>}<div className="mt-2 flex flex-wrap gap-2">{review.example && <Button size="sm" variant="outline" onClick={() => { setAnswer(q.id, review.example!, true); setProposals((p) => { const next = { ...p }; delete next[q.id]; return next; }); }}>Use suggested wording</Button>}<Button size="sm" variant="ghost" onClick={() => setProposals((p) => { const next = { ...p }; delete next[q.id]; return next; })}>Dismiss</Button></div></div>}
+                      </div>;
+                    })}</div>}
+                  </section>;
+                })}
+                <details className="py-4"><summary className="cursor-pointer text-sm font-medium">Co-inventors</summary><div className="mt-3"><CoInventorsField ideaId={ideaId} /></div></details>
+                <details className="py-4"><summary className="cursor-pointer text-sm font-medium">Version history</summary><p className="mt-2 text-sm text-pl-text-3">Current draft · revision {(idea?.revision || 1) + (requestedChanges ? 1 : 0)}</p>{(draftData?.data?.history ?? []).map((entry: any) => <details key={entry.revision} className="mt-2"><summary className="cursor-pointer text-sm">Reviewed revision {entry.revision}</summary>{disclosureSections(entry.answers.__meta_data).map((section) => <div key={section.id} className="mt-3"><h3 className="text-sm font-medium">{section.title}</h3>{section.questions.filter((q) => q.answer).map((q) => <p key={q.id} className="mt-1 text-sm text-pl-text-2">{q.answer}</p>)}</div>)}</details>)}</details>
+                <details className="py-4"><summary className="cursor-pointer text-sm font-medium">Original material</summary><p className="mt-2 whitespace-pre-wrap break-words text-sm text-pl-text-2">{draftData?.data?.answers?.__source?.text || "No source text saved. Add material above or write your answers directly."}</p></details>
+                <details className="py-4" ref={(el) => { sectionRefs.current.attachments = el; }}><summary className="cursor-pointer text-sm font-medium">Source files · {attachments.length}</summary><div className="mt-3 space-y-2">{attachments.map((f: any) => <p key={f.id} className="flex min-w-0 items-center gap-2 text-sm"><FileText className="size-4 shrink-0" /><span className="break-all">{f.original_name}</span></p>)}<input ref={attachInputRef} type="file" multiple className="hidden" onChange={(e) => { if (e.target.files?.length) uploadAttachment(Array.from(e.target.files)); e.target.value = ""; }} /><Button size="sm" variant="outline" onClick={() => attachInputRef.current?.click()}><Plus />Add files</Button></div></details>
+              </div>
+            </div>
+            <aside className="min-w-0 space-y-5">
+              <section className="border-b border-pl-border pb-5"><h2 className="text-sm font-semibold">Submission readiness</h2><p className="mt-2 text-lg font-semibold">{requiredComplete ? "Ready for review" : `${missingRequired.length} required answer${missingRequired.length === 1 ? "" : "s"} to finish`}</p><p className="mt-1 text-xs text-pl-text-3">{requiredComplete ? "Your Workspace Admin receives this disclosure when you submit." : "Complete these answers to submit your disclosure."}</p>{!requiredComplete && <ul className="mt-3 space-y-1">{missingRequired.map((id) => <li key={id}><button className="rounded-sm py-1 text-left text-sm text-pl-blue-text underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-ring" onClick={() => scrollToSection(sections.find((s) => s.questions.some((q: any) => q.id === id))?.id)}>{FIELD_META[id].label} →</button></li>)}</ul>}</section>
+              <section><h2 className="text-sm font-semibold">Optional evaluation</h2><p className="mt-1 text-xs text-pl-text-3">AI-assisted and advisory. You can submit without it.</p>
+                {scored ? <><p className="mt-3 text-2xl font-semibold tabular-nums">{score10?.toFixed(1)}<span className="text-sm font-normal text-pl-text-3"> /10</span></p><p className="mt-1 text-sm">{score10! >= 7 ? "Highly novel" : score10! >= 4 ? "Moderately novel" : score10! >= 2 ? "Marginally novel" : "Closely matched"}</p>{dirtySinceScore && <p className="mt-2 text-xs text-pl-amber-text">Evaluated before your latest edits.</p>}<p className="mt-2 text-sm text-pl-text-2">{score10! < 4 ? "The search found close overlap. Review the differences and strengthen your explanation." : "The search found potentially distinct features. Review the comparison before drawing conclusions."}</p>
+                <h3 className="mt-4 text-sm font-medium">What appears different</h3><ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-pl-text-2">{differences.map((difference) => <li key={difference}>{difference}</li>)}</ul>
+                <h3 className="mt-4 text-sm font-medium">How to strengthen</h3><ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-pl-text-2">{recommendations.map((tip, index) => <li key={index}>{disclosureSuggestion(tip)}<span className="block text-xs text-pl-text-3">{tip.rationale}</span></li>)}</ul>
+                <details className="mt-4"><summary className="cursor-pointer text-sm font-medium">Prior art · {evidence.length} references</summary><div className="mt-3 space-y-4">{evidence.map((reference) => <article key={reference.publicationNumber}><h4 className="text-sm font-medium">{reference.publicationNumber}</h4><p className="mt-1 text-sm">{reference.title}</p><p className="mt-2 text-xs text-pl-text-2">{reference.analysis}</p>{reference.abstract && <p className="mt-2 text-xs text-pl-text-3">{reference.abstract}</p>}</article>)}</div></details></> : scoringActive ? <div className="mt-3"><EvaluationProgress compact evaluationId={runningEvaluationId} reference={idea?.reference_number} /></div> : <p className="mt-3 text-sm text-pl-text-2">{liveSignal}</p>}
+                <Button className="mt-3" size="sm" variant="outline" disabled={isScoring || scoringActive} onClick={handleFinish}>{scoringActive ? "Evaluating…" : scored ? "Evaluate again" : "Evaluate idea"}</Button>
+              </section>
+            </aside>
+          </div>
+        </>}
       </div>
+      </div>
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-pl-border bg-background px-6 py-3"><p className="min-w-0 text-xs text-pl-text-3">{finishNote || (requiredComplete ? "Submit this disclosure to your Workspace Admin." : "Your draft stays editable until you submit it for review.")}</p><Button size="sm" onClick={handleSend} disabled={isSending || !online || !draftData}>{isSending ? "Submitting…" : requestedChanges ? "Resubmit for review" : "Submit for review"}</Button></footer>
+      <Dialog open={!!conflictDraft} onOpenChange={(open) => { if (!open) setConflictDraft(null); }}><DialogContent className="max-h-full overflow-y-auto"><DialogHeader><DialogTitle>Compare the saved revision</DialogTitle><DialogDescription>Your answers remain in the disclosure. Review the latest saved answers before choosing which version to keep.</DialogDescription></DialogHeader><div className="space-y-3">{disclosureSections(conflictDraft?.meta_data).map((section) => <details key={section.id}><summary className="cursor-pointer text-sm font-medium">{section.title}</summary>{section.questions.map((q) => <div key={q.id} className="mt-3 text-sm"><h3 className="font-medium">{FIELD_META[q.id]?.label || q.text}</h3><div className="mt-2 grid gap-3 sm:grid-cols-2"><div><p className="text-xs text-pl-text-3">Your answer</p><p className="mt-1">{answers[q.id] || "No answer"}</p></div><div><p className="text-xs text-pl-text-3">Saved answer</p><p className="mt-1">{q.answer || "No answer"}</p></div></div></div>)}</details>)}</div><div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => { setSections(disclosureSections(conflictDraft.meta_data)); setProvenance(Object.fromEntries(disclosureSections(conflictDraft.meta_data).flatMap((section) => section.questions).filter((question) => question.answer?.trim()).map((question) => [question.id, question.provenance || "you"]))); versionRef.current = conflictDraft.version ?? 0; sessionStorage.removeItem(recoveryKey); setSaveState("saved"); setConflictDraft(null); }}>Use saved revision</Button><Button size="sm" onClick={async () => { versionRef.current = conflictDraft.version ?? 0; try { await saveNow(sections, provenance, completion); setConflictDraft(null); } catch { /* Keep the comparison open on failure. */ } }}>Save my answers instead</Button></div></DialogContent></Dialog>
+      <Dialog open={confirmSubmit} onOpenChange={setConfirmSubmit}><DialogContent><DialogHeader><DialogTitle>{requestedChanges ? "Resubmit this disclosure?" : "Submit this disclosure for review?"}</DialogTitle><DialogDescription>{idea?.submitted_by ? `Inventor: ${idea.author?.name}. Submitted by: ${idea.submitted_by.name}. ` : ""}Your Workspace Admin will review this version. You can edit it again if changes are requested.</DialogDescription></DialogHeader><div className="flex flex-wrap justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setConfirmSubmit(false)}>Keep editing</Button><Button size="sm" disabled={isSending} onClick={() => sendToCommittee()}>{isSending ? "Submitting…" : "Submit for review"}</Button></div></DialogContent></Dialog>
     </div>
   );
 };

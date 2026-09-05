@@ -42,6 +42,13 @@
       "type": "Array<{ jurisdiction, count }> (GET /v1/dashboard, V0 scenarios only)",
       "finding": "BF-5",
       "reason": "The jurisdiction list that is the text alternative of the Patents worldwide panel and the subtitle's jurisdiction count (DSN-0002)."
+    },
+    {
+      "entity": "Draft",
+      "field": "version, history, answers.__source, per-question provenance",
+      "type": "version number; frozen submitted revisions with answers; retained source text and filenames; ai/edited/you provenance",
+      "finding": "BF-7",
+      "reason": "DSN-0006: one canonical disclosure with optimistic concurrency through answers.__expected_version, retained source material, visible human/AI provenance and frozen reviewed revisions. V0 only; existing draft routes and adapter remain intact."
     }
   ],
   "collections": [

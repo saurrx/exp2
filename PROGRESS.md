@@ -144,3 +144,6 @@ Built the compact four-column portfolio with persona scope, jurisdiction filteri
 
 ### DSN-0012 evaluator corrections
 Fresh evaluator round 1 NEEDS_WORK: retained filename was not rendered consistently, partial import listed only representative errors, search competed with load recovery, and operational empty screenshots were absent. All four corrected: explicit filename, complete 19-row disclosure, dominant reload/import recovery and Case Owner/Photon Admin empty states. Expanded 16-story focused suite passes, axe remains zero, retained retry and empty-scope recovery pass. Refreshing stable captures and independent round 2; coverage remains 8/17.
+
+### DSN-0012 complete — evaluator PASS
+Fresh evaluator round 2 PASS: all seven scores 4, no findings or missing states across 56 inspected screenshots. Sixteen V0 portfolio stories, focused 16/16, final required gates 8/8, both builds, stable changed captures, focused axe, four-persona filtered CSV, detail/Back, import recovery/empty scope and actual status save checks pass. The final status save probe exposed an ignored legacy body field; corrected to the existing canonical status payload in the component and verified the saved response and refreshed row. No adapter/auth/analytics or reference-screen change. Coverage 9/17; ready for no-ff merge. Next: DSN-0013 Patent detail.

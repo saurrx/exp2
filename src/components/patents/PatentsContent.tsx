@@ -658,7 +658,7 @@ const PatentsContent = (props: PatentsContentProps) => {
       }) => {
         const response = await API_CONFIG.put(
           `/api/v1/patent/update-single/${id}`,
-          { legal_current_status: status },
+          { status: backendStatus(status) },
         );
         return response?.data;
       },

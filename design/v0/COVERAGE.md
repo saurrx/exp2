@@ -25,7 +25,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 16 | 17 | conceptual | DSN-0008 |
 | Review decision | Workspace Admin | `/ideas` | 5 | 12 | conceptual | DSN-0010 |
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
-| Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 7 | 12 | none |  |
+| Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 9 | 16 | none | DSN-0012 |
 | Patent detail | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents/:patentId` | 6 | 15 | unwired |  |
 | Actions | Workspace Admin, Case Owner, Photon Admin | `/due-dates`, `/actions` | 5 | 14 | none |  |
 | Photon due dates | Case Owner, Photon Admin | `/due-dates` | 5 | 10 | none |  |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 209 intended stories, 53 V0 scenarios; backend impact conceptual on 6, unwired on 5, none on 6.
+17 surfaces, 213 intended stories, 55 V0 scenarios; backend impact conceptual on 6, unwired on 5, none on 6.
 
 ## Inventor home
 
@@ -167,18 +167,18 @@ Brief: `product-context/surfaces/workspace-admin-dashboard.md` · Storybook titl
 
 ## Patent portfolio
 
-Brief: `product-context/surfaces/patent-portfolio.md` · Storybook title: `Surfaces/Patent portfolio` · DSN: none yet
+Brief: `product-context/surfaces/patent-portfolio.md` · Storybook title: `Surfaces/Patent portfolio` · DSN: DSN-0012
 
 - **Personas:** Inventor, Workspace Admin, Case Owner, Photon Admin
 - **User goal:** Understand the company's patent assets and find a specific record quickly.
 - **Business goal:** Portfolio visibility that supports the service relationship and shows inventors that invention is valued.
 - **Routes:** `/patents` (Inventor, Workspace Admin, Case Owner, Photon Admin)
-- **Required scenarios:** `v0/inventor/portfolio`, `v0/workspace-admin/queue`, `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/large`, `v0/shape/slow`, `v0/shape/failure`
-- **States:** loading — table and summary skeletons; empty — empty imported portfolio; filter matches nothing; success — typical and thousands of records, jurisdiction distribution as counts and filters; error — list unavailable; import reported errors; permission — Inventor and Workspace Admin read-only, no import; upcoming-date indicator hidden from Inventor
+- **Required scenarios:** `v0/inventor/portfolio`, `v0/workspace-admin/queue`, `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/large`, `v0/workspace-admin/empty-portfolio`, `v0/portfolio/long-titles`, `v0/portfolio/import-result`, `v0/shape/failure`
+- **States:** loading — Patent loading skeletons with current scope; empty — empty imported portfolio; filter matches nothing; success — typical and thousands of records, jurisdiction distribution as counts and filters; error — list unavailable; import reported errors; permission — Inventor and Workspace Admin read-only, no import; upcoming-date indicator hidden from Inventor
 - **Surface-specific states:** empty-imported-portfolio, typical, thousands-of-records, long-titles, multiple-jurisdictions, filtered-empty, import-result
 - **Navigation badge:** none
-- **Backend impact:** none — GET /v1/patents with paging, stats, tags, export and import exist.
-- **Intended story ids:** `surfaces-patent-portfolio--inventor`, `surfaces-patent-portfolio--workspace-admin`, `surfaces-patent-portfolio--case-owner`, `surfaces-patent-portfolio--photon-admin`, `surfaces-patent-portfolio--empty-imported-portfolio`, `surfaces-patent-portfolio--thousands-of-records`, `surfaces-patent-portfolio--long-titles`, `surfaces-patent-portfolio--multiple-jurisdictions`, `surfaces-patent-portfolio--filtered-empty`, `surfaces-patent-portfolio--import-result`, `surfaces-patent-portfolio--loading`, `surfaces-patent-portfolio--error`
+- **Backend impact:** none — Existing list/stats/tags/export/import and PATCH routes. Component uses canonical query/status fields; mock list/export share filters and native CSV response. Import enforces existing V0 client/role scope.
+- **Intended story ids:** `surfaces-patent-portfolio--inventor`, `surfaces-patent-portfolio--workspace-admin`, `surfaces-patent-portfolio--case-owner`, `surfaces-patent-portfolio--photon-admin`, `surfaces-patent-portfolio--empty-imported-portfolio`, `surfaces-patent-portfolio--thousands-of-records`, `surfaces-patent-portfolio--long-titles`, `surfaces-patent-portfolio--multiple-jurisdictions`, `surfaces-patent-portfolio--filtered-empty`, `surfaces-patent-portfolio--import-result`, `surfaces-patent-portfolio--loading`, `surfaces-patent-portfolio--error`, `surfaces-patent-portfolio--import-failure`, `surfaces-patent-portfolio--import-in-progress`, `surfaces-patent-portfolio--empty-case-owner`, `surfaces-patent-portfolio--empty-photon-admin`
 - **Excluded here:** every field at once, import for client personas
 
 ## Patent detail

@@ -746,11 +746,13 @@
         "v0/case-owner/my-work",
         "v0/photon-admin/firm",
         "v0/shape/large",
-        "v0/shape/slow",
+        "v0/workspace-admin/empty-portfolio",
+        "v0/portfolio/long-titles",
+        "v0/portfolio/import-result",
         "v0/shape/failure"
       ],
       "states": {
-        "loading": "table and summary skeletons",
+        "loading": "Patent loading skeletons with current scope",
         "empty": "empty imported portfolio; filter matches nothing",
         "success": "typical and thousands of records, jurisdiction distribution as counts and filters",
         "error": "list unavailable; import reported errors",
@@ -767,7 +769,7 @@
       },
       "badge": "none",
       "backendImpact": "none",
-      "backendNotes": "GET /v1/patents with paging, stats, tags, export and import exist.",
+      "backendNotes": "Existing list/stats/tags/export/import and PATCH routes. Component uses canonical query/status fields; mock list/export share filters and native CSV response. Import enforces existing V0 client/role scope.",
       "storyIds": [
         "surfaces-patent-portfolio--inventor",
         "surfaces-patent-portfolio--workspace-admin",
@@ -780,13 +782,17 @@
         "surfaces-patent-portfolio--filtered-empty",
         "surfaces-patent-portfolio--import-result",
         "surfaces-patent-portfolio--loading",
-        "surfaces-patent-portfolio--error"
+        "surfaces-patent-portfolio--error",
+        "surfaces-patent-portfolio--import-failure",
+        "surfaces-patent-portfolio--import-in-progress",
+        "surfaces-patent-portfolio--empty-case-owner",
+        "surfaces-patent-portfolio--empty-photon-admin"
       ],
       "excludes": [
         "every field at once",
         "import for client personas"
       ],
-      "dsn": null
+      "dsn": "DSN-0012"
     },
     {
       "brief": "surfaces/patent-detail.md",

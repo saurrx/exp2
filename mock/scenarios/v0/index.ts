@@ -193,6 +193,38 @@ const disclosureScenario = (slug: string, completion: number, evaluation?: IdeaS
   });
 const disclosureStates = [disclosureScenario("empty", 0), disclosureScenario("partially-prefilled", 40), disclosureScenario("unsupported-gaps", 80), disclosureScenario("complete", 100), disclosureScenario("evaluation-running", 100, { state: "RUNNING" }), disclosureScenario("evaluation-result", 100, { state: "SUCCEEDED", score: 23 }), disclosureScenario("evaluation-stale", 100, { state: "SUCCEEDED", score: 62 }), disclosureScenario("requested-changes", 100, undefined, true)];
 
+const evaluationStates = ["not-run", "queued", "running", "succeeded", "partial", "no-close-prior-art", "failed", "timed-out", "stale-after-edits", "re-evaluating", "workspace-admin"].map((slug) => v0(`v0/evaluation/${slug}`, `Evaluation: ${slug}`,
+  "Synthetic advisory evaluation with submission available at every score.", slug === "workspace-admin" ? U.admin.email : U.inventor.email, [U.inventor.email, U.admin.email], () => {
+    const state = slug === "queued" ? "QUEUED" : slug === "running" ? "RUNNING" : slug === "failed" ? "FAILED" : slug === "timed-out" ? "TIMED_OUT" : slug === "partial" ? "PARTIAL" : "SUCCEEDED";
+    const db = northwindBuild(`v0/evaluation/${slug}`, SMALL, [{ invention: 0, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 2, ...(slug === "workspace-admin" ? { submittedBy: U.admin } : {}), ...(slug === "not-run" ? {} : { evaluation: { state, score: slug === "no-close-prior-art" ? 81 : 23 } }) }]);
+    const draft = db.drafts[0];
+    const meta = disclosureSections(draft.answers.__meta_data as any[]);
+    meta.find((section) => section.id === "advantages")!.questions[0].answer = "The synthetic fixture combines the passive element with closed-loop correction without an external reference signal.";
+    draft.answers.__meta_data = meta;
+    // Keep this surface's synthetic evidence internally coherent with the cable disclosure.
+    const evaluationReport = db.evaluations[0]?.report as any;
+    if (evaluationReport) {
+      const examples = [
+        ["Passive cable tensioner with an external setting reference", "A passive spring maintains cable tension. An operator sets the reference tension before use; the assembly does not correct it automatically during movement."],
+        ["Cable routing fixture with an encoder and external reference", "An encoder measures cable movement against an external reference. The fixture reports drift but does not adjust tension through a control loop."],
+        ["Joint cable guide with manual reference adjustment", "A guide routes a cable through an articulated joint. Its initial tension is adjusted manually against a reference gauge and remains fixed during operation."],
+      ];
+      evaluationReport.scoringResult.closestMatches.forEach((match: any, index: number) => { match.title = examples[index][0]; match.abstract = examples[index][1]; });
+      evaluationReport.priorArt.forEach((art: any, index: number) => { art.title = examples[index][0]; art.abstract = examples[index][1]; });
+      if (state !== "PARTIAL") evaluationReport.scoringResult.summary = "The closest references share the cable arrangement and external reference setting. None of these returned references describes the self-correcting loop in the disclosure. Search coverage is limited to the references returned.";
+      draft.report = evaluationReport;
+    }
+    if (slug === "no-close-prior-art") {
+      const report = db.evaluations[0].report as any;
+      report.priorArt = []; report.scoringResult.closestMatches = []; report.scoringResult.distinctDifferences = [];
+      report.scoringResult.summary = "No close reference was returned by the available search. The search coverage does not establish uniqueness.";
+      report.scoringResult.recommendations = [{ text: "Explain how the correction loop responds when the load changes.", rationale: "The technical response needs enough detail for comparison.", basis: [] }];
+      report.scoringResult.evaluationMetrics = { evaluationCount: 0, maxSimilarity: null, avgSimilarity: null };
+      draft.report = report;
+    }
+    return db;
+  }));
+
 const workspaceAdminQueue = v0("v0/workspace-admin/queue", "Workspace Admin queue at Northwind",
   "Seven scored ideas awaiting the one review stage, oldest 56 days, one submitted on behalf of an inventor by the admin, one resubmitted after changes. Five contributing inventors, two Workspace Admins, and deadlines with contextual dates.",
   U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => northwindBuild("v0/workspace-admin/queue"));
@@ -254,6 +286,6 @@ const authFailures = v0("v0/auth/failures", "Authentication failures",
   "The only V0 scenario that returns 401 on purpose: invalid login, expired session with a failed refresh, revoked access, SSO failure, unknown domain at signup.",
   U.admin.email, [U.admin.email], () => { const d = emptyDataV0({ authFails: true }); d.portfolios = SMALL; return d; });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, ...evaluationStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

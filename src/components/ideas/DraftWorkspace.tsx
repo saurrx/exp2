@@ -18,6 +18,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
+import PatentNoveltyReport from "@/components/ideas/ShowScoreReport";
 import EvaluationProgress from "@/components/ideas/EvaluationProgress";
 import API_CONFIG, { rawApi } from "@/lib/apiConfig";
 import { extractDocumentText } from "@/lib/documentText";
@@ -555,7 +556,8 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
 
   /* ------------------------------- full score ------------------------------- */
 
-  const { data: scoreData } = useQuery({
+  const [evaluationOpen, setEvaluationOpen] = useState(false);
+  const { data: scoreData, isLoading: evaluationLoading, isError: evaluationLoadError, refetch: reloadEvaluation } = useQuery({
     queryKey: ["draft_score", draftId],
     enabled: !!draftId,
     refetchInterval: scoringActive ? 1500 : false,
@@ -564,6 +566,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   });
   const scoreRaw = scoreData?.data?.score;
   const scoreMeta = scoreData?.data?.score_meta_data;
+  const serverEvaluationState = scoreData?.data?.state;
   const serverEvaluationStatus = scoreData?.data?.status as string | undefined;
   const runningEvaluationId =
     scoreData?.data?.report?.evaluationId ?? scoreData?.data?.report?.id ?? null;
@@ -582,7 +585,8 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   const strengthenTips: string[] = scoreMeta?.coaching?.suggestions ?? [];
 
   useEffect(() => {
-    if (scored && scoringActive) {
+    if (serverEvaluationStatus === "FAILED") setScoringActive(false);
+    if (scored && scoringActive && serverEvaluationStatus !== "RUNNING") {
       setScoringActive(false);
       setDirtySinceScore(false);
     }
@@ -756,13 +760,6 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   const saveMessage = !online ? "Offline · your answers remain here" : saveState === "saving" ? "Saving…" : saveState === "conflict" ? "Another revision was saved. Your answers remain here." : saveState === "error" ? "Could not save. Your answers remain here." : savedLabel(savedAt) || "Autosaves as you type";
   const fieldCls = "w-full resize-y rounded-sm border border-pl-border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-  const assessment = scoreMeta?.scoringResult;
-  const differences: string[] = assessment?.distinctDifferences ?? [];
-  const recommendations: any[] = assessment?.recommendations ?? [];
-  const disclosureSuggestion = (suggestion: any) => String(typeof suggestion === "string" ? suggestion : suggestion.text)
-    .replace(/^Claim the combination of (.+)\.$/, "Explain how $1 work together.")
-    .replace(/^Add dependent claims on (.+)\.$/, "Describe $1 and how it contributes to your idea.");
-  const evidence: any[] = assessment?.closestMatches ?? [];
   const liveSignal = !answers.prob1?.trim() ? "Describe the problem your idea addresses." : !answers.sol1?.trim() ? "Your problem is described. Explain how your idea solves it." : !answers.adv1?.trim() ? "Your problem and approach are described. Add what makes your idea different, in your own words." : "Your problem, approach and distinguishing idea are described. Evaluation can compare them with prior art.";
   const editable = !idea || ((idea.author_id ?? idea.created_by_id) === user?.id || (user?.role === "LEGAL_COUNSEL" && idea.submitted_by_id === user.id)) && ["DRAFT", "CHANGES_REQUESTED"].includes(idea.state ?? (idea.status === "IN_DRAFT" ? "DRAFT" : idea.status === "UPDATE_REQUEST" ? "CHANGES_REQUESTED" : ""));
   if (idea && !editable) return <div data-disclosure-workspace className="min-h-0 flex-1 overflow-y-auto p-6"><PageHeader title="Invention disclosure" /><h1 className="text-xl font-semibold">{idea.title}</h1><p className="mt-2 text-sm text-pl-text-3">This disclosure is read-only. Review its status on the idea page.</p><Button size="sm" variant="outline" className="mt-3" onClick={() => navigate(`/ideas/${ideaId}`)}>View idea</Button><div className="mt-5 divide-y divide-pl-border">{sections.map((section) => <details key={section.id} className="py-3"><summary className="cursor-pointer font-medium">{section.title}</summary>{section.questions.filter((q: any) => q.answer).map((q: any) => <p key={q.id} className="mt-3 text-sm">{q.answer}</p>)}</details>)}</div></div>;
@@ -836,12 +833,10 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
             </div>
             <aside className="min-w-0 space-y-5">
               <section className="border-b border-pl-border pb-5"><h2 className="text-sm font-semibold">Submission readiness</h2><p className="mt-2 text-lg font-semibold">{requiredComplete ? "Ready for review" : `${missingRequired.length} required answer${missingRequired.length === 1 ? "" : "s"} to finish`}</p><p className="mt-1 text-xs text-pl-text-3">{requiredComplete ? "Your Workspace Admin receives this disclosure when you submit." : "Complete these answers to submit your disclosure."}</p>{!requiredComplete && <ul className="mt-3 space-y-1">{missingRequired.map((id) => <li key={id}><button className="rounded-sm py-1 text-left text-sm text-pl-blue-text underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:ring-ring" onClick={() => scrollToSection(sections.find((s) => s.questions.some((q: any) => q.id === id))?.id)}>{FIELD_META[id].label} →</button></li>)}</ul>}</section>
-              <section><h2 className="text-sm font-semibold">Optional evaluation</h2><p className="mt-1 text-xs text-pl-text-3">AI-assisted and advisory. You can submit without it.</p>
-                {scored ? <><p className="mt-3 text-2xl font-semibold tabular-nums">{score10?.toFixed(1)}<span className="text-sm font-normal text-pl-text-3"> /10</span></p><p className="mt-1 text-sm">{score10! >= 7 ? "Highly novel" : score10! >= 4 ? "Moderately novel" : score10! >= 2 ? "Marginally novel" : "Closely matched"}</p>{dirtySinceScore && <p className="mt-2 text-xs text-pl-amber-text">Evaluated before your latest edits.</p>}<p className="mt-2 text-sm text-pl-text-2">{score10! < 4 ? "The search found close overlap. Review the differences and strengthen your explanation." : "The search found potentially distinct features. Review the comparison before drawing conclusions."}</p>
-                <h3 className="mt-4 text-sm font-medium">What appears different</h3><ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-pl-text-2">{differences.map((difference) => <li key={difference}>{difference}</li>)}</ul>
-                <h3 className="mt-4 text-sm font-medium">How to strengthen</h3><ul className="mt-2 list-disc space-y-2 pl-4 text-sm text-pl-text-2">{recommendations.map((tip, index) => <li key={index}>{disclosureSuggestion(tip)}<span className="block text-xs text-pl-text-3">{tip.rationale}</span></li>)}</ul>
-                <details className="mt-4"><summary className="cursor-pointer text-sm font-medium">Prior art · {evidence.length} references</summary><div className="mt-3 space-y-4">{evidence.map((reference) => <article key={reference.publicationNumber}><h4 className="text-sm font-medium">{reference.publicationNumber}</h4><p className="mt-1 text-sm">{reference.title}</p><p className="mt-2 text-xs text-pl-text-2">{reference.analysis}</p>{reference.abstract && <p className="mt-2 text-xs text-pl-text-3">{reference.abstract}</p>}</article>)}</div></details></> : scoringActive ? <div className="mt-3"><EvaluationProgress compact evaluationId={runningEvaluationId} reference={idea?.reference_number} /></div> : <p className="mt-3 text-sm text-pl-text-2">{liveSignal}</p>}
-                <Button className="mt-3" size="sm" variant="outline" disabled={isScoring || scoringActive} onClick={handleFinish}>{scoringActive ? "Evaluating…" : scored ? "Evaluate again" : "Evaluate idea"}</Button>
+              <section><h2 className="text-sm font-semibold">Optional evaluation</h2>
+                {dirtySinceScore && scored && <p className="mt-2 text-xs text-pl-amber-text">Evaluated before your latest edits.</p>}
+                {scoringActive ? <div className="mt-3"><EvaluationProgress compact evaluationId={runningEvaluationId} reference={idea?.reference_number} state={serverEvaluationState} reEvaluating={dirtySinceScore} /></div> : evaluationLoadError ? <div role="alert" className="mt-3 text-sm"><p>Could not load the evaluation.</p><Button size="sm" variant="outline" className="mt-2" onClick={() => reloadEvaluation()}>Try again</Button></div> : evaluationLoading ? <p role="status" className="mt-3 text-sm text-pl-text-3">Loading evaluation…</p> : serverEvaluationStatus === "FAILED" ? <div role="alert" className="mt-3"><p className="text-sm font-medium">{serverEvaluationState === "TIMED_OUT" ? "Evaluation timed out" : "Evaluation could not finish"}</p><p className="mt-2 text-sm text-pl-text-2">Your disclosure is saved. Try evaluating again, or submit for review.</p></div> : scored && scoreMeta?.scoringResult ? <div className="mt-3"><PatentNoveltyReport embedded title={idea?.title} reference={idea?.reference_number} api_evaluation_id={scoreMeta.id} scoringResult={scoreMeta.scoringResult} priorArt={scoreMeta.priorArt ?? []} report={scoreMeta} /><Button className="mt-3" size="sm" variant="ghost" onClick={() => setEvaluationOpen(true)}>Open detailed report</Button></div> : <><p className="mt-2 text-xs text-pl-text-3">AI-assisted and advisory. You can submit without it.</p><h3 className="mt-3 text-sm font-medium">Patentability signal · not a score</h3><p className="mt-2 text-sm text-pl-text-2">{liveSignal}</p></>}
+                <Button className="mt-3" size="sm" variant="outline" disabled={isScoring || scoringActive || evaluationLoading} onClick={handleFinish}>{scoringActive ? "Evaluating…" : scored || serverEvaluationStatus === "FAILED" ? "Evaluate again" : "Evaluate idea"}</Button>
               </section>
             </aside>
           </div>
@@ -849,6 +844,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
       </div>
       </div>
       <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-pl-border bg-background px-6 py-3"><p className="min-w-0 text-xs text-pl-text-3">{finishNote || (requiredComplete ? "Submit this disclosure to your Workspace Admin." : "Your draft stays editable until you submit it for review.")}</p><Button size="sm" onClick={handleSend} disabled={isSending || !online || !draftData}>{isSending ? "Submitting…" : requestedChanges ? "Resubmit for review" : "Submit for review"}</Button></footer>
+      <Dialog open={evaluationOpen} onOpenChange={setEvaluationOpen}><DialogContent className="max-h-full max-w-4xl overflow-y-auto"><DialogHeader><DialogTitle>Evaluation result</DialogTitle><DialogDescription>{idea?.reference_number} · {idea?.title}</DialogDescription></DialogHeader>{dirtySinceScore && <p className="text-sm text-pl-amber-text">Evaluated before your latest edits.</p>}{scoreMeta?.scoringResult && <PatentNoveltyReport embedded title={idea?.title} reference={idea?.reference_number} api_evaluation_id={scoreMeta.id} scoringResult={scoreMeta.scoringResult} priorArt={scoreMeta.priorArt ?? []} report={scoreMeta} />}<Button size="sm" variant="outline" onClick={() => setEvaluationOpen(false)}>Return to disclosure</Button></DialogContent></Dialog>
       <Dialog open={!!conflictDraft} onOpenChange={(open) => { if (!open) setConflictDraft(null); }}><DialogContent className="max-h-full overflow-y-auto"><DialogHeader><DialogTitle>Compare the saved revision</DialogTitle><DialogDescription>Your answers remain in the disclosure. Review the latest saved answers before choosing which version to keep.</DialogDescription></DialogHeader><div className="space-y-3">{disclosureSections(conflictDraft?.meta_data).map((section) => <details key={section.id}><summary className="cursor-pointer text-sm font-medium">{section.title}</summary>{section.questions.map((q) => <div key={q.id} className="mt-3 text-sm"><h3 className="font-medium">{FIELD_META[q.id]?.label || q.text}</h3><div className="mt-2 grid gap-3 sm:grid-cols-2"><div><p className="text-xs text-pl-text-3">Your answer</p><p className="mt-1">{answers[q.id] || "No answer"}</p></div><div><p className="text-xs text-pl-text-3">Saved answer</p><p className="mt-1">{q.answer || "No answer"}</p></div></div></div>)}</details>)}</div><div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => { setSections(disclosureSections(conflictDraft.meta_data)); setProvenance(Object.fromEntries(disclosureSections(conflictDraft.meta_data).flatMap((section) => section.questions).filter((question) => question.answer?.trim()).map((question) => [question.id, question.provenance || "you"]))); versionRef.current = conflictDraft.version ?? 0; sessionStorage.removeItem(recoveryKey); setSaveState("saved"); setConflictDraft(null); }}>Use saved revision</Button><Button size="sm" onClick={async () => { versionRef.current = conflictDraft.version ?? 0; try { await saveNow(sections, provenance, completion); setConflictDraft(null); } catch { /* Keep the comparison open on failure. */ } }}>Save my answers instead</Button></div></DialogContent></Dialog>
       <Dialog open={confirmSubmit} onOpenChange={setConfirmSubmit}><DialogContent><DialogHeader><DialogTitle>{requestedChanges ? "Resubmit this disclosure?" : "Submit this disclosure for review?"}</DialogTitle><DialogDescription>{idea?.submitted_by ? `Inventor: ${idea.author?.name}. Submitted by: ${idea.submitted_by.name}. ` : ""}Your Workspace Admin will review this version. You can edit it again if changes are requested.</DialogDescription></DialogHeader><div className="flex flex-wrap justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setConfirmSubmit(false)}>Keep editing</Button><Button size="sm" disabled={isSending} onClick={() => sendToCommittee()}>{isSending ? "Submitting…" : "Submit for review"}</Button></div></DialogContent></Dialog>
     </div>

@@ -273,3 +273,26 @@ describe("Idea detail disclosure boundaries", () => {
     expect((await req("GET", `/v1/files/${ownFile.id}/raw`)).status).toBe(200);
   });
 });
+
+
+describe("evaluation attribution after revision", () => {
+  it("ignores save metadata but preserves stale answer evidence and its original revision after resubmission", async () => {
+    const db = seed("v0/idea-detail/rejected"), idea = db.ideas[0], draft = db.drafts[0]; setFramePersona("inventor@northwind.test");
+    const context = async () => ((await req("GET", `/v1/drafts/${draft.id}`)).data as any).evaluation_context;
+    expect(await context()).toMatchObject({ revision: 1, is_current: true });
+    await req("PATCH", `/v1/drafts/${draft.id}`, { answers: draft.answers });
+    expect(await context()).toMatchObject({ revision: 1, is_current: true });
+    const answers = JSON.parse(JSON.stringify(draft.answers)); answers.__meta_data[0].questions[0].answer += " The revised test covers variable load.";
+    await req("PATCH", `/v1/drafts/${draft.id}`, { answers });
+    expect(await context()).toMatchObject({ revision: 1, is_current: false });
+    await req("POST", `/v1/ideas/${idea.id}/submit`, { comment: "Added the variable-load test." });
+    expect(idea.revision).toBe(2); expect(await context()).toMatchObject({ revision: 1, is_current: false });
+  });
+  it("a requested evaluation captures the saved answer text rather than the previous result", async () => {
+    const db = seed("v0/idea-detail/rejected"), draft = db.drafts[0]; setFramePersona("inventor@northwind.test");
+    const answers = JSON.parse(JSON.stringify(draft.answers)); answers.__meta_data[0].questions[0].answer += " A further load-response measurement.";
+    await req("PATCH", `/v1/drafts/${draft.id}`, { answers });
+    await req("POST", `/v1/drafts/${draft.id}/evaluate`, {});
+    expect(((await req("GET", `/v1/drafts/${draft.id}`)).data as any).evaluation_context).toMatchObject({ revision: 1, is_current: true });
+  });
+});

@@ -5,6 +5,7 @@ import { uuid, mulberry32, seedFrom } from "../runtime/prng";
 import type { Draft, Evaluation, Idea, User } from "../runtime/types";
 import type { IdeaState } from "../../contract/enums";
 import { currentUser, hydrateIdea, visibleIdeas } from "./scope";
+import { disclosureFingerprint } from "../runtime/disclosureFingerprint";
 import { makeReport } from "../scenarios/reports";
 import { answersFor, SECTIONS, SECTION_TITLES } from "../scenarios/content";
 
@@ -37,7 +38,9 @@ function evaluationView(ev: Evaluation | undefined, draft: Draft | undefined) {
 const hydrateDraft = (d: Draft) => {
   const db = getDb();
   const idea = db.ideas.find((i) => i.id === d.idea_id);
-  return { ...d, idea: idea ? { id: idea.id, title: idea.title, state: idea.state, client_id: idea.client_id, author_id: idea.author_id } : null };
+  const evaluation = db.evaluations.find((evaluation) => evaluation.id === d.api_evaluation_id);
+  const evaluation_context = evaluation?.input_fingerprint !== undefined && evaluation.input_revision !== undefined ? { revision: evaluation.input_revision, evaluated_at: evaluation.started_at, is_current: evaluation.input_fingerprint === disclosureFingerprint(d.answers) } : null;
+  return { ...d, ...(db.flags.v0 ? { evaluation_context } : {}), idea: idea ? { id: idea.id, title: idea.title, state: idea.state, client_id: idea.client_id, author_id: idea.author_id } : null };
 };
 
 /** The review chain (pulse-backend review-chain.ts): the stage is derived from the idea's state, never asserted by the caller. */
@@ -307,7 +310,7 @@ export const ideaHandlers = [
     const db = getDb();
     const d = db.drafts.find((x) => x.id === params.id);
     if (!d) return { status: 404, body: { message: "Draft not found." } };
-    const ev: Evaluation = { id: uuid(rngNow(d.id + "eval")), draft_id: d.id, mode: "progress", state: "QUEUED", final_state: "SUCCEEDED", started_at: clock.iso(), score: null, report: null, failure_reason: null };
+    const ev: Evaluation = { id: uuid(rngNow(d.id + "eval")), draft_id: d.id, ...(db.flags.v0 ? { input_fingerprint: disclosureFingerprint(d.answers), input_revision: db.ideas.find((idea) => idea.id === d.idea_id)?.revision } : {}), mode: "progress", state: "QUEUED", final_state: "SUCCEEDED", started_at: clock.iso(), score: null, report: null, failure_reason: null };
     db.evaluations = db.evaluations.filter((e) => e.draft_id !== d.id).concat(ev);
     d.api_evaluation_id = ev.id; d.score = null; d.report = null; d.updated_at = clock.iso();
     touched();
@@ -317,7 +320,7 @@ export const ideaHandlers = [
     const db = getDb();
     const d = db.drafts.find((x) => x.id === params.id) ?? db.drafts.find((x) => x.api_evaluation_id === params.id);
     if (!d) return { status: 404, body: { message: "Draft not found." } };
-    const ev: Evaluation = { id: uuid(rngNow(d.id + "re")), draft_id: d.id, mode: "progress", state: "QUEUED", final_state: "SUCCEEDED", started_at: clock.iso(), score: null, report: null, failure_reason: null };
+    const ev: Evaluation = { id: uuid(rngNow(d.id + "re")), draft_id: d.id, ...(db.flags.v0 ? { input_fingerprint: disclosureFingerprint(d.answers), input_revision: db.ideas.find((idea) => idea.id === d.idea_id)?.revision } : {}), mode: "progress", state: "QUEUED", final_state: "SUCCEEDED", started_at: clock.iso(), score: null, report: null, failure_reason: null };
     db.evaluations = db.evaluations.filter((e) => e.draft_id !== d.id).concat(ev);
     d.api_evaluation_id = ev.id; d.score = null; d.report = null; d.updated_at = clock.iso(); touched();
     return { evaluationId: ev.id };

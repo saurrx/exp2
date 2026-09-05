@@ -5,6 +5,7 @@ import { buildIdeas, emptyData, portfolio, rngFor, seedOperations, type Data, ty
 import { generatePortfolio } from "../portfolio";
 import { BEACON, NORTHWIND, ORBITAL, V0_ACCESS, V0_ALL_USERS, V0_CLIENTS, V0_USERS as U } from "./personas";
 import { disclosureSections, storedDisclosure } from "../../../src/components/ideas/disclosureMaterial";
+import { disclosureFingerprint } from "../../runtime/disclosureFingerprint";
 import { outboxFor } from "./emails";
 
 /**
@@ -148,7 +149,7 @@ function northwindBuild(name: string, portfolios: Record<string, ReturnType<type
 
 const v0 = (name: string, title: string, description: string, defaultPersona: string, personas: string[], build: () => Data): ScenarioDef => ({
   name, title, description, clock: NOW, defaultPersona, personas,
-  build: () => { const d = build(); d.emails = outboxFor(rngFor(`${name}.emails`), d); return d; },
+  build: () => { const d = build(); for (const evaluation of d.evaluations) { const draft = d.drafts.find((draft) => draft.id === evaluation.draft_id); if (draft) { evaluation.input_fingerprint = disclosureFingerprint(draft.answers); evaluation.input_revision = d.ideas.find((idea) => idea.id === draft.idea_id)?.revision; } } d.emails = outboxFor(rngFor(`${name}.emails`), d); return d; },
 });
 
 const inventorFirstRun = v0("v0/inventor/first-run", "New inventor at Northwind, nothing yet",
@@ -204,7 +205,8 @@ function alignCableEvidence(db: Data) {
       ];
       evaluationReport.scoringResult.closestMatches.forEach((match: any, index: number) => { match.title = examples[index][0]; match.abstract = examples[index][1]; });
       evaluationReport.priorArt.forEach((art: any, index: number) => { art.title = examples[index][0]; art.abstract = examples[index][1]; });
-      if (db.evaluations[0]?.state !== "PARTIAL") evaluationReport.scoringResult.summary = "The closest references share the cable arrangement and external reference setting. None of these returned references describes the self-correcting loop in the disclosure. Search coverage is limited to the references returned.";
+      if (db.evaluations[0]?.state === "PARTIAL") evaluationReport.scoringResult.summary = "The prior-art search completed, but the obviousness analysis timed out. The returned references share the cable arrangement and do not describe the correction loop.";
+      else evaluationReport.scoringResult.summary = "The closest references share the cable arrangement and external reference setting. None of these returned references describes the self-correcting loop in the disclosure. Search coverage is limited to the references returned.";
       draft.report = evaluationReport;
     }
 }
@@ -235,7 +237,7 @@ const ideaDetailStates = ["draft", "evaluated", "submitted", "under-review", "ch
     const state = slug === "draft" || slug === "evaluated" ? "DRAFT" : slug === "changes-requested" ? "CHANGES_REQUESTED" : slug === "rejected" ? "REJECTED" : slug === "sent-to-photon" ? "SENT_TO_PHOTON" : ["filed", "granted", "closed"].includes(slug) ? "FILED" : "LEGAL_REVIEW";
     const db = northwindBuild(`v0/idea-detail/${slug}`, SMALL, [{ invention: 0, author: U.inventor, coInventors: [U.coinventor], state, completion: slug === "draft" ? 0 : 100, ageDays: 6, reviewer: U.admin,
       comment: slug === "rejected" ? "The submitted material does not yet explain how the correction loop differs from the external-reference mechanism. You may revise and resubmit with that distinction." : "Please explain how the correction loop responds to a change in load and include the repeatability observations.",
-      ...(slug === "on-behalf-attribution" ? { submittedBy: U.admin } : {}), ...(slug === "long-content" ? { title: LONG_TITLE } : {}),
+      ...(slug === "on-behalf-attribution" ? { submittedBy: U.admin } : {}), ...(slug === "long-content" ? { title: "Self-tensioning cable harness with passive tension control and a self-correcting feedback loop for articulated robot joints under variable load" } : {}),
       ...(["draft", "missing-evaluation"].includes(slug) ? {} : { evaluation: { state: slug === "partial-evaluation" ? "PARTIAL" : "SUCCEEDED", score: 62 } }) }]);
     alignCableEvidence(db);
     const idea = db.ideas[0], draft = db.drafts[0];

@@ -28,7 +28,7 @@ Linked patent hydration, attachment access and real review history need to match
 ## What moved and stayed
 The existing IdeaDetailsContent now leads with reference, status and next-step sentence, then ownership and a concise brief. Disclosure sections, detailed evaluation, original source, attachments and review history open on demand. The single current action remains in a footer while the content scrolls, including at desktop zoom; Request changes is secondary and Reject stays behind the decision menu and confirmation. Photon users retain client scope in the persistent page header. The brief omits an identical title prefix.
 
-Routes, existing adapter, auth, analytics, query hooks and the two reference screens are unchanged. Existing detail/draft data queries and filing form remain in place. Local canonical transition reads and review decisions serve the new presentation; activity reloads on return from revision so the latest transition is visible. Draft and evaluated records redirect into the existing disclosure workspace. Granted and Closed come from the linked patent, with no added idea status or legal workflow stage.
+Routes, existing adapter, auth, analytics, shared query hooks and the two reference screens are unchanged. Existing detail/draft data queries and filing form remain in place. Local canonical transition reads and review decisions serve the new presentation; activity reloads on return from revision so the latest transition is visible. Draft and evaluated records redirect into the existing disclosure workspace. Granted and Closed come from the linked patent, with no added idea status or legal workflow stage.
 
 Corrections exposed by this surface: the shared evaluation bands now use the product thresholds 8/6/4; evaluation baselines from DSN-0006/0007 were refreshed. Rejected disclosures can be revised and resubmitted with a required reconsideration note, preserving the previous decision and revision history. FileIdeaModal uses Record filing and explains the recorded consequence, while retaining its shared patent form and payload.
 
@@ -61,4 +61,24 @@ Browser checks exercised real Workspace Admin approval, rejected disclosure edit
 All `surfaces-idea-detail-and-status--*.png` images in shots/ are copies of final story baselines. The four persona defaults cover 1280×720, 1366×768, 1440×900, 1920×1080 and 640×360 at device scale 2. Every remaining story has 1280×720 and 1440×900, plus a long-content zoom view. Supplemental images cover expanded sections/evidence/files/history, decisions and filing, with filenames naming the state and viewport.
 
 ## Independent evaluator
-Pending fresh-context review.
+Round 1, verbatim:
+
+```text
+VERDICT: NEEDS_WORK
+SURFACE: idea-detail  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 3 · trust 3 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, status, actions and client scope support the recorded roleplay, but readers must still infer evaluation meaning and whether it covers the current revision.
+FINDINGS (most severe first, max 7):
+
+1. Evaluation after reconsideration — The editor says “Evaluated before your latest edits,” but reconsideration-saved-history presents the same 6.2 score without that qualification; readers must guess whether revision 2 was evaluated — Preserve evaluation freshness and revision attribution beside the score after resubmission.
+2. Evaluation summary — Across all four defaults, “Review the comparison…” instructs readers to seek a conclusion instead of providing the required Assessment; Inventors must expand supporting evidence to understand the result — Show a substantive assessment before What appears different and How to strengthen, keeping detailed prior art collapsed.
+3. Long-content invention brief — The title describes an interferometric displacement sensor while the brief describes a cable harness; the Workspace Admin must guess which invention the decision concerns — Make the synthetic title, brief, disclosure and evaluation describe the same invention.
+4. Permission-denied recovery — The toast identifies an access restriction, but the page says the cause is uncertain and emphasizes Reload idea; the Inventor must remember the transient explanation and guess whether retrying helps — Keep the access explanation inline and make Back to ideas the primary recovery action.
+
+STATES MISSING: none of the brief’s named states; all 77 PNGs inspected.
+REFERENCE MATCH: yes — Typography, restrained colour, hairline separation and amber primary controls follow the reference language.
+```
+
+Round 1 corrections: BF-9 now captures the evaluated answer-text fingerprint and review revision, and shows the original revision/date plus saved-content freshness next to the score. Save metadata does not mark unchanged text stale; real answer edits do, and resubmission retains this qualification. A substantive report assessment now precedes expanded evidence. The long title describes the same cable mechanism. Access denial stays inline with Back to ideas leading and no retry. Local dialog descriptions use the secondary text token after a focused axe check found 4.34:1 contrast in the inherited muted description. Two new semantic checks cover answer-based freshness and re-evaluation attribution.
+
+Round 2 verification: **256/256 stories**, **38/38 semantic checks**, both builds passed, **0 focused axe findings** across twelve detail/recovery states, all five zoom checks passed, filing and reconsideration browser flows passed, stable screenshots with zero egress. The story readiness check now awaits the domain action becoming enabled after the access-scoped disclosure load. Fresh-context verdict pending.

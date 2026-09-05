@@ -56,6 +56,13 @@
       "type": "Array of stored file metadata / string",
       "finding": "BF-8",
       "reason": "DSN-0008: retain and retrieve supporting attachments with the invention disclosure. The V0 mock associates uploads through POST /v1/ideas/:id/files and exposes only the linked stored files on the idea."
+    },
+    {
+      "entity": "Evaluation / Draft",
+      "field": "Evaluation.input_fingerprint, input_revision / Draft.evaluation_context",
+      "type": "Internal answer fingerprint and revision / { revision, evaluated_at, is_current } or null",
+      "finding": "BF-9",
+      "reason": "DSN-0008 evaluator: preserve evaluation attribution and freshness after edits and resubmission. The mock captures the answer-text fingerprint and review revision when evaluation starts, compares saved answers when hydrating the draft, and exposes the date, revision and freshness. Save metadata alone does not make the evaluation stale. No raw fingerprint is rendered."
     }
   ],
   "collections": [

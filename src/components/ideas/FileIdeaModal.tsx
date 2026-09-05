@@ -83,7 +83,7 @@ const FileIdeaModal: React.FC<FileIdeaModalProps> = ({
       <DialogContent className="max-w-2xl max-h-full overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Record the completed filing</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-pl-text-2">
             Enter the filed application details. This links the patent record to
             the disclosure and updates its status to Filed.
           </DialogDescription>

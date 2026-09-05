@@ -72,7 +72,7 @@ function submit(idea: Idea, actor: User, comment: string | undefined) {
   if (from !== "DRAFT") idea.revision += 1;
   db.transitions.push({ id: uuid(rngNow(idea.id + "submit")), idea_id: idea.id, from_state: from === "DRAFT" ? null : from, to_state: to, stage: null, decision: null, actor_id: actor.id, revision: idea.revision, comment: comment?.trim() || null, is_appeal: from === "REJECTED", created_at: clock.iso() });
   idea.state = to; idea.submitted_at = clock.iso(); idea.updated_at = clock.iso();
-  if (draft) { draft.status = "SUBMITTED"; draft.updated_at = clock.iso(); }
+  if (draft) { if (db.flags.v0) draft.history = [...(draft.history ?? []), { revision: idea.revision, answers: JSON.parse(JSON.stringify(draft.answers)), submitted_at: clock.iso() }]; draft.status = "SUBMITTED"; draft.updated_at = clock.iso(); }
   touched();
   return hydrateIdea(db, idea, clock.now());
 }
@@ -239,7 +239,16 @@ export const ideaHandlers = [
     const db = getDb();
     const d = db.drafts.find((x) => x.id === params.id);
     if (!d) return { status: 404, body: { message: "Draft not found." } };
-    if (b.answers) d.answers = b.answers;
+    if (db.flags.v0) {
+      const idea = db.ideas.find((i) => i.id === d.idea_id);
+      const actor = currentUser();
+      const canWrite = actor && idea && (idea.author_id === actor.id || (actor.role === "LEGAL_COUNSEL" && idea.submitted_by_id === actor.id));
+      if (!canWrite || !idea || !["DRAFT", "CHANGES_REQUESTED"].includes(idea.state)) return { status: 403, body: { message: "This disclosure is not editable by you in its current state." } };
+      const expected = b.answers?.__expected_version;
+      if (expected !== undefined && expected !== (d.version ?? 0)) return { status: 409, body: { message: "Another revision was saved. Compare it before replacing your answers." } };
+      d.version = (d.version ?? 0) + 1;
+    }
+    if (b.answers) { const { __expected_version, ...answers } = b.answers; d.answers = { ...(d.answers.__source ? { __source: d.answers.__source } : {}), ...answers }; }
     if (b.status === "SUBMITTED" || b.status === "DRAFT") d.status = b.status;
     d.updated_at = clock.iso(); touched();
     // The idea-details autosave path expects 201 on this route (frontend CLAUDE.md).
@@ -298,7 +307,8 @@ export const ideaHandlers = [
     const d = getDb().drafts.find((x) => x.id === params.id);
     if (!d) return { status: 404, body: { message: "Draft not found." } };
     const a = d.answers as Record<string, unknown>;
-    const filled = SECTIONS.filter((s) => typeof a[s] === "string" && (a[s] as string).trim().length > 40).length;
+    const canonical: Record<string, string> = { background: "bg1", problem: "prob1", solution: "sol1", novelty: "adv1", application: "imp1" };
+    const filled = SECTIONS.filter((s) => { const answer = a[canonical[s]] ?? a[s]; return typeof answer === "string" && answer.trim().length > 40; }).length;
     const band = filled >= 5 ? "STRONG" : filled >= 3 ? "PROMISING" : filled >= 1 ? "EARLY" : "EMPTY";
     return { state: band, source: "heuristic", sections_with_content: filled, total_sections: SECTIONS.length, message: band === "STRONG" ? "Every section carries substance; ready for evaluation." : band === "PROMISING" ? "The solution reads well; the novelty section is where reviewers will look next." : band === "EARLY" ? "Start with the problem and the solution; the rest follows." : "Nothing written yet." };
   }),
@@ -310,8 +320,19 @@ export const ideaHandlers = [
     if (!d || !idea) return { status: 404, body: { message: "Draft not found." } };
     const text = String(b.text ?? "").trim();
     if (text.length < 40) return { status: 400, body: { message: "Paste at least a paragraph to draft from." } };
+    if (db.flags.v0) {
+      // Deterministic extraction: copy only explicitly labelled source passages.
+      // Unlabelled material is retained as source; the mock never fabricates facts.
+      const keys: Record<string, string> = { "field": "bg1", "background": "bg1", "problem": "prob1", "solution": "sol1", "how it works": "sol1", "application": "imp1", "components": "sol2", "benefits": "adv2" };
+      const answers: Record<string, string> = {};
+      for (const line of text.split(/\n/)) {
+        const match = line.match(/^([^:]+):\s*(.+)$/);
+        const key = match && keys[match[1].trim().toLowerCase()];
+        if (key && match) answers[key] = match[2].trim();
+      }
+      return { answers, sections: Object.keys(answers), skipped: ["adv1"], source: "provided-text" };
+    }
     const filled = answersFor(idea.title, "the described field", true) as Record<string, unknown>;
-    // Never the novelty section: that is the inventor's claim (enforced server-side in production).
     const answers = Object.fromEntries(SECTIONS.filter((s) => s !== "novelty").map((s) => [s, `${filled[s]} (drafted from your text)`]));
     return { answers, sections: Object.keys(answers), skipped: ["novelty"] };
   }),
@@ -319,6 +340,11 @@ export const ideaHandlers = [
     const b = (await body()) as { question_id?: string; answer?: string };
     if (!getDb().drafts.some((x) => x.id === params.id)) return { status: 404, body: { message: "Draft not found." } };
     if (b.question_id === "novelty") return { status: 422, body: { message: "The novelty section is the inventor's claim and is not reviewed by the assistant." } };
+    if (getDb().flags.v0) {
+      if (b.question_id === "adv1") return { verdict: "refused", message: "This is your conception to describe in your own words." };
+      const length = String(b.answer ?? "").trim().length;
+      return { verdict: length < 30 ? "unusable" : length < 160 ? "improve" : "good", message: length < 30 ? "Add a few sentences explaining the mechanism or effect you observed." : length < 160 ? "Explain what changes for the user, using facts you can support." : "This answer gives a clear starting point. Check that each statement is supported by your own work." };
+    }
     const len = String(b.answer ?? "").trim().length;
     const verdict = len < 30 ? "unusable" : len < 160 ? "improve" : "good";
     return { question_id: b.question_id, verdict, rewrite: verdict === "improve" ? `${String(b.answer).trim()} In practice this means the operator no longer has to intervene between shifts.` : null, reason: verdict === "unusable" ? "Too short to review." : verdict === "improve" ? "Say what changes for the user, not only what the mechanism does." : "Reads clearly and states a concrete effect.", label: SECTION_TITLES[(b.question_id as keyof typeof SECTION_TITLES)] ?? b.question_id };

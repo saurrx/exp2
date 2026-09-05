@@ -24,3 +24,8 @@ All three preserve the current route and persona boundaries. A uses whitespace, 
 
 ## Validation
 Pending. Coverage remains null until implementation, required renders/checks and fresh evaluator PASS.
+
+## Transport and navigation defects exposed by the surface
+Canonical detail reads retain missing dates and patent inventors rather than the legacy adapter's inferred creation-date fallback and idea-inventor substitution. The query key, patent prop and existing GET/update routes remain. Same-client document association is modeled as BF-11; canonical assignee/family/history fields are now honored by the existing mock update handler. Patent-file downloads alone opt into native byte responses; legacy file routes retain their existing behavior. No adapter, auth, analytics or shared query-hook file changed.
+
+Full-app verification exposed two required navigation defects. Portfolio return context existed only in navigation state, which the mock bootstrap clears on reload; the record URL now retains the existing portfolio query and the single header Back link restores it. The existing Due dates component disabled its query for Photon-side users with no personal client_id, although those roles are authorized by assigned/all-client scope. A minimal prerequisite fix enables the existing scoped query for those existing roles. No new route, query endpoint, permissions, or due-date redesign is introduced; that surface remains DSN-0015.

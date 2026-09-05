@@ -229,3 +229,8 @@ must change; the record ships as a proposal).
 - One-click view-as satisfies "Enter client view when authorized".
 - Reference numbers only, never identifiers, in both rule sets.
 - Fixtures are synthetic and deterministic in both rule sets.
+
+## BF-11 — Patent document association (DSN-0013)
+The detail brief authorizes documents and operational record maintenance. Existing detail upload submits `documents: [file_id]` through the existing patent update route, but the mock ignored it. V0 now associates only stored files from the same client with the patent, preserving the existing same-origin upload/update/download/delete routes. Inventors and Workspace Admins read documents; only scoped Case Owners and Photon Admins maintain them. The association body is declared in proposed-fields.json and remains conceptual until verified against the real backend. Runtime file bytes are retained only as mock storage; they are excluded from patent metadata responses. Native download responses are opt-in for patent documents only, preserving other file-route behavior.
+
+The required detail also exposed ignored canonical assignee/family/history update fields, missing file/due-date aliases, invented filing-date fallbacks, and overwritten patent inventor data in the legacy transport. DSN-0013 reads the same GET route through rawApi and sends canonical fields through the existing update route, retaining props, query identity and permission boundaries. No adapter, shared query hook, auth or analytics changes. Upcoming-date links use the existing search parameter; portfolio return state retains list filters.

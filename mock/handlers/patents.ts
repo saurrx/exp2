@@ -2,7 +2,7 @@ import { route } from "../runtime/registry";
 import { getDb, touched } from "../runtime/db";
 import { clock } from "../runtime/clock";
 import { uuid, mulberry32, seedFrom } from "../runtime/prng";
-import { currentUser } from "./scope";
+import { currentUser, visibleIdeas } from "./scope";
 import { allDueDates, allPatents, dueDateById, overrideDueDate, overridePatent, paginate, patentById, q, qi, scopeFor } from "../runtime/store";
 import type { DueDate, Patent } from "../runtime/types";
 
@@ -11,9 +11,9 @@ const ideaLinkFor = (p: Patent) => {
   const db = getDb();
   const link = (db as unknown as { links?: Array<{ idea_id: string; patent_id: string }> }).links?.find((l) => l.patent_id === p.id);
   const idea = link && db.ideas.find((i) => i.id === link.idea_id);
-  if (!idea) return null;
+  if (!idea || (db.flags.v0 && !visibleIdeas(db, currentUser()).some(i => i.id === idea.id))) return null;
   const inventors = db.inventors.filter((x) => x.idea_id === idea.id).map((x) => ({ inventor: (() => { const u = db.users.find((y) => y.id === x.inventor_id); return u ? { id: u.id, name: u.name, email: u.email } : null; })() }));
-  return { idea: { id: idea.id, title: idea.title, inventors } };
+  return { idea: { id: idea.id, title: idea.title, reference: idea.reference, inventors } };
 };
 /** The list row as pulse-backend returns it: the patent, its next pending due date, and the idea link with inventors. */
 const listRow = (p: Patent) => {
@@ -116,18 +116,25 @@ export const patentHandlers = [
   route("get", "/v1/patents/:id", ({ params }) => {
     const p = patentById(params.id as string);
     if (!p) return { status: 404, body: { message: "Patent not found." } };
-    const db = getDb();
+    const db = getDb(); const user = currentUser(); const scope = scopeFor(user);
+    if (db.flags.v0 && (!user || (scope && !scope.includes(p.client_id)))) return { status: 404, body: { message: "Patent not found." } };
     const dues = allDueDates([p.client_id]).filter((d) => d.patent_id === p.id).sort((a, b) => a.due_at.localeCompare(b.due_at)).map((d) => ({ ...dueSummary(d), action: db.actionRequests.find((a) => a.due_date_id === d.id) ?? null }));
-    return { ...p, due_dates: dues, idea_link: ideaLinkFor(p), files: db.files.filter((f) => f.category === `patent:${p.id}`) };
+    return { ...p, client: (() => { const client = db.clients.find(c => c.id === p.client_id); return client ? { id: client.id, name: client.name } : null; })(), ...(db.flags.v0 && user?.role === "INVENTOR" ? { next_steps_gpo: [], next_steps_legal: [], additional_notes: null } : {}), due_dates: db.flags.v0 && user?.role === "INVENTOR" ? [] : dues, idea_link: ideaLinkFor(p), files: db.files.filter((f) => f.category === `patent:${p.id}` && f.status === "STORED").map(({ content_base64: _bytes, ...f }) => f) };
   }),
   route("patch", "/v1/patents/:id", async ({ params, body }) => {
-    const b = (await body()) as Partial<Patent> & { publication_country?: string; application_date?: string };
+    const b = (await body()) as Partial<Patent> & { publication_country?: string; application_date?: string; documents?: string[] };
     const p = patentById(params.id as string);
     if (!p) return { status: 404, body: { message: "Patent not found." } };
+    const db = getDb(); const user = currentUser(); const scope = scopeFor(user);
+    if (db.flags.v0 && (!user || !["CASE_OWNER", "PHOTON_ADMIN"].includes(user.role) || (scope && !scope.includes(p.client_id)))) return { status: 403, body: { message: "You cannot maintain this patent." } };
+    if (b.title !== undefined && !b.title.trim()) return { status: 400, body: { message: "Enter a patent title." } };
+    if (b.status && !["APPLIED", "EXAMINATION", "GRANTED", "EXPIRED", "WITHDRAWN", "REJECTED", "ABANDONED", "NONPAYMENT"].includes(b.status)) return { status: 400, body: { message: "Choose a recorded legal status." } };
+    if (b.documents && (!db.flags.v0 || !Array.isArray(b.documents) || b.documents.some(id => !db.files.some(f => f.id === id && f.client_id === p.client_id && f.status === "STORED" && (f.category === "patent" || f.category === `patent:${p.id}`))))) return { status: 400, body: { message: "Choose stored documents belonging to this patent's client." } };
     const patch: Partial<Patent> = {};
-    for (const k of ["title", "application_number", "jurisdiction", "status", "filing_date", "grant_date", "tags", "abstract", "additional_notes", "prn", "oc", "next_steps_gpo", "next_steps_legal", "inventors"] as const) if (b[k] !== undefined) (patch as Record<string, unknown>)[k] = b[k];
+    for (const k of ["title", "application_number", "jurisdiction", "status", "filing_date", "grant_date", "tags", "abstract", "additional_notes", "prn", "oc", "next_steps_gpo", "next_steps_legal", "inventors", "current_assignee", "assignee_original", "simple_family_members", "status_timeline_history"] as const) if (b[k] !== undefined) (patch as Record<string, unknown>)[k] = b[k];
     if (b.publication_country) patch.jurisdiction = b.publication_country;
     if (b.application_date) patch.filing_date = b.application_date;
+    for (const id of b.documents || []) db.files.find(f => f.id === id)!.category = `patent:${p.id}`;
     return overridePatent(p.id, patch);
   }),
   route("delete", "/v1/patents/:id", ({ params }) => {

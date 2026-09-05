@@ -193,8 +193,6 @@
     "legacy-reference-screens-login--validation-errors|color-contrast|serious|p[]:© 2026 Photon Legal. All rights reserved",
     "legacy-reference-screens-login--validation-errors|color-contrast|serious|p[alert]:Email is required",
     "legacy-reference-screens-login--validation-errors|color-contrast|serious|p[alert]:Password is required",
-    "legacy-reference-screens-patents--detail-counsel|heading-order|moderate|h3[]:Patent Information",
-    "legacy-reference-screens-patents--detail|heading-order|moderate|h3[]:Patent Information",
     "legacy-reference-screens-workspace-and-profile--counsel-people|button-name|critical|button[]:",
     "legacy-reference-screens-workspace-and-profile--counsel-people|button-name|critical|button[combobox]:Administrator",
     "legacy-reference-screens-workspace-and-profile--counsel-people|button-name|critical|button[combobox]:Inventor",

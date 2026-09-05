@@ -63,8 +63,8 @@ const defaultHeaderForRoute = (
   }
   if (/^\/patents\/[^/]+$/.test(pathname)) {
     return {
-      title: "Filing details",
-      back: { label: "Back to filings", to: "/patents" },
+      title: "Patent detail",
+      back: { label: "Back to patents", to: "/patents" },
     };
   }
   if (pathname === "/patents") return { title: "Patents" };
@@ -101,7 +101,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   className,
   header,
 }) => {
-  const { pathname } = useLocation();
+  const { pathname, search: locationSearch } = useLocation();
   const { user } = useUserCookie();
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
     try {
@@ -145,9 +145,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     if (header === false) return null;
     return {
       ...defaultHeaderForRoute(pathname, user?.role),
+      ...(/^\/patents\/[^/]+$/.test(pathname) ? { back: { label: "Back to patents", to: `/patents${locationSearch}` } } : {}),
       ...(header || {}),
     };
-  }, [header, pathname, user?.role]);
+  }, [header, pathname, locationSearch, user?.role]);
 
   // The header slots. Refs rather than state so a page's portal targets a
   // stable DOM node; `ready` flips once after mount so the portals attach on

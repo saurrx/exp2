@@ -2,6 +2,7 @@ import { route } from "../runtime/registry";
 import { getDb, touched } from "../runtime/db";
 import { clock } from "../runtime/clock";
 import { mulberry32, seedFrom, uuid } from "../runtime/prng";
+import { scopeFor, patentById } from "../runtime/store";
 import { currentUser, visibleIdeas } from "./scope";
 
 /** Uploads are same-origin, exactly as production: presign, then PUT the bytes to /v1/files/:id/content. */
@@ -18,16 +19,28 @@ export const fileHandlers = [
     touched();
     return { id, original_name: name, file_name: `${id}-${name}`, file_path: `v1/files/${id}/raw`, size: Number(b.size ?? 0), type: String(b.content_type ?? "application/octet-stream"), content_type: String(b.content_type ?? "application/octet-stream"), put_url: `/v1/files/${id}/content` };
   }),
-  route("put", "/v1/files/:id/content", ({ params }) => {
+  route("put", "/v1/files/:id/content", async ({ params, request }) => {
     const db = getDb();
     const f = db.files.find((x) => x.id === params.id);
     if (!f) return { status: 404, body: { message: "File not found." } };
+    if (db.flags.v0 && f.category === "patent") {
+      const user = currentUser(); const scope = scopeFor(user);
+      if (!user || !["CASE_OWNER", "PHOTON_ADMIN"].includes(user.role) || !f.client_id || (scope && !scope.includes(f.client_id))) return { status: 403, body: { message: "File is outside your client scope." } };
+      const bytes = new Uint8Array(await request.arrayBuffer());
+      let binary = ""; for (const byte of bytes) binary += String.fromCharCode(byte);
+      f.content_base64 = btoa(binary);
+    }
     f.status = "STORED"; touched();
     return { id: f.id, status: "STORED" };
   }),
   route("get", "/v1/files/:id/download", ({ params }) => ({ url: `/v1/files/${params.id}/raw` })),
   route("delete", "/v1/files/:id", ({ params }) => {
     const db = getDb();
+    const file = db.files.find(f => f.id === params.id);
+    if (db.flags.v0 && file?.category.startsWith("patent:")) {
+      const user = currentUser(); const scope = scopeFor(user);
+      if (!user || !["CASE_OWNER", "PHOTON_ADMIN"].includes(user.role) || !file.client_id || (scope && !scope.includes(file.client_id))) return { status: 403, body: { message: "You cannot remove this patent document." } };
+    }
     db.files = db.files.filter((x) => x.id !== params.id); touched();
     return { ok: true };
   }),
@@ -36,8 +49,14 @@ export const fileHandlers = [
     const client = db.clients.find((c) => c.logo_file_id === params.id);
     const f = db.files.find((x) => x.id === params.id);
     if (db.flags.v0 && f?.idea_id && !visibleIdeas(db, currentUser()).some((idea) => idea.id === f.idea_id)) return { status: 403, body: { message: "This attachment is outside your workspace." } };
+    if (db.flags.v0 && f?.category.startsWith("patent:")) {
+      const user = currentUser(); const scope = scopeFor(user); const patent = patentById(f.category.slice(7));
+      if (!user || !patent || (scope && !scope.includes(patent.client_id))) return { status: 403, body: { message: "Document is outside your workspace." } };
+      const bytes = f.content_base64 ? Uint8Array.from(atob(f.content_base64), char => char.charCodeAt(0)) : new TextEncoder().encode(JSON.stringify({ note: `Synthetic document: ${f.original_name}` }));
+      return new Response(bytes, { headers: { "content-type": f.content_type, "x-pulse-patent-document": "1" } }) as unknown as { status: number };
+    }
     const label = client ? client.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase() : "PL";
     if (f && !f.content_type.startsWith("image/")) return { status: 200, body: { note: `mock file ${f.original_name}` } };
     return new Response(svgLogo(label), { status: 200, headers: { "content-type": "image/svg+xml" } }) as unknown as { status: number };
-  }),
+  }, { rawResponse: response => response.headers.has("x-pulse-patent-document") }),
 ];

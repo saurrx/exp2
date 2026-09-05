@@ -113,7 +113,7 @@ const navForRole = (role: Role | undefined, reviewCount: number): NavItem[] => {
   const operationalItems: NavItem[] = [
     { label: "Overview", path: "/", icon: LayoutDashboard },
     { label: "Clients", path: "/clients", icon: Building2 },
-    { label: "Ideas", path: "/ideas", icon: Lightbulb, badge: reviewCount },
+    { label: "Ideas", path: "/ideas", icon: Lightbulb },
     { label: "Patents", path: "/patents", icon: FileStack },
     // Two screens, two names, neither pretending to be the other. "Due Dates"
     // is the deadline calendar and list — the clock. "Actions" is the

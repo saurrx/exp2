@@ -68,7 +68,7 @@ export default function CaseOwnerMyWork({ data, loading, error, retry }: { data?
                 <h2 className="mb-2 text-xs font-medium text-pl-text-2">{group.label}</h2>
                 <ul className="divide-y divide-pl-border">{group.items.map(item => <li key={item.id}>
                   <button type="button" onClick={() => select(item)} aria-current={selected.id === item.id ? "true" : undefined} className={`w-full min-w-0 border-l-2 px-3 py-3 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-pl-brand ${selected.id === item.id ? "border-pl-brand" : "border-transparent hover:bg-pl-bg-subtle"}`}>
-                    {selected.id === item.id ? <span>Selected work →</span> : <><span className="block text-xs text-pl-text-2">{item.client_name}</span><span className="mt-1 block break-words font-medium">{item.title}</span><span className="mt-2 block text-xs text-pl-text-2">{timing(item)}</span></>}
+                    {selected.id === item.id ? <span>Selected work →</span> : <><span className="block text-xs text-pl-text-2">{item.client_name}</span><span className="mt-1 block break-words font-medium">{item.title}</span><span className="mt-2 block text-xs text-pl-text-2">{timing(item)}</span>{(item.kind === "action" || item.kind === "date") && <span className="mt-1 block break-words text-xs text-pl-text-2">{item.reference} · {item.kind === "action" ? "Review client instruction" : "Check recorded event"}</span>}</>}
                   </button>
                 </li>)}</ul>
               </section>)}
@@ -84,7 +84,7 @@ export default function CaseOwnerMyWork({ data, loading, error, retry }: { data?
         </nav>
         <section id="assigned-clients" aria-labelledby="assigned-clients-heading" className="mt-8 border-t border-pl-border pt-5">
           <h2 id="assigned-clients-heading" className="text-base font-semibold">Assigned clients</h2>
-          {!data.clients.length ? <p className="mt-3 text-sm text-pl-text-2">No current assignments.</p> : <ul className="mt-3 divide-y divide-pl-border">{data.clients.map(client => <li key={client.client_id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><div className="min-w-0"><p className="break-words font-medium">{client.client_name}</p><p className="mt-1 text-xs text-pl-text-2">{client.health}{client.assigned_at && <> · Assigned {age(client.assigned_at).toLowerCase()}</>}</p></div><Link to={client.href} className="underline underline-offset-4">Open client workspace →</Link></li>)}</ul>}
+          {!data.clients.length ? <p className="mt-3 text-sm text-pl-text-2">No current assignments.</p> : <ul className="mt-3 divide-y divide-pl-border">{data.clients.map(client => <li key={client.client_id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><div className="min-w-0"><p className="break-words font-medium">{client.client_name}</p>{!(selected?.kind === "setup" && selected.client_id === client.client_id) && <p className="mt-1 text-xs text-pl-text-2">{client.health}{client.assigned_at && <> · Assigned {age(client.assigned_at).toLowerCase()}</>}</p>}</div><Link to={client.href} className="underline underline-offset-4">Open client workspace →</Link></li>)}</ul>}
         </section>
         <section aria-labelledby="lifecycle-updates-heading" className="mt-8 border-t border-pl-border pt-5">
           <h2 id="lifecycle-updates-heading" className="text-base font-semibold">Recent lifecycle updates</h2>

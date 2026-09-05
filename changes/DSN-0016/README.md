@@ -61,3 +61,21 @@ As Devika, I first see the selected newly approved idea, with client and referen
 Every ID starts `surfaces-case-owner-my-work--`: no-assigned-clients, newly-assigned-client, new-approved-idea, urgent-action, overdue-date, onboarding-incomplete, access-expired, data-error, loading, long-title, quiet, access-request-error, access-requested, portfolio-context. All select synthetic `v0/` scenarios as Case Owner. Every state has 1280×720 and 1440×900 captures; new-approved-idea also has 1366×768, 1920×1080 and 640×360@2; long-title, access-expired and access-request-error add 640×360@2. The client-view failure screenshot is separate boundary evidence, outside the new-content shots directory.
 
 Shared-navigation baseline checkpoint: 19 completed broad captures differ from their prior baseline only by the reviewed My work label: 490 pixels, bounds [54,124,116,137]. Representative Actions, idea detail, patent detail and portfolio images were opened. These exact current captures were accepted; mixed or other-surface differences remain unaccepted. The file list and pixel evidence are in sidebar-diffs-initial.json.
+
+## Independent review round 1
+```text
+VERDICT: NEEDS_WORK
+SURFACE: case-owner-my-work  PERSONA: Case Owner
+SCORECARD: product-fit 3 · hierarchy 4 · usability 3 · trust 3 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, the selected idea supports the builder’s first-glance, action and reading claims, but urgent rows require additional selection to identify the work, and client-view exit leaves scope unresolved.
+FINDINGS (most severe first, max 7):
+
+1. Client-view exit — The confirmed failed exit leaves Devika in Northwind’s Workspace Admin view; the failure screenshot shows Leah Feldman’s identity without a visible client-mode indicator or exit control — Restore the original Case Owner identity and scope on exit, retain an explicit client-view indicator and recovery control on failure, and verify the complete round trip once the auth exception is authorized.
+2. Urgent-event rows in the default state — “Patent renewal” and “Response to examination report” identify client and urgency but omit the patent reference and whether the next step concerns a client instruction or recorded event; Devika must select each to discover that distinction — Include the reference and concise next-step distinction in each unselected row.
+3. Newly assigned/onboarding states — “Invite inventors” or “Add a Workspace Admin” and assignment age appear in both the selected brief and assigned-client roster at both review widths; Devika rereads the same responsibility, contrary to the charter’s no-repeated-title/status rule — Keep the task and age in the brief and avoid repeating them in the supporting roster.
+
+STATES MISSING: Successful client-view exit/restored Case Owner evidence; all eight named brief states are pictured. All 34 shots and the separate failure image were inspected.
+REFERENCE MATCH: yes — Typography, restrained amber primary controls, hairline separation and list/detail composition follow the reference language; the three directions and chosen tradeoff are recorded.
+```
+
+Findings 2 and 3 are addressed in source: unselected urgent rows now show the patent reference and Review client instruction/Check recorded event distinction; the selected setup task and assignment age are suppressed from the supporting roster. The queued capture/gate continuation was stopped before it ran because these corrections require a new static build. The broad runner continues against its unchanged earlier build. Revised validation and captures are pending. Finding 1 still requires the specific auth authorization; no readiness claim.

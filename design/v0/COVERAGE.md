@@ -20,7 +20,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Inventor home | Inventor | `/` | 8 | 10 | conceptual | DSN-0005 |
 | Start an idea | Inventor, Workspace Admin | `/ideas`, `/ideas/:id/draft` | 5 | 11 | conceptual | DSN-0006 |
 | Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired | DSN-0006 |
-| Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 4 | 12 | none |  |
+| Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none | DSN-0007 |
 | Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | none |  |
 | Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 6 | 17 | conceptual |  |
 | Review decision | Workspace Admin | `/ideas/:id` | 3 | 12 | none |  |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 209 intended stories, 23 V0 scenarios; backend impact conceptual on 4, unwired on 5, none on 8.
+17 surfaces, 209 intended stories, 34 V0 scenarios; backend impact conceptual on 4, unwired on 5, none on 8.
 
 ## Inventor home
 
@@ -87,17 +87,17 @@ Brief: `product-context/surfaces/disclosure-workspace.md` · Storybook title: `S
 
 ## Evaluation result
 
-Brief: `product-context/surfaces/evaluation.md` · Storybook title: `Surfaces/Evaluation result` · DSN: none yet
+Brief: `product-context/surfaces/evaluation.md` · Storybook title: `Surfaces/Evaluation result` · DSN: DSN-0007
 
 - **Personas:** Inventor, Workspace Admin
 - **User goal:** Understand the advisory novelty assessment and strengthen the disclosure.
 - **Business goal:** Help inventors submit stronger disclosures without reducing submission volume.
 - **Routes:** `/ideas/:id/draft` (Inventor) — evaluation is opened from the disclosure workspace; `/ideas/:id` (Inventor, Workspace Admin) — the summary and detailed evidence on the idea
-- **Required scenarios:** `v0/inventor/first-run`, `v0/inventor/portfolio`, `v0/shape/failure`, `v0/shape/slow`
+- **Required scenarios:** `v0/evaluation/not-run`, `v0/evaluation/queued`, `v0/evaluation/running`, `v0/evaluation/succeeded`, `v0/evaluation/partial`, `v0/evaluation/no-close-prior-art`, `v0/evaluation/failed`, `v0/evaluation/timed-out`, `v0/evaluation/stale-after-edits`, `v0/evaluation/re-evaluating`, `v0/evaluation/workspace-admin`
 - **States:** loading — queued and running with progress; empty — not run: Evaluate idea offered, never required; success — assessment, what appears different, how to strengthen; detailed prior art collapsed; error — failed or timed out with a retry that keeps the disclosure; permission — not applicable inside the inventor's own idea
 - **Surface-specific states:** not-run, queued, running, succeeded, partial, no-close-prior-art, failed, timed-out, stale-after-edits, re-evaluating
 - **Navigation badge:** none
-- **Backend impact:** none — POST evaluate, POST re-evaluate and GET evaluation exist; the envelope carries score, noveltyScore, closestMatches, recommendations, priorArt. Whether closestMatches carries per-reference differences for 'What appears different' is verified in the evaluation record (BF-2 if not).
+- **Backend impact:** none — Existing report envelope verified in DSN-0007: closestMatches includes per-reference differences, overlaps, similarities and analysis. No BF-2 contract gap; no route or field added.
 - **Intended story ids:** `surfaces-evaluation-result--not-run`, `surfaces-evaluation-result--queued`, `surfaces-evaluation-result--running`, `surfaces-evaluation-result--succeeded`, `surfaces-evaluation-result--partial`, `surfaces-evaluation-result--no-close-prior-art`, `surfaces-evaluation-result--failed`, `surfaces-evaluation-result--timed-out`, `surfaces-evaluation-result--stale-after-edits`, `surfaces-evaluation-result--re-evaluating`, `surfaces-evaluation-result--loading`, `surfaces-evaluation-result--error`
 - **Excluded here:** score cutoff, probability language, repeated disclaimers, detailed evidence before the conclusion
 

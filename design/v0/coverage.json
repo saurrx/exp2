@@ -330,10 +330,17 @@
         }
       ],
       "scenarios": [
-        "v0/inventor/first-run",
-        "v0/inventor/portfolio",
-        "v0/shape/failure",
-        "v0/shape/slow"
+        "v0/evaluation/not-run",
+        "v0/evaluation/queued",
+        "v0/evaluation/running",
+        "v0/evaluation/succeeded",
+        "v0/evaluation/partial",
+        "v0/evaluation/no-close-prior-art",
+        "v0/evaluation/failed",
+        "v0/evaluation/timed-out",
+        "v0/evaluation/stale-after-edits",
+        "v0/evaluation/re-evaluating",
+        "v0/evaluation/workspace-admin"
       ],
       "states": {
         "loading": "queued and running with progress",
@@ -356,7 +363,7 @@
       },
       "badge": "none",
       "backendImpact": "none",
-      "backendNotes": "POST evaluate, POST re-evaluate and GET evaluation exist; the envelope carries score, noveltyScore, closestMatches, recommendations, priorArt. Whether closestMatches carries per-reference differences for 'What appears different' is verified in the evaluation record (BF-2 if not).",
+      "backendNotes": "Existing report envelope verified in DSN-0007: closestMatches includes per-reference differences, overlaps, similarities and analysis. No BF-2 contract gap; no route or field added.",
       "storyIds": [
         "surfaces-evaluation-result--not-run",
         "surfaces-evaluation-result--queued",
@@ -377,7 +384,7 @@
         "repeated disclaimers",
         "detailed evidence before the conclusion"
       ],
-      "dsn": null
+      "dsn": "DSN-0007"
     },
     {
       "brief": "surfaces/ideas.md",

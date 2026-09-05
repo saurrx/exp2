@@ -1,0 +1,113 @@
+
+> design@0.0.0 build:design
+> vite build --config vite.design.config.ts
+
+vite v5.4.21 building for production...
+transforming...
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+✓ 4190 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                       1.33 kB │ gzip:   0.52 kB
+dist/assets/pdf.worker.min-yatZIOMy.mjs           1,375.84 kB
+dist/assets/style-DTLpdRlW.css                        0.37 kB │ gzip:   0.21 kB
+dist/assets/main-CicYn4iD.css                       137.64 kB │ gzip:  22.70 kB
+dist/assets/constants-CBpXd0Y3.js                     0.04 kB │ gzip:   0.06 kB
+dist/assets/pdf.worker.min-ocdtAcA3.js                0.07 kB │ gzip:   0.09 kB
+dist/assets/roleAccess-Ovt14rZi.js                    0.14 kB │ gzip:   0.13 kB
+dist/assets/chevron-down-B3UciI6k.js                  0.30 kB │ gzip:   0.24 kB
+dist/assets/BlockedRedirect-DKDFad81.js               0.31 kB │ gzip:   0.24 kB
+dist/assets/plus-CdU9l-3b.js                          0.32 kB │ gzip:   0.25 kB
+dist/assets/filter-D3UWilCc.js                        0.33 kB │ gzip:   0.26 kB
+dist/assets/arrow-right-Pu3QkaF7.js                   0.33 kB │ gzip:   0.26 kB
+dist/assets/use-mobile-DrQMjxYn.js                    0.33 kB │ gzip:   0.25 kB
+dist/assets/search-DzjzVv0M.js                        0.34 kB │ gzip:   0.27 kB
+dist/assets/circle-check-C0qKXTnl.js                  0.34 kB │ gzip:   0.27 kB
+dist/assets/clock-C7GKecMK.js                         0.35 kB │ gzip:   0.27 kB
+dist/assets/user-3jPQxcwP.js                          0.36 kB │ gzip:   0.28 kB
+dist/assets/separator-DuzrjotK.js                     0.37 kB │ gzip:   0.27 kB
+dist/assets/ProductPage-PC-sbLDy.js                   0.38 kB │ gzip:   0.30 kB
+dist/assets/copy-BfGqPI6W.js                          0.40 kB │ gzip:   0.30 kB
+dist/assets/pen-O4AWkZWp.js                           0.40 kB │ gzip:   0.30 kB
+dist/assets/calendar-D88SRsG6.js                      0.43 kB │ gzip:   0.30 kB
+dist/assets/upload-Ct0OavPm.js                        0.43 kB │ gzip:   0.31 kB
+dist/assets/download-Bq9iK7tR.js                      0.43 kB │ gzip:   0.32 kB
+dist/assets/pencil-DErkTABx.js                        0.44 kB │ gzip:   0.32 kB
+dist/assets/users-ECpXCnDG.js                         0.47 kB │ gzip:   0.32 kB
+dist/assets/file-search-C6B-H5Lu.js                   0.49 kB │ gzip:   0.34 kB
+dist/assets/save-CleIOcVR.js                          0.50 kB │ gzip:   0.33 kB
+dist/assets/file-text-BcwNim5S.js                     0.50 kB │ gzip:   0.32 kB
+dist/assets/trash-2-0UTOe_bG.js                       0.53 kB │ gzip:   0.34 kB
+dist/assets/file-pen-BB-pRgcg.js                      0.54 kB │ gzip:   0.36 kB
+dist/assets/AuthLoadingOverlay-DwRkslew.js            0.54 kB │ gzip:   0.37 kB
+dist/assets/arrow-up-MC5D828C.js                      0.61 kB │ gzip:   0.31 kB
+dist/assets/textarea-B0HKY8BU.js                      0.72 kB │ gzip:   0.44 kB
+dist/assets/badge-HB0ZB5hK.js                         0.75 kB │ gzip:   0.39 kB
+dist/assets/popover-CtVS22h0.js                       0.78 kB │ gzip:   0.42 kB
+dist/assets/checkbox-Vb9Xyve3.js                      0.78 kB │ gzip:   0.43 kB
+dist/assets/scroll-area-BqMAbC5-.js                   0.81 kB │ gzip:   0.43 kB
+dist/assets/mail-CpxdMCmK.js                          0.90 kB │ gzip:   0.45 kB
+dist/assets/chevrons-right-CYJDhwBt.js                1.00 kB │ gzip:   0.38 kB
+dist/assets/s3Upload-DJNM5HNH.js                      1.03 kB │ gzip:   0.53 kB
+dist/assets/card-BhCl1J47.js                          1.11 kB │ gzip:   0.44 kB
+dist/assets/SamlCallback-BJ2I_oFi.js                  1.14 kB │ gzip:   0.69 kB
+dist/assets/AuthField-9HARWAGI.js                     1.16 kB │ gzip:   0.66 kB
+dist/assets/StatusChip-Cw7SCq_A.js                    1.28 kB │ gzip:   0.76 kB
+dist/assets/commonApi.service-Dc4bfw6T.js             1.50 kB │ gzip:   0.76 kB
+dist/assets/usePatentEventCompletion-COwdn9cX.js      1.50 kB │ gzip:   0.75 kB
+dist/assets/AssistantPage-pKlQXO6O.js                 1.63 kB │ gzip:   0.85 kB
+dist/assets/Loader-CvTJbyXf.js                        1.64 kB │ gzip:   0.67 kB
+dist/assets/BrandIcons-B4BYrgjk.js                    1.69 kB │ gzip:   0.78 kB
+dist/assets/documentText-Ftd_RdEw.js                  1.75 kB │ gzip:   0.96 kB
+dist/assets/patentLegalStatus-CXs_s3vP.js             1.77 kB │ gzip:   0.50 kB
+dist/assets/ActionDropdown-asIdF1O2.js                1.78 kB │ gzip:   1.00 kB
+dist/assets/menu-radio-item-LeMoNKs1.js               1.91 kB │ gzip:   0.96 kB
+dist/assets/product-chip-DmHXLidY.js                  1.93 kB │ gzip:   0.78 kB
+dist/assets/command-BtcfX5JG.js                       2.03 kB │ gzip:   0.78 kB
+dist/assets/alert-dialog-DjpFRQ83.js                  2.13 kB │ gzip:   0.81 kB
+dist/assets/input-BiFO235u.js                         2.28 kB │ gzip:   1.14 kB
+dist/assets/NotFound-D8txzQUH.js                      2.97 kB │ gzip:   1.37 kB
+dist/assets/select-BhcWQ6F3.js                        3.01 kB │ gzip:   1.24 kB
+dist/assets/Invite-bmO7eKAO.js                        3.49 kB │ gzip:   1.64 kB
+dist/assets/ForgotPassword-DUeIT4Y2.js                4.71 kB │ gzip:   1.98 kB
+dist/assets/ResetPassword-CnSkSSKr.js                 5.23 kB │ gzip:   2.11 kB
+dist/assets/Signup-D8dM-Ldh.js                        6.11 kB │ gzip:   2.43 kB
+dist/assets/PatentFieldsForm-BuYy3TeC.js              6.25 kB │ gzip:   2.20 kB
+dist/assets/ClientLogo-CaVxNjFQ.js                    7.34 kB │ gzip:   2.77 kB
+dist/assets/IdeaSubmissionModal-eCL_TDOK.js           8.07 kB │ gzip:   3.29 kB
+dist/assets/ShowScoreReport-Bcg4zv8n.js               8.68 kB │ gzip:   3.40 kB
+dist/assets/Login-CT67AypY.js                         9.07 kB │ gzip:   3.23 kB
+dist/assets/patentReportPdf-CZg5S4SL.js               9.26 kB │ gzip:   3.20 kB
+dist/assets/select-vendor-DxUYxJsA.js                11.86 kB │ gzip:   4.66 kB
+dist/assets/index-EoN3avop.js                        18.66 kB │ gzip:   6.95 kB
+dist/assets/react-vendor-n_txrk3b.js                 21.50 kB │ gzip:   7.97 kB
+dist/assets/ActionsPage-Cjh3NsSu.js                  30.64 kB │ gzip:   8.03 kB
+dist/assets/ClientsPage-d3RWrAxv.js                  35.98 kB │ gzip:   8.93 kB
+dist/assets/IdeaDraftPage-kGQj4kfA.js                36.79 kB │ gzip:  11.41 kB
+dist/assets/ProfilePage-Cfte5cpn.js                  38.02 kB │ gzip:  10.01 kB
+dist/assets/DueDatesPage-aHoM1AOW.js                 48.88 kB │ gzip:  11.53 kB
+dist/assets/WorkspacePage-BrqZhtt3.js                52.84 kB │ gzip:  12.67 kB
+dist/assets/ClientDetailPage-CShbEj0z.js             57.83 kB │ gzip:  15.48 kB
+dist/assets/IdeasPage-fi1z0ZDs.js                    60.20 kB │ gzip:  17.91 kB
+dist/assets/utils-vendor-BMqD49QO.js                 72.09 kB │ gzip:  26.56 kB
+dist/assets/date-vendor-D8eLmKx0.js                  82.18 kB │ gzip:  25.37 kB
+dist/assets/PatentsPage-UglxI5H7.js                  85.13 kB │ gzip:  20.27 kB
+dist/assets/Index-B6LCzgBK.js                        91.68 kB │ gzip:  25.64 kB
+dist/assets/query-vendor-BI31PEkb.js                 92.41 kB │ gzip:  31.29 kB
+dist/assets/IdeaDetailsPage-xvtiJ8ln.js              97.49 kB │ gzip:  25.70 kB
+dist/assets/motion-vendor-CMd_bZHC.js               124.76 kB │ gzip:  40.71 kB
+dist/assets/form-vendor-fzOXtIBi.js                 159.98 kB │ gzip:  47.41 kB
+dist/assets/radix-vendor-BRrAx06F.js                316.42 kB │ gzip:  97.85 kB
+dist/assets/pdf-BnPRJEQ6.js                         365.12 kB │ gzip: 107.40 kB
+dist/assets/main-B-Ivts6m.js                        433.56 kB │ gzip: 136.43 kB
+dist/assets/index-DS5O4XA_.js                       457.63 kB │ gzip: 137.65 kB
+dist/assets/mammoth.browser-CGFZ_6YM.js             499.90 kB │ gzip: 124.75 kB
+dist/assets/charts-vendor-CWIJkp7_.js               504.11 kB │ gzip: 141.90 kB
+dist/assets/pdf-vendor-w4Hybfcz.js                1,240.36 kB │ gzip: 452.97 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.36s

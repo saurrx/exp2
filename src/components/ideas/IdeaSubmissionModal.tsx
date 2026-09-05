@@ -90,7 +90,7 @@ const IdeaSubmissionModal: React.FC<IdeaSubmissionModalProps> = ({ open, onOpenC
     if (!files) return;
     setError(null);
     for (const file of Array.from(files)) {
-      if (!/\.(pdf|docx|txt|md)$/i.test(file.name)) { setError("Use PDF, DOCX, TXT or Markdown. For slides, paste the text below."); continue; }
+      if (!/\.(pdf|docx|txt|md)$/i.test(file.name)) { setError("Use PDF, DOCX, TXT or Markdown. For slides, use the “Paste notes or describe your idea” field."); continue; }
       setSourceFiles((prev) => prev.some((f) => f.name === file.name) ? prev : [...prev, file]);
     }
   };

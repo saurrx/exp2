@@ -9,6 +9,7 @@ export function disclosureSections(meta: any[] = []) {
   const questions = meta.flatMap((section) => section.questions ?? []);
   return ideaDraftQuestions.map((section) => ({
     ...section,
+    title: section.id === "advantages" ? "Novelty" : section.id === "implementation" ? "Application" : section.title,
     questions: section.questions.map((question) => {
       const existing = questions.find((q) => q.id === question.id) ?? questions.find((q) => legacyFields[q.id] === question.id);
       return { ...question, ...(existing ? { answer: existing.answer ?? "", provenance: existing.provenance } : {}) };

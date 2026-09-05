@@ -1,6 +1,6 @@
 # DSN-0006 — Start an idea and invention disclosure workspace
 
-Status: in progress. Branch: `codex/dsn-0006-disclosure-workspace`.
+Status: complete. Branch: `codex/dsn-0006-disclosure-workspace`.
 
 ## Intent and persona
 Anika Sharma brings existing notes after engineering work. She needs to turn those notes into a supported disclosure, supply the human conception, and send it for review. A Workspace Admin can capture for a selected inventor with separate attribution. Starting creates a draft; submission freezes the reviewed revision. Success signals are submission starts, completed drafts and completed-to-submitted conversion; unsupported answers must not increase.
@@ -64,4 +64,63 @@ The task and next owner are explicit, material leads, evaluation recedes and can
 ## Validation
 Typecheck, role lint, token check, app build, Storybook build and V0 33/33 passed. Full story suite: 234/234 passed across 53 files after replacing legacy coverage. Functional browser probes submitted an unevaluated draft and a low-scoring draft; both reached LEGAL_REVIEW with SUBMITTED draft status and one frozen revision. On-behalf submission reached LEGAL_REVIEW with distinct author/submitter attribution. All probes blocked egress and attempted none. Width probes verified both surfaces at all five viewports. See logs/.
 
-Selected gates passed 7/7. Fresh evaluator is pending. Coverage remains null until PASS.
+Final selected gates passed 7/7. Fresh evaluator round 3 passed with all scores 4, no findings and no missing states. Both coverage entries record DSN-0006.
+
+## Evaluator round 1
+
+```text
+VERDICT: NEEDS_WORK
+SURFACE: start-idea + disclosure-workspace  PERSONA: Inventor and Workspace Admin on behalf
+SCORECARD: product-fit 4 · hierarchy 4 · usability 3 · trust 3 · craft 4 · accessibility 3 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, material and primary actions are clear, but contrary to the record, the Inventor must reconcile conflicting guidance and repeated statuses.
+
+FINDINGS (most severe first, max 7):
+
+1. Live evaluation signal — “Nothing written yet” appears beside a populated answer in saving/error/conflict states; after extraction, “Start with the problem and the solution” appears when only novelty remains required — derive guidance from the current answers and identify the actual remaining gap.
+2. Evaluation result — the Inventor must accept an unidentified “closest reference” without accessible evidence or “How to strengthen” guidance; the paragraph also repeats the full title — provide the required assessment/difference/improvement sequence with evidence on demand and remove the repeated title.
+3. Section completion — “Ready for review” appears alongside “In progress” sections and blank optional fields, making the Inventor guess whether more work is required — distinguish required completion from optional enrichment consistently.
+4. Save error/conflict — the identical status appears in both the header and a prominent warning block, breaking the no-repeated-status rule — consolidate the message beside its recovery action.
+5. Disclosure at 200% zoom — fixed headers and footer leave a narrow writing area; the scrolled screenshot shows the field without its label — reduce fixed header height and keep the active field label visible while editing.
+6. On-behalf disclosure evidence — intake identifies Anika separately from the submitter, but no screenshot shows the Workspace Admin continuing that editable disclosure or confirming attribution at submission — capture those states at both review widths.
+7. Unsupported-file recovery — “paste the text below” points away from the textarea, which is above the message — refer to the field by its visible label or correct the direction.
+
+STATES MISSING: Workspace Admin on-behalf editable disclosure and submission confirmation; expanded conflict comparison and resolution.
+REFERENCE MATCH: yes — typography, restrained color, hairline separation, compact controls and amber primary actions follow the reference language.
+```
+
+Corrections completed: guidance reads current answers, sections distinguish required from optional, evaluation evidence is available, save errors appear once, the header scrolls at zoom and field labels stay visible, and additional on-behalf/conflict screenshots cover the requested evidence.
+
+Round 2 evidence: all 60 baselines re-rendered. Ten additional screenshots cover on-behalf editing and confirmation, expanded conflict comparison, resolved conflict and expanded evaluation evidence at both 1280×720 and 1440×900. The two zoom interaction screenshots were refreshed: the field label, helper and full textarea remain visible while editing. Five-width measurements passed again. Required/optional section labels, current-answer signal and single-location error copy were inspected. Evaluation now shows assessment, differences and strengthening before expandable references.
+
+## Evaluator round 2
+
+```text
+VERDICT: NEEDS_WORK
+SURFACE: start-idea + disclosure-workspace  PERSONA: Inventor and Workspace Admin on behalf
+SCORECARD: product-fit 4 · hierarchy 4 · usability 3 · trust 3 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — Default states at both review widths support the record’s material-first flow, but conflict recovery requires remembering how differently named sections correspond.
+FINDINGS (most severe first, max 7):
+
+1. Evaluation “How to strengthen” — “Add dependent claims” and “Claim the combination” make the Inventor interpret legal drafting instructions instead of explaining their invention — express improvements as concrete disclosure questions in plain language; leave claim drafting to Photon Legal.
+2. Conflict comparison section names — “Advantages” and “Implementation” replace the workspace’s “Novelty” and “Application,” requiring users to guess where their answers moved before choosing which revision to keep — use identical section names and ordering in editing, comparison and read-only views.
+
+STATES MISSING: none
+REFERENCE MATCH: yes — restrained color, typography, compact controls, hairline sections and amber primary actions follow the Workspace Admin reference language.
+```
+
+Final corrections: use Novelty/Application consistently in editing, history, comparison and read-only views; translate the supplied claim-drafting recommendations into disclosure questions without adding technical facts. Loading a saved revision also restores its provenance, and requested changes reopen the canonical draft while retaining the frozen reviewed version.
+
+## Evaluator round 3 — final
+
+```text
+VERDICT: PASS
+SURFACE: start-idea + disclosure-workspace  PERSONA: Inventor and Workspace Admin on behalf
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, the six-answer roleplay agrees with the record: material leads, primary actions are clear, required reading is contextual, no cross-view recall is needed, unrelated UI recedes, and save state and submission ownership are explicit.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none
+REFERENCE MATCH: yes — restrained color, typography, compact controls, hairline separation and amber primary actions follow the Workspace Admin Overview / Ideas queue language.
+```
+
+Final evidence: 60 refreshed baselines plus 12 supplemental screenshots; app and Storybook builds, 234/234 story tests, 33/33 V0 tests, roles, tokens and selected gates 7/7 pass. No protected adapter, auth, analytics, query hooks, reference screens or dependencies changed.

@@ -18,8 +18,8 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Surface | Personas | Routes | Scenarios | Story ids | Backend impact | DSN |
 |---|---|---|---|---|---|---|
 | Inventor home | Inventor | `/` | 8 | 10 | conceptual | DSN-0005 |
-| Start an idea | Inventor, Workspace Admin | `/ideas`, `/ideas/:id/draft` | 5 | 11 | conceptual |  |
-| Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired |  |
+| Start an idea | Inventor, Workspace Admin | `/ideas`, `/ideas/:id/draft` | 5 | 11 | conceptual | DSN-0006 |
+| Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired | DSN-0006 |
 | Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 4 | 12 | none |  |
 | Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | none |  |
 | Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 6 | 17 | conceptual |  |
@@ -55,7 +55,7 @@ Brief: `product-context/surfaces/inventor-home.md` · Storybook title: `Surfaces
 
 ## Start an idea
 
-Brief: `product-context/surfaces/start-idea.md` · Storybook title: `Surfaces/Start an idea` · DSN: none yet
+Brief: `product-context/surfaces/start-idea.md` · Storybook title: `Surfaces/Start an idea` · DSN: DSN-0006
 
 - **Personas:** Inventor, Workspace Admin
 - **User goal:** Move from 'I may have an invention' to a useful starting disclosure with almost no blank-page friction.
@@ -71,7 +71,7 @@ Brief: `product-context/surfaces/start-idea.md` · Storybook title: `Surfaces/St
 
 ## Invention disclosure workspace
 
-Brief: `product-context/surfaces/disclosure-workspace.md` · Storybook title: `Surfaces/Invention disclosure workspace` · DSN: none yet
+Brief: `product-context/surfaces/disclosure-workspace.md` · Storybook title: `Surfaces/Invention disclosure workspace` · DSN: DSN-0006
 
 - **Personas:** Inventor, Workspace Admin
 - **User goal:** Complete a credible invention disclosure without needing patent expertise.

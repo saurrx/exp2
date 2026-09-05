@@ -51,6 +51,10 @@ function review(idea: Idea, actor: User, decision: string, comment: string | und
   const to: IdeaState | null = decision === "APPROVED" ? (stage === "TECHNICAL" ? "LEGAL_REVIEW" : "SENT_TO_PHOTON") : decision === "CHANGES_REQUESTED" ? "CHANGES_REQUESTED" : decision === "REJECTED" ? "REJECTED" : null;
   if (!to) return { status: 400, body: { message: `Unknown decision ${decision}.` } };
   db.transitions.push({ id: uuid(rngNow(idea.id + to)), idea_id: idea.id, from_state: idea.state, to_state: to, stage, decision: decision as never, actor_id: actor.id, revision: idea.revision, comment: comment?.trim() || null, is_appeal: false, created_at: clock.iso() });
+  if (db.flags.v0 && to === "CHANGES_REQUESTED") {
+    const draft = db.drafts.find((d) => d.idea_id === idea.id);
+    if (draft) draft.status = "DRAFT";
+  }
   idea.state = to; idea.updated_at = clock.iso();
   touched();
   return hydrateIdea(db, idea, clock.now());

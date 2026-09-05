@@ -1,0 +1,3 @@
+complete {"state":"LEGAL_REVIEW","status":"SUBMITTED","history":1} egress 0
+evaluation-result {"state":"LEGAL_REVIEW","status":"SUBMITTED","history":1} egress 0
+on-behalf {"state":"LEGAL_REVIEW","distinctAttribution":true} egress 0

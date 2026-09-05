@@ -1,0 +1,4 @@
+PASS unsaved selections and notes survive event switching
+PASS required countries validated and sent as selected
+PASS decline requires response and preserves original client note
+PASS 35 submitted requests paginate 20/15; clearing status filter restores queue

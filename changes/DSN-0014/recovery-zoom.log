@@ -1,0 +1,2 @@
+PASS submission-error: event/reference and decision visible at zoom; retained send retries successfully
+PASS decline-response: event/reference and decision visible at zoom; decline persists

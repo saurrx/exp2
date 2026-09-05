@@ -1,0 +1,15 @@
+VERDICT: NEEDS_WORK
+SURFACE: actions  PERSONA: Workspace Admin, Case Owner, Photon Admin; Inventor refusal
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 3 · business 4
+COGNITIVE LOAD: fail — Unlike the record’s roleplay, the rendered layouts require discovering hidden choices and remembering event identity while acting.
+
+FINDINGS (most severe first, max 7):
+
+1. Instruction choices at 1280×720 — Workspace Admin sees only “Respond to the office action” above the sticky controls; extension and abandonment choices lack a visible continuation cue, making one option appear exhaustive — Reduce introductory spacing and keep the complete choice group visible or clearly indicate its continuation.
+2. Confirmation and decline at 200% zoom — The patent reference, event and deadline are absent beside the final action, forcing Workspace Admin and operators to remember which request they are sending or declining — Keep a compact event identity and deadline with the confirmation.
+3. Missing-template ownership — Workspace Admin is told to send an instruction while another sentence says Photon Legal must first configure unavailable options — Replace the generic ownership sentence with the actual configuration dependency and immediate contact step.
+4. Default state at 200% zoom — All three personas see headings, filters and “Choose another event,” but no selected event, urgency, instruction or primary task control — Compact the introductory area and move secondary filters behind disclosure so the selected task leads.
+5. Sticky operator controls — At 1280×720 the incoming request’s submitter is below the visible content; the long-title state clips “Client note,” and the 1440×900 decline form cuts through submitter text — Reserve space for the action area and keep attribution and relevant instruction context readable before processing.
+
+STATES MISSING: none; all brief-listed states and Inventor refusal are represented across the 58 images.
+REFERENCE MATCH: yes — Typography, amber controls, restrained borders and two-pane structure match the reference language; the spacing and compact-layout problems above weaken its task-first hierarchy.

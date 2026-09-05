@@ -903,14 +903,25 @@
         }
       ],
       "scenarios": [
-        "v0/workspace-admin/queue",
-        "v0/case-owner/my-work",
-        "v0/photon-admin/firm",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/actions/action-required",
+        "v0/actions/saved-draft",
+        "v0/actions/submitted",
+        "v0/actions/updated",
+        "v0/actions/acknowledged",
+        "v0/actions/in-progress",
+        "v0/actions/completed",
+        "v0/actions/declined",
+        "v0/actions/overdue",
+        "v0/actions/missing-template",
+        "v0/actions/no-action",
+        "v0/actions/countries",
+        "v0/actions/many",
+        "v0/actions/empty-queue",
+        "v0/actions/long-title",
+        "v0/inventor/portfolio"
       ],
       "states": {
-        "loading": "queue skeleton ordered by urgency",
+        "loading": "loading message before events and instructions are available",
         "empty": "no upcoming event needing an instruction",
         "success": "saved draft, submitted, updated; Photon side acknowledged, in progress, completed, declined",
         "error": "submission error with the instruction preserved; missing template or configuration",
@@ -930,8 +941,8 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "none",
-      "backendNotes": "Templates, queue, submit-all, decide, request-status and resolve exist.",
+      "backendImpact": "conceptual",
+      "backendNotes": "Existing templates, queue, submit-all, decide, request-status and resolve routes retained. BF-12 declares selected action_ids submission, opt-in queue pagination and a separate response_note; these remain conceptual until verified against the real backend.",
       "storyIds": [
         "surfaces-actions--workspace-admin-action-required",
         "surfaces-actions--workspace-admin-saved-draft",
@@ -956,7 +967,7 @@
         "navigation badge",
         "client Due Dates navigation"
       ],
-      "dsn": null
+      "dsn": "DSN-0014"
     },
     {
       "brief": "surfaces/due-dates.md",

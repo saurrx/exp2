@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import API_CONFIG, { rawApi } from "@/lib/apiConfig";
@@ -7,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import ActionsWorkspace, { actionField, type EventRow } from "./ActionsWorkspace";
 
 export default function OCActionsContent() {
-  const [searchQuery,setSearchQuery]=useState("");
+  const location = useLocation();
+  const [searchQuery,setSearchQuery]=useState(() => new URLSearchParams(location.search).get("search") || "");
   const [filterOption,setFilterOption]=useState("all");
   const [statusFilter,setStatusFilter]=useState("all");
   const [clientFilter,setClientFilter]=useState("all");

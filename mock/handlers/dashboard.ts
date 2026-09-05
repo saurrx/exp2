@@ -19,8 +19,8 @@ function v0Aggregates(ideas: Idea[], patents: Patent[], scope: string[] | null) 
   const qStart = quarterStart(now), pStart = previousQuarterStart(now), mStart = monthStart(now), yStart = yearStart(now);
   const pending = ideas.filter((i) => i.state === "LEGAL_REVIEW" || i.state === "TECH_REVIEW");
   const waitDays = (i: Idea) => Math.max(0, Math.floor((now - Date.parse(i.submitted_at ?? i.created_at)) / DAY));
-  const due = allDueDates(scope).filter((d) => d.status === "PENDING" && Date.parse(d.due_at) >= now).sort((a, b) => a.due_at.localeCompare(b.due_at));
-  const due30 = due.filter((d) => Date.parse(d.due_at) < now + 30 * DAY);
+  const due = allDueDates(scope).filter((d) => d.status === "PENDING" && Date.parse(d.due_at || "") >= now).sort((a, b) => (a.due_at || "").localeCompare(b.due_at || ""));
+  const due30 = due.filter((d) => Date.parse(d.due_at || "") < now + 30 * DAY);
   const submittedIn = (from: number, to: number) => ideas.filter((i) => within(i.submitted_at, from, to));
   const pipeline = (rows: Idea[]) => {
     const count = (...states: Idea["state"][]) => rows.filter((idea) => states.includes(idea.state)).length;

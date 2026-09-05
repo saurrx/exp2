@@ -194,3 +194,8 @@ DSN-0014 follow-up: the broad gate found pre-existing allowlist failures for doc
 
 ### DSN-0014 ready to merge
 Fresh evaluator round 2 returned PASS: all seven categories 4/5, no findings, no missing states across 58 inspected images. Revised required gates pass 8/8, both builds pass, all 22 states have zero accessibility/overflow findings at 1440 and 640, and zoom retry/decline viewport checks pass. All 14 intended story IDs are present; replaced legacy stories, journeys and baselines are retired. The ledger is now 11/17, with BF-12 conceptual contract extensions recorded. Post-ledger V0 tests pass 38/38. Ready for no-ff merge; next DSN-0015 Photon due dates.
+
+## DSN-0014 merged recap — 2026-09-05 07:29 UTC
+Actions is complete and merged to main with --no-ff (797b165), pushed to origin. Workspace Admin can save and selectively send event instructions; Case Owner and Photon Admin process attributed requests with explicit ownership, required countries/reasons and retained recovery. Twenty-two V0 stories cover all fourteen intended IDs and replace legacy Actions/client Due dates coverage. All 58 revised captures are stable and inspected; fresh evaluator round 2 PASS with seven scores of 4. Required gates 8/8, both builds, 44 accessibility/zoom contexts, stored workflow checks and zoom retry/decline checks pass. Coverage is 11/17. BF-12 remains conceptual until backend verification. Preserved the concurrent firing's yield entry in the PROGRESS-only merge conflict. Broader regression/allowlist follow-ups remain recorded; no founder decision required.
+
+Next surface: **DSN-0015 — Photon due dates** (`product-context/surfaces/due-dates.md`). No surface remains in progress. The overall RUN COMPLETE condition remains unmet.

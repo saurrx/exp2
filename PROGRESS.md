@@ -223,3 +223,5 @@ Photon due dates is complete, merged to main with --no-ff (3a9c48f) and pushed. 
 Next surface: **DSN-0016 — Case Owner my work** (`product-context/surfaces/case-owner-my-work.md`). No surface remains in progress. The overall RUN COMPLETE condition remains unmet.
 
 - Autonomous firing · 2026-09-05T08:50:49.123923+00:00 · Yielded under the 25-minute concurrency rule: another run committed 9693e4f (DSN-0016 Case Owner my work) within the exclusion window; active codex/dsn-0016-case-owner-my-work checkout and uncommitted work preserved. Yield recorded from an isolated main worktree; no surface edits or validation performed.
+
+- Autonomous firing · 2026-09-05T09:50:12.051451+00:00 · Yielded under the 25-minute concurrency rule: another run committed 414f7b3 (DSN-0016 final validation and blocked completion audit) within the exclusion window. Surface branch preserved; no surface edits or validation performed.

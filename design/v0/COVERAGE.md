@@ -20,7 +20,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Inventor home | Inventor | `/` | 8 | 10 | conceptual | DSN-0005 |
 | Start an idea | Inventor, Workspace Admin | `/ideas`, `/ideas/:id/draft` | 5 | 11 | conceptual | DSN-0006 |
 | Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired | DSN-0006 |
-| Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none |  |
+| Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none | DSN-0007 |
 | Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | none |  |
 | Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 6 | 17 | conceptual |  |
 | Review decision | Workspace Admin | `/ideas/:id` | 3 | 12 | none |  |
@@ -87,7 +87,7 @@ Brief: `product-context/surfaces/disclosure-workspace.md` · Storybook title: `S
 
 ## Evaluation result
 
-Brief: `product-context/surfaces/evaluation.md` · Storybook title: `Surfaces/Evaluation result` · DSN: none yet
+Brief: `product-context/surfaces/evaluation.md` · Storybook title: `Surfaces/Evaluation result` · DSN: DSN-0007
 
 - **Personas:** Inventor, Workspace Admin
 - **User goal:** Understand the advisory novelty assessment and strengthen the disclosure.

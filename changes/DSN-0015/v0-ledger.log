@@ -1,0 +1,44 @@
+
+> design@0.0.0 test:v0
+> vitest run --project=v0
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+2:08:57 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+│
+▲  No story files found for the specified pattern:
+│  design/stories/**/*.mdx
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+2:08:57 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+2:08:57 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+2:08:57 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+
+ RUN  v4.1.11 /Users/saurabh/PL/exp2
+
+(node:81172) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:81173) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  4 passed (4)
+      Tests  43 passed (43)
+   Start at  14:08:58
+   Duration  1.39s (transform 305ms, setup 40ms, import 553ms, tests 1.13s, environment 0ms)
+

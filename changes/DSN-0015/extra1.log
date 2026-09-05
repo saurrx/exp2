@@ -1,0 +1,4 @@
+PASS missing dates stay separate from overdue; invalid calendar date rejected
+PASS unsaved correction retained across event selection
+PASS spreadsheet import creates six events with row provenance and returns to queue
+PASS 200% zoom exposes primary action and supports editing, canceling completion and navigation

@@ -1,0 +1,148 @@
+$ node qa/invariant/layout.qa.mjs --base http://localhost:3700
+exit 1 signal null
+
+
+### PHOTON_SUPERADMIN
+  ok   / @1280x720  (2 suppressed)
+  ok   /clients @1280x720
+  ok   /ideas @1280x720
+  FAIL /patents @1280x720
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1280x720
+  ok   /actions @1280x720
+  ok   /profile @1280x720
+  ok   / @1440x900  (2 suppressed)
+  ok   /clients @1440x900
+  ok   /ideas @1440x900
+  FAIL /patents @1440x900
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1440x900
+  ok   /actions @1440x900
+  ok   /profile @1440x900
+
+### PHOTON_ADMIN
+  ok   / @1280x720  (2 suppressed)
+  ok   /clients @1280x720
+  ok   /ideas @1280x720
+  FAIL /patents @1280x720
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1280x720
+  ok   /actions @1280x720
+  ok   /workspace @1280x720
+  ok   /profile @1280x720
+  ok   / @1440x900  (2 suppressed)
+  ok   /clients @1440x900
+  ok   /ideas @1440x900
+  FAIL /patents @1440x900
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1440x900
+  ok   /actions @1440x900
+  ok   /workspace @1440x900
+  ok   /profile @1440x900
+
+### CASE_OWNER
+  ok   / @1280x720  (2 suppressed)
+  ok   /clients @1280x720
+  ok   /ideas @1280x720
+  FAIL /patents @1280x720
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1280x720
+  ok   /actions @1280x720
+  ok   /profile @1280x720
+  ok   / @1440x900  (2 suppressed)
+  ok   /clients @1440x900
+  ok   /ideas @1440x900
+  FAIL /patents @1440x900
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1440x900
+  ok   /actions @1440x900
+  ok   /profile @1440x900
+
+### LEGAL_COUNSEL
+  FAIL / @1280x720
+       clipped-horizontal: div.flex.flex-wrap > div.min-w-0 > label.relative.mt-1 > span.sr-only hides 39px of content (40 > 1) — "Period…"
+       clipped-horizontal: tr.text-left.text-xs > th.w-[76px].px-3 > button.ml-auto.flex > span.sr-only hides 114px of content (115 > 1) — "sorted highest first…"
+       clipped-text: tr.text-left.text-xs > th.w-[76px].px-3 > button.ml-auto.flex > span.sr-only clips "sorted highest first…"
+  ok   /ideas @1280x720
+  FAIL /patents @1280x720
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1280x720
+  ok   /actions @1280x720
+  ok   /workspace @1280x720
+  ok   /profile @1280x720
+  FAIL / @1440x900
+       clipped-horizontal: div.flex.flex-wrap > div.min-w-0 > label.relative.mt-1 > span.sr-only hides 39px of content (40 > 1) — "Period…"
+       clipped-horizontal: tr.text-left.text-xs > th.w-[76px].px-3 > button.ml-auto.flex > span.sr-only hides 114px of content (115 > 1) — "sorted highest first…"
+       clipped-text: tr.text-left.text-xs > th.w-[76px].px-3 > button.ml-auto.flex > span.sr-only clips "sorted highest first…"
+  ok   /ideas @1440x900
+  FAIL /patents @1440x900
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1440x900
+  ok   /actions @1440x900
+  ok   /workspace @1440x900
+  ok   /profile @1440x900
+
+### TECH_COMMITTEE
+  ok   / @1280x720  (2 suppressed)
+  ok   /ideas @1280x720
+  FAIL /patents @1280x720
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1280x720
+  ok   /profile @1280x720
+  ok   / @1440x900  (2 suppressed)
+  ok   /ideas @1440x900
+  FAIL /patents @1440x900
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /due-dates @1440x900
+  ok   /profile @1440x900
+
+### INVENTOR
+  ok   / @1280x720  (2 suppressed)
+  ok   /ideas @1280x720
+  FAIL /patents @1280x720
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /profile @1280x720
+  ok   / @1440x900  (2 suppressed)
+  ok   /ideas @1440x900
+  FAIL /patents @1440x900
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only hides 187px of content (188 > 1) — "Title or application number…"
+       clipped-horizontal: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only hides 252px of content (253 > 1) — "Patent records in the selected portfolio…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > form.mt-4.flex > label.sr-only clips "Title or application number…"
+       clipped-text: div.flex.min-h-0 > div.min-h-0.min-w-0 > table.mt-3.w-full > caption.sr-only clips "Patent records in the selected portfolio…"
+  ok   /profile @1440x900
+
+76 page-viewport combinations · 54 violation(s) · 24 suppressed
+

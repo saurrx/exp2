@@ -1,0 +1,6 @@
+$ node tools/design/isolation.mjs
+exit 1 signal null
+
+ok Anika Sharma: own identity 1, review decisions 0
+FAIL Leah Feldman: own identity 0, review decisions 0
+

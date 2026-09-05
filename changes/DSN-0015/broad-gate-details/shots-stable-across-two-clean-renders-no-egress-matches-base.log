@@ -1,0 +1,642 @@
+$ node tools/design/shots.mjs --twice
+exit 1 signal null
+
+same   surfaces-actions--workspace-admin-action-required--at-1280x720
+same   surfaces-actions--workspace-admin-action-required--at-1440x900
+same   surfaces-actions--workspace-admin-action-required--at-1366x768 (8 px noise)
+same   surfaces-actions--workspace-admin-action-required--at-1920x1080
+same   surfaces-actions--workspace-admin-action-required--at-640x360@2
+same   surfaces-actions--workspace-admin-saved-draft--at-1280x720
+same   surfaces-actions--workspace-admin-saved-draft--at-1440x900
+same   surfaces-actions--workspace-admin-submitted--at-1280x720
+same   surfaces-actions--workspace-admin-submitted--at-1440x900
+same   surfaces-actions--workspace-admin-updated--at-1280x720
+same   surfaces-actions--workspace-admin-updated--at-1440x900
+same   surfaces-actions--workspace-admin-no-action--at-1280x720
+same   surfaces-actions--workspace-admin-no-action--at-1440x900
+same   surfaces-actions--photon-acknowledged--at-1280x720
+same   surfaces-actions--photon-acknowledged--at-1440x900
+same   surfaces-actions--photon-acknowledged--at-1366x768
+same   surfaces-actions--photon-acknowledged--at-1920x1080
+same   surfaces-actions--photon-acknowledged--at-640x360@2
+same   surfaces-actions--photon-in-progress--at-1280x720
+same   surfaces-actions--photon-in-progress--at-1440x900
+same   surfaces-actions--photon-completed--at-1280x720
+same   surfaces-actions--photon-completed--at-1440x900
+same   surfaces-actions--photon-declined--at-1280x720
+same   surfaces-actions--photon-declined--at-1440x900
+same   surfaces-actions--photon-overdue--at-1280x720
+same   surfaces-actions--photon-overdue--at-1440x900
+same   surfaces-actions--missing-template--at-1280x720
+same   surfaces-actions--missing-template--at-1440x900
+UNSTABLE surfaces-actions--submission-error--at-1280x720: two clean renders differ by 757 pixels in [498,436,750,479]
+same   surfaces-actions--submission-error--at-1440x900
+DIFF   surfaces-actions--submission-error--at-640x360@2: 1774 pixels in [40,640,319,719] (actual saved beside the baseline)
+same   surfaces-actions--loading--at-1280x720
+same   surfaces-actions--loading--at-1440x900
+same   surfaces-actions--inventor-refused--at-1280x720
+same   surfaces-actions--inventor-refused--at-1440x900
+same   surfaces-actions--case-owner-incoming--at-1280x720
+same   surfaces-actions--case-owner-incoming--at-1440x900
+same   surfaces-actions--case-owner-incoming--at-1366x768
+same   surfaces-actions--case-owner-incoming--at-1920x1080
+same   surfaces-actions--case-owner-incoming--at-640x360@2
+same   surfaces-actions--photon-empty--at-1280x720
+same   surfaces-actions--photon-empty--at-1440x900
+same   surfaces-actions--many-requests--at-1280x720
+same   surfaces-actions--many-requests--at-1440x900
+same   surfaces-actions--countries--at-1280x720
+same   surfaces-actions--countries--at-1440x900
+same   surfaces-actions--countries--at-640x360@2
+same   surfaces-actions--long-title--at-1280x720
+same   surfaces-actions--long-title--at-1440x900
+same   surfaces-actions--long-title--at-640x360@2
+same   surfaces-actions--confirmation--at-1280x720
+same   surfaces-actions--confirmation--at-1440x900
+same   surfaces-actions--confirmation--at-640x360@2
+same   surfaces-actions--decline-response--at-1280x720
+same   surfaces-actions--decline-response--at-1440x900
+same   surfaces-actions--decline-response--at-640x360@2
+same   surfaces-actions--load-error--at-1280x720
+same   surfaces-actions--load-error--at-1440x900
+DIFF   surfaces-invention-disclosure-workspace--empty--at-1280x720: 7957 pixels in [892,470,1200,595] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--empty--at-1440x900: 7963 pixels in [1069,470,1378,595] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--empty--at-1366x768: 7963 pixels in [949,470,1258,595] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--empty--at-1920x1080: 7963 pixels in [1389,470,1698,595] (actual saved beside the baseline)
+same   surfaces-invention-disclosure-workspace--empty--at-640x360@2
+DIFF   surfaces-invention-disclosure-workspace--partially-prefilled--at-1280x720: 8953 pixels in [892,406,1211,551] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--partially-prefilled--at-1440x900: 8971 pixels in [1069,406,1388,551] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--unsupported-gaps--at-1280x720: 11706 pixels in [892,374,1233,519] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--unsupported-gaps--at-1440x900: 11640 pixels in [1069,374,1410,519] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--saving--at-1280x720: 7957 pixels in [892,438,1200,563] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--saving--at-1440x900: 7964 pixels in [1069,438,1378,563] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--saved--at-1280x720: 12389 pixels in [892,352,1246,497] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--saved--at-1440x900: 12334 pixels in [1069,352,1400,517] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--offline--at-1280x720: 7957 pixels in [892,470,1200,595] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--offline--at-1440x900: 7963 pixels in [1069,470,1378,595] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--conflict--at-1280x720: 7965 pixels in [14,130,1200,639] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--conflict--at-1440x900: 7963 pixels in [1069,514,1378,639] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--complete--at-1280x720: 12389 pixels in [892,352,1246,497] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--complete--at-1440x900: 12334 pixels in [1069,352,1400,517] (actual saved beside the baseline)
+same   surfaces-invention-disclosure-workspace--evaluation-running--at-1280x720
+same   surfaces-invention-disclosure-workspace--evaluation-running--at-1440x900
+same   surfaces-invention-disclosure-workspace--evaluation-result--at-1280x720
+same   surfaces-invention-disclosure-workspace--evaluation-result--at-1440x900
+same   surfaces-invention-disclosure-workspace--evaluation-stale--at-1280x720
+same   surfaces-invention-disclosure-workspace--evaluation-stale--at-1440x900
+DIFF   surfaces-invention-disclosure-workspace--requested-changes--at-1280x720: 12389 pixels in [892,444,1246,589] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--requested-changes--at-1440x900: 12334 pixels in [1069,444,1400,609] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--resubmission--at-1280x720: 15106 pixels in [409,330,1246,589] (actual saved beside the baseline)
+DIFF   surfaces-invention-disclosure-workspace--resubmission--at-1440x900: 15141 pixels in [489,420,1400,609] (actual saved beside the baseline)
+same   surfaces-invention-disclosure-workspace--loading--at-1280x720
+same   surfaces-invention-disclosure-workspace--loading--at-1440x900
+   note surfaces-invention-disclosure-workspace--error--at-1280x720: 10 anti-aliasing pixel(s) between renders, within tolerance
+DIFF   surfaces-invention-disclosure-workspace--error--at-1280x720: 7967 pixels in [100,329,1200,639] (actual saved beside the baseline)
+   note surfaces-invention-disclosure-workspace--error--at-1440x900: 10 anti-aliasing pixel(s) between renders, within tolerance
+DIFF   surfaces-invention-disclosure-workspace--error--at-1440x900: 7963 pixels in [1069,514,1378,639] (actual saved beside the baseline)
+same   surfaces-invention-disclosure-workspace--workspace-admin-read-only--at-1280x720
+same   surfaces-invention-disclosure-workspace--workspace-admin-read-only--at-1440x900
+same   surfaces-evaluation-result--not-run--at-1280x720
+same   surfaces-evaluation-result--not-run--at-1440x900
+same   surfaces-evaluation-result--queued--at-1280x720
+same   surfaces-evaluation-result--queued--at-1440x900
+same   surfaces-evaluation-result--running--at-1280x720
+same   surfaces-evaluation-result--running--at-1440x900
+same   surfaces-evaluation-result--succeeded--at-1280x720
+same   surfaces-evaluation-result--succeeded--at-1440x900
+same   surfaces-evaluation-result--succeeded--at-1366x768
+same   surfaces-evaluation-result--succeeded--at-1920x1080
+same   surfaces-evaluation-result--succeeded--at-640x360@2
+same   surfaces-evaluation-result--partial--at-1280x720
+same   surfaces-evaluation-result--partial--at-1440x900
+same   surfaces-evaluation-result--no-close-prior-art--at-1280x720
+same   surfaces-evaluation-result--no-close-prior-art--at-1440x900
+same   surfaces-evaluation-result--failed--at-1280x720
+same   surfaces-evaluation-result--failed--at-1440x900
+same   surfaces-evaluation-result--timed-out--at-1280x720
+same   surfaces-evaluation-result--timed-out--at-1440x900
+same   surfaces-evaluation-result--stale-after-edits--at-1280x720
+same   surfaces-evaluation-result--stale-after-edits--at-1440x900
+same   surfaces-evaluation-result--re-evaluating--at-1280x720
+same   surfaces-evaluation-result--re-evaluating--at-1440x900
+same   surfaces-evaluation-result--loading--at-1280x720
+same   surfaces-evaluation-result--loading--at-1440x900
+same   surfaces-evaluation-result--error--at-1280x720
+same   surfaces-evaluation-result--error--at-1440x900
+same   surfaces-evaluation-result--workspace-admin--at-1280x720
+same   surfaces-evaluation-result--workspace-admin--at-1440x900
+   note surfaces-idea-detail-and-status--draft--at-1280x720: 28 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-idea-detail-and-status--draft--at-1280x720
+UNSTABLE surfaces-idea-detail-and-status--draft--at-1440x900: two clean renders differ by 60 pixels in [288,18,297,45]
+   note surfaces-idea-detail-and-status--evaluated--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-idea-detail-and-status--evaluated--at-1280x720
+UNSTABLE surfaces-idea-detail-and-status--evaluated--at-1440x900: two clean renders differ by 60 pixels in [288,18,297,45]
+same   surfaces-idea-detail-and-status--submitted--at-1280x720
+same   surfaces-idea-detail-and-status--submitted--at-1440x900
+same   surfaces-idea-detail-and-status--submitted--at-1366x768
+same   surfaces-idea-detail-and-status--submitted--at-1920x1080
+same   surfaces-idea-detail-and-status--submitted--at-640x360@2
+   note surfaces-idea-detail-and-status--under-review--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-idea-detail-and-status--under-review--at-1280x720
+same   surfaces-idea-detail-and-status--under-review--at-1440x900
+same   surfaces-idea-detail-and-status--under-review--at-1366x768
+same   surfaces-idea-detail-and-status--under-review--at-1920x1080
+same   surfaces-idea-detail-and-status--under-review--at-640x360@2
+   note surfaces-idea-detail-and-status--changes-requested--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-idea-detail-and-status--changes-requested--at-1280x720
+same   surfaces-idea-detail-and-status--changes-requested--at-1440x900
+same   surfaces-idea-detail-and-status--rejected--at-1280x720
+same   surfaces-idea-detail-and-status--rejected--at-1440x900
+same   surfaces-idea-detail-and-status--resubmitted--at-1280x720
+same   surfaces-idea-detail-and-status--resubmitted--at-1440x900
+   note surfaces-idea-detail-and-status--sent-to-photon--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-idea-detail-and-status--sent-to-photon--at-1280x720
+same   surfaces-idea-detail-and-status--sent-to-photon--at-1440x900
+same   surfaces-idea-detail-and-status--sent-to-photon--at-1366x768 (8 px noise)
+same   surfaces-idea-detail-and-status--sent-to-photon--at-1920x1080
+same   surfaces-idea-detail-and-status--sent-to-photon--at-640x360@2
+same   surfaces-idea-detail-and-status--filed--at-1280x720
+same   surfaces-idea-detail-and-status--filed--at-1440x900
+same   surfaces-idea-detail-and-status--granted--at-1280x720
+same   surfaces-idea-detail-and-status--granted--at-1440x900
+same   surfaces-idea-detail-and-status--closed--at-1280x720
+same   surfaces-idea-detail-and-status--closed--at-1440x900
+same   surfaces-idea-detail-and-status--missing-evaluation--at-1280x720
+same   surfaces-idea-detail-and-status--missing-evaluation--at-1440x900
+same   surfaces-idea-detail-and-status--partial-evaluation--at-1280x720
+same   surfaces-idea-detail-and-status--partial-evaluation--at-1440x900
+same   surfaces-idea-detail-and-status--on-behalf-attribution--at-1280x720
+same   surfaces-idea-detail-and-status--on-behalf-attribution--at-1440x900
+same   surfaces-idea-detail-and-status--loading--at-1280x720
+same   surfaces-idea-detail-and-status--loading--at-1440x900
+same   surfaces-idea-detail-and-status--error--at-1280x720
+same   surfaces-idea-detail-and-status--error--at-1440x900
+same   surfaces-idea-detail-and-status--permission-denied--at-1280x720
+same   surfaces-idea-detail-and-status--permission-denied--at-1440x900
+same   surfaces-idea-detail-and-status--photon-admin--at-1280x720 (8 px noise)
+same   surfaces-idea-detail-and-status--photon-admin--at-1440x900
+same   surfaces-idea-detail-and-status--photon-admin--at-1366x768 (8 px noise)
+same   surfaces-idea-detail-and-status--photon-admin--at-1920x1080
+same   surfaces-idea-detail-and-status--photon-admin--at-640x360@2
+same   surfaces-idea-detail-and-status--long-content--at-1280x720
+same   surfaces-idea-detail-and-status--long-content--at-1440x900
+same   surfaces-idea-detail-and-status--long-content--at-640x360@2
+same   surfaces-idea-detail-and-status--decision-reason--at-1280x720
+same   surfaces-idea-detail-and-status--decision-reason--at-1440x900
+DIFF   surfaces-idea-detail-and-status--attachment-failure--at-1280x720: 58351 pixels in [166,64,1189,658] (actual saved beside the baseline)
+same   surfaces-idea-detail-and-status--attachment-failure--at-1440x900
+same   surfaces-idea-detail-and-status--decision-failure--at-1280x720
+   note surfaces-idea-detail-and-status--decision-failure--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-idea-detail-and-status--decision-failure--at-1440x900 (3 px noise)
+same   surfaces-ideas-list--inventor-empty--at-1280x720
+same   surfaces-ideas-list--inventor-empty--at-1440x900
+same   surfaces-ideas-list--inventor-drafts-only--at-1280x720
+same   surfaces-ideas-list--inventor-drafts-only--at-1440x900
+same   surfaces-ideas-list--inventor-mixed--at-1280x720
+same   surfaces-ideas-list--inventor-mixed--at-1440x900
+same   surfaces-ideas-list--inventor-mixed--at-1366x768
+   note surfaces-ideas-list--inventor-mixed--at-1920x1080: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--inventor-mixed--at-1920x1080 (8 px noise)
+same   surfaces-ideas-list--inventor-mixed--at-640x360@2
+   note surfaces-ideas-list--workspace-admin-pending--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--workspace-admin-pending--at-1280x720
+same   surfaces-ideas-list--workspace-admin-pending--at-1440x900
+   note surfaces-ideas-list--workspace-admin-pending--at-1366x768: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--workspace-admin-pending--at-1366x768
+same   surfaces-ideas-list--workspace-admin-pending--at-1920x1080
+same   surfaces-ideas-list--workspace-admin-pending--at-640x360@2
+   note surfaces-ideas-list--workspace-admin-large-queue--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--workspace-admin-large-queue--at-1280x720 (8 px noise)
+same   surfaces-ideas-list--workspace-admin-large-queue--at-1440x900
+same   surfaces-ideas-list--workspace-admin-filtered-empty--at-1280x720 (8 px noise)
+same   surfaces-ideas-list--workspace-admin-filtered-empty--at-1440x900
+same   surfaces-ideas-list--case-owner--at-1280x720 (11 px noise)
+same   surfaces-ideas-list--case-owner--at-1440x900
+   note surfaces-ideas-list--case-owner--at-1366x768: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--case-owner--at-1366x768 (8 px noise)
+same   surfaces-ideas-list--case-owner--at-1920x1080 (3 px noise)
+same   surfaces-ideas-list--case-owner--at-640x360@2
+same   surfaces-ideas-list--photon-admin--at-1280x720 (3 px noise)
+   note surfaces-ideas-list--photon-admin--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--photon-admin--at-1440x900
+same   surfaces-ideas-list--photon-admin--at-1366x768 (18 px noise)
+   note surfaces-ideas-list--photon-admin--at-1920x1080: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--photon-admin--at-1920x1080 (3 px noise)
+same   surfaces-ideas-list--photon-admin--at-640x360@2
+same   surfaces-ideas-list--long-titles--at-1280x720
+same   surfaces-ideas-list--long-titles--at-1440x900
+same   surfaces-ideas-list--loading--at-1280x720
+same   surfaces-ideas-list--loading--at-1440x900
+   note surfaces-ideas-list--error--at-1280x720: 13 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-ideas-list--error--at-1280x720 (11 px noise)
+same   surfaces-ideas-list--error--at-1440x900
+same   surfaces-inventor-home--first-run--at-1280x720
+   note surfaces-inventor-home--first-run--at-1440x900: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--first-run--at-1440x900
+same   surfaces-inventor-home--invited-inactive--at-1280x720
+   note surfaces-inventor-home--invited-inactive--at-1440x900: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--invited-inactive--at-1440x900 (8 px noise)
+same   surfaces-inventor-home--no-ideas--at-1280x720
+   note surfaces-inventor-home--no-ideas--at-1440x900: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--no-ideas--at-1440x900
+same   surfaces-inventor-home--active-draft--at-1280x720 (9 px noise)
+same   surfaces-inventor-home--active-draft--at-1440x900
+same   surfaces-inventor-home--several-statuses--at-1280x720 (9 px noise)
+same   surfaces-inventor-home--several-statuses--at-1440x900
+same   surfaces-inventor-home--several-statuses--at-1366x768
+   note surfaces-inventor-home--several-statuses--at-1920x1080: 11 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--several-statuses--at-1920x1080 (11 px noise)
+same   surfaces-inventor-home--several-statuses--at-640x360@2
+same   surfaces-inventor-home--requested-changes--at-1280x720
+same   surfaces-inventor-home--requested-changes--at-1440x900 (11 px noise)
+   note surfaces-inventor-home--recent-submission--at-1280x720: 9 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--recent-submission--at-1280x720 (9 px noise)
+   note surfaces-inventor-home--recent-submission--at-1440x900: 11 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--recent-submission--at-1440x900
+same   surfaces-inventor-home--evaluation-available--at-1280x720
+same   surfaces-inventor-home--evaluation-available--at-1440x900 (8 px noise)
+same   surfaces-inventor-home--loading--at-1280x720 (23 px noise)
+   note surfaces-inventor-home--loading--at-1440x900: 11 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-inventor-home--loading--at-1440x900
+same   surfaces-inventor-home--error--at-1280x720
+same   surfaces-inventor-home--error--at-1440x900 (19 px noise)
+same   surfaces-patent-detail--inventor--at-1280x720
+same   surfaces-patent-detail--inventor--at-1440x900
+same   surfaces-patent-detail--inventor--at-1366x768
+same   surfaces-patent-detail--inventor--at-1920x1080
+same   surfaces-patent-detail--inventor--at-640x360@2
+same   surfaces-patent-detail--workspace-admin-upcoming-event--at-1280x720
+same   surfaces-patent-detail--workspace-admin-upcoming-event--at-1440x900
+same   surfaces-patent-detail--workspace-admin-upcoming-event--at-1366x768
+same   surfaces-patent-detail--workspace-admin-upcoming-event--at-1920x1080
+same   surfaces-patent-detail--workspace-admin-upcoming-event--at-640x360@2
+same   surfaces-patent-detail--case-owner-editor--at-1280x720 (26 px noise)
+same   surfaces-patent-detail--case-owner-editor--at-1440x900
+same   surfaces-patent-detail--case-owner-editor--at-1366x768 (26 px noise)
+   note surfaces-patent-detail--case-owner-editor--at-1920x1080: 16 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-detail--case-owner-editor--at-1920x1080 (33 px noise)
+same   surfaces-patent-detail--case-owner-editor--at-640x360@2
+same   surfaces-patent-detail--photon-admin-editor--at-1280x720
+same   surfaces-patent-detail--photon-admin-editor--at-1440x900
+   note surfaces-patent-detail--photon-admin-editor--at-1366x768: 26 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-detail--photon-admin-editor--at-1366x768
+UNSTABLE surfaces-patent-detail--photon-admin-editor--at-1920x1080: two clean renders differ by 49 pixels in [560,114,1647,717]
+same   surfaces-patent-detail--photon-admin-editor--at-640x360@2
+same   surfaces-patent-detail--pending--at-1280x720
+same   surfaces-patent-detail--pending--at-1440x900
+same   surfaces-patent-detail--filed--at-1280x720
+same   surfaces-patent-detail--filed--at-1440x900
+same   surfaces-patent-detail--granted--at-1280x720
+same   surfaces-patent-detail--granted--at-1440x900
+same   surfaces-patent-detail--inactive--at-1280x720
+same   surfaces-patent-detail--inactive--at-1440x900
+same   surfaces-patent-detail--closed--at-1280x720
+same   surfaces-patent-detail--closed--at-1440x900
+same   surfaces-patent-detail--incomplete-imported-record--at-1280x720
+same   surfaces-patent-detail--incomplete-imported-record--at-1440x900
+same   surfaces-patent-detail--multiple-family-members--at-1280x720
+same   surfaces-patent-detail--multiple-family-members--at-1440x900
+same   surfaces-patent-detail--no-originating-idea--at-1280x720
+same   surfaces-patent-detail--no-originating-idea--at-1440x900
+same   surfaces-patent-detail--many-documents--at-1280x720
+same   surfaces-patent-detail--many-documents--at-1440x900
+same   surfaces-patent-detail--loading--at-1280x720
+same   surfaces-patent-detail--loading--at-1440x900
+same   surfaces-patent-detail--error--at-1280x720
+same   surfaces-patent-detail--error--at-1440x900
+   note surfaces-patent-detail--save-failure--at-1280x720: 24 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-detail--save-failure--at-1280x720 (23 px noise)
+same   surfaces-patent-detail--save-failure--at-1440x900 (23 px noise)
+UNSTABLE surfaces-patent-detail--save-failure--at-640x360@2: two clean renders differ by 3341 pixels in [40,388,375,475]
+same   surfaces-patent-detail--saving--at-1280x720
+same   surfaces-patent-detail--saving--at-1440x900
+same   surfaces-patent-detail--case-owner-record--at-1280x720
+same   surfaces-patent-detail--case-owner-record--at-1440x900
+same   surfaces-patent-detail--case-owner-record--at-1366x768
+same   surfaces-patent-detail--case-owner-record--at-1920x1080
+same   surfaces-patent-detail--case-owner-record--at-640x360@2
+same   surfaces-patent-detail--photon-admin-record--at-1280x720
+same   surfaces-patent-detail--photon-admin-record--at-1440x900
+same   surfaces-patent-detail--photon-admin-record--at-1366x768
+same   surfaces-patent-detail--photon-admin-record--at-1920x1080
+same   surfaces-patent-detail--photon-admin-record--at-640x360@2
+same   surfaces-patent-detail--save-success--at-1280x720
+same   surfaces-patent-detail--save-success--at-1440x900
+same   surfaces-patent-detail--document-failure--at-1280x720
+same   surfaces-patent-detail--document-failure--at-1440x900
+same   surfaces-patent-detail--document-failure--at-640x360@2
+same   surfaces-patent-detail--remove-document--at-1280x720
+same   surfaces-patent-detail--remove-document--at-1440x900
+same   surfaces-patent-detail--remove-document--at-640x360@2
+same   surfaces-patent-detail--long-title--at-1280x720
+same   surfaces-patent-detail--long-title--at-1440x900
+same   surfaces-patent-detail--long-title--at-640x360@2
+same   surfaces-patent-portfolio--inventor--at-1280x720
+same   surfaces-patent-portfolio--inventor--at-1440x900 (10 px noise)
+same   surfaces-patent-portfolio--inventor--at-1366x768
+same   surfaces-patent-portfolio--inventor--at-1920x1080
+same   surfaces-patent-portfolio--inventor--at-640x360@2
+same   surfaces-patent-portfolio--workspace-admin--at-1280x720
+same   surfaces-patent-portfolio--workspace-admin--at-1440x900
+same   surfaces-patent-portfolio--workspace-admin--at-1366x768 (14 px noise)
+same   surfaces-patent-portfolio--workspace-admin--at-1920x1080
+same   surfaces-patent-portfolio--workspace-admin--at-640x360@2
+same   surfaces-patent-portfolio--case-owner--at-1280x720
+same   surfaces-patent-portfolio--case-owner--at-1440x900
+same   surfaces-patent-portfolio--case-owner--at-1366x768 (8 px noise)
+   note surfaces-patent-portfolio--case-owner--at-1920x1080: 25 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--case-owner--at-1920x1080
+same   surfaces-patent-portfolio--case-owner--at-640x360@2
+same   surfaces-patent-portfolio--photon-admin--at-1280x720
+same   surfaces-patent-portfolio--photon-admin--at-1440x900
+same   surfaces-patent-portfolio--photon-admin--at-1366x768 (8 px noise)
+same   surfaces-patent-portfolio--photon-admin--at-1920x1080
+same   surfaces-patent-portfolio--photon-admin--at-640x360@2
+same   surfaces-patent-portfolio--empty-imported-portfolio--at-1280x720
+same   surfaces-patent-portfolio--empty-imported-portfolio--at-1440x900
+   note surfaces-patent-portfolio--thousands-of-records--at-1280x720: 10 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--thousands-of-records--at-1280x720 (10 px noise)
+   note surfaces-patent-portfolio--thousands-of-records--at-1440x900: 14 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--thousands-of-records--at-1440x900
+same   surfaces-patent-portfolio--long-titles--at-1280x720 (8 px noise)
+same   surfaces-patent-portfolio--long-titles--at-1440x900
+same   surfaces-patent-portfolio--multiple-jurisdictions--at-1280x720
+   note surfaces-patent-portfolio--multiple-jurisdictions--at-1440x900: 14 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--multiple-jurisdictions--at-1440x900
+   note surfaces-patent-portfolio--filtered-empty--at-1280x720: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--filtered-empty--at-1280x720
+same   surfaces-patent-portfolio--filtered-empty--at-1440x900
+same   surfaces-patent-portfolio--import-result--at-1280x720
+   note surfaces-patent-portfolio--import-result--at-1440x900: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--import-result--at-1440x900 (6 px noise)
+   note surfaces-patent-portfolio--loading--at-1280x720: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--loading--at-1280x720
+same   surfaces-patent-portfolio--loading--at-1440x900
+same   surfaces-patent-portfolio--error--at-1280x720
+same   surfaces-patent-portfolio--error--at-1440x900
+   note surfaces-patent-portfolio--import-failure--at-1280x720: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--import-failure--at-1280x720 (3 px noise)
+   note surfaces-patent-portfolio--import-failure--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--import-failure--at-1440x900
+same   surfaces-patent-portfolio--import-in-progress--at-1280x720
+same   surfaces-patent-portfolio--import-in-progress--at-1440x900
+   note surfaces-patent-portfolio--empty-case-owner--at-1280x720: 29 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-patent-portfolio--empty-case-owner--at-1280x720 (20 px noise)
+same   surfaces-patent-portfolio--empty-case-owner--at-1440x900
+same   surfaces-patent-portfolio--empty-photon-admin--at-1280x720 (9 px noise)
+same   surfaces-patent-portfolio--empty-photon-admin--at-1440x900
+same   surfaces-photon-due-dates--upcoming--at-1280x720
+same   surfaces-photon-due-dates--upcoming--at-1440x900
+same   surfaces-photon-due-dates--upcoming--at-1366x768
+same   surfaces-photon-due-dates--upcoming--at-1920x1080
+same   surfaces-photon-due-dates--upcoming--at-640x360@2
+same   surfaces-photon-due-dates--due-soon--at-1280x720
+same   surfaces-photon-due-dates--due-soon--at-1440x900
+same   surfaces-photon-due-dates--overdue--at-1280x720
+same   surfaces-photon-due-dates--overdue--at-1440x900
+same   surfaces-photon-due-dates--completed--at-1280x720
+   note surfaces-photon-due-dates--completed--at-1440x900: 7 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-photon-due-dates--completed--at-1440x900 (7 px noise)
+same   surfaces-photon-due-dates--missing-date--at-1280x720
+same   surfaces-photon-due-dates--missing-date--at-1440x900
+same   surfaces-photon-due-dates--import-problem--at-1280x720
+same   surfaces-photon-due-dates--import-problem--at-1440x900
+same   surfaces-photon-due-dates--large-same-day-group--at-1280x720
+same   surfaces-photon-due-dates--large-same-day-group--at-1440x900
+same   surfaces-photon-due-dates--no-upcoming-dates--at-1280x720
+same   surfaces-photon-due-dates--no-upcoming-dates--at-1440x900
+   note surfaces-photon-due-dates--loading--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-photon-due-dates--loading--at-1280x720
+same   surfaces-photon-due-dates--loading--at-1440x900
+   note surfaces-photon-due-dates--error--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-photon-due-dates--error--at-1280x720
+same   surfaces-photon-due-dates--error--at-1440x900
+same   surfaces-photon-due-dates--photon-admin--at-1280x720
+same   surfaces-photon-due-dates--photon-admin--at-1440x900
+same   surfaces-photon-due-dates--photon-admin--at-1366x768
+same   surfaces-photon-due-dates--photon-admin--at-1920x1080
+same   surfaces-photon-due-dates--photon-admin--at-640x360@2
+same   surfaces-photon-due-dates--case-owner-scope--at-1280x720
+same   surfaces-photon-due-dates--case-owner-scope--at-1440x900
+same   surfaces-photon-due-dates--edit-date--at-1280x720
+same   surfaces-photon-due-dates--edit-date--at-1440x900
+same   surfaces-photon-due-dates--edit-date--at-640x360@2
+same   surfaces-photon-due-dates--save-error--at-1280x720
+same   surfaces-photon-due-dates--save-error--at-1440x900
+same   surfaces-photon-due-dates--save-error--at-640x360@2
+same   surfaces-photon-due-dates--completion-confirmation--at-1280x720
+same   surfaces-photon-due-dates--completion-confirmation--at-1440x900
+same   surfaces-photon-due-dates--completion-confirmation--at-640x360@2
+same   surfaces-photon-due-dates--long-title--at-1280x720
+same   surfaces-photon-due-dates--long-title--at-1440x900
+same   surfaces-photon-due-dates--long-title--at-640x360@2
+same   surfaces-photon-due-dates--spreadsheet-import--at-1280x720
+   note surfaces-photon-due-dates--spreadsheet-import--at-1440x900: 6 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-photon-due-dates--spreadsheet-import--at-1440x900
+same   surfaces-photon-due-dates--spreadsheet-import--at-640x360@2
+same   surfaces-photon-due-dates--inventor-refused--at-1280x720
+same   surfaces-photon-due-dates--inventor-refused--at-1440x900
+same   surfaces-review-decision--typical--at-1280x720
+same   surfaces-review-decision--typical--at-1440x900
+same   surfaces-review-decision--typical--at-1366x768
+   note surfaces-review-decision--typical--at-1920x1080: 2 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-review-decision--typical--at-1920x1080 (2 px noise)
+same   surfaces-review-decision--typical--at-640x360@2
+same   surfaces-review-decision--no-evaluation--at-1280x720
+same   surfaces-review-decision--no-evaluation--at-1440x900
+same   surfaces-review-decision--partial-evaluation--at-1280x720 (8 px noise)
+same   surfaces-review-decision--partial-evaluation--at-1440x900
+   note surfaces-review-decision--long-disclosure--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-review-decision--long-disclosure--at-1280x720 (8 px noise)
+same   surfaces-review-decision--long-disclosure--at-1440x900
+   note surfaces-review-decision--missing-detail--at-1280x720: 8 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-review-decision--missing-detail--at-1280x720
+same   surfaces-review-decision--missing-detail--at-1440x900
+   note surfaces-review-decision--approve-confirmation--at-1280x720: 6 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-review-decision--approve-confirmation--at-1280x720 (6 px noise)
+   note surfaces-review-decision--approve-confirmation--at-1440x900: 6 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-review-decision--approve-confirmation--at-1440x900 (6 px noise)
+same   surfaces-review-decision--request-changes--at-1280x720
+same   surfaces-review-decision--request-changes--at-1440x900
+same   surfaces-review-decision--reject--at-1280x720
+same   surfaces-review-decision--reject--at-1440x900
+same   surfaces-review-decision--decision-in-progress--at-1280x720
+same   surfaces-review-decision--decision-in-progress--at-1440x900
+same   surfaces-review-decision--concurrent-decision-completed--at-1280x720
+same   surfaces-review-decision--concurrent-decision-completed--at-1440x900
+same   surfaces-review-decision--success--at-1280x720
+same   surfaces-review-decision--success--at-1440x900
+same   surfaces-review-decision--failure-retry--at-1280x720
+   note surfaces-review-decision--failure-retry--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-review-decision--failure-retry--at-1440x900
+same   surfaces-start-an-idea--empty--at-1280x720
+same   surfaces-start-an-idea--empty--at-1440x900
+   note surfaces-start-an-idea--empty--at-1366x768: 1 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--empty--at-1366x768 (1 px noise)
+same   surfaces-start-an-idea--empty--at-1920x1080
+same   surfaces-start-an-idea--empty--at-640x360@2
+   note surfaces-start-an-idea--dragging-file--at-1280x720: 1 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--dragging-file--at-1280x720
+same   surfaces-start-an-idea--dragging-file--at-1440x900
+   note surfaces-start-an-idea--parsing--at-1280x720: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--parsing--at-1280x720 (3 px noise)
+same   surfaces-start-an-idea--parsing--at-1440x900
+DIFF   surfaces-start-an-idea--partial-extraction--at-1280x720: 11706 pixels in [892,374,1233,519] (actual saved beside the baseline)
+DIFF   surfaces-start-an-idea--partial-extraction--at-1440x900: 11640 pixels in [1069,374,1410,519] (actual saved beside the baseline)
+   note surfaces-start-an-idea--unsupported-file--at-1280x720: 1 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--unsupported-file--at-1280x720
+same   surfaces-start-an-idea--unsupported-file--at-1440x900
+   note surfaces-start-an-idea--extraction-failure--at-1280x720: 1 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--extraction-failure--at-1280x720 (1 px noise)
+same   surfaces-start-an-idea--extraction-failure--at-1440x900
+   note surfaces-start-an-idea--duplicate-warning--at-1280x720: 1 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--duplicate-warning--at-1280x720
+same   surfaces-start-an-idea--duplicate-warning--at-1440x900
+DIFF   surfaces-start-an-idea--transition-to-disclosure--at-1280x720: 11706 pixels in [892,374,1233,519] (actual saved beside the baseline)
+DIFF   surfaces-start-an-idea--transition-to-disclosure--at-1440x900: 11640 pixels in [1069,374,1410,519] (actual saved beside the baseline)
+same   surfaces-start-an-idea--on-behalf--at-1280x720 (4 px noise)
+   note surfaces-start-an-idea--on-behalf--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--on-behalf--at-1440x900
+   note surfaces-start-an-idea--loading--at-1280x720: 1 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-start-an-idea--loading--at-1280x720 (1 px noise)
+same   surfaces-start-an-idea--loading--at-1440x900
+same   surfaces-start-an-idea--error--at-1280x720 (1 px noise)
+same   surfaces-start-an-idea--error--at-1440x900
+same   surfaces-workspace-admin-dashboard--typical
+   note surfaces-workspace-admin-dashboard--no-pending-reviews: 14 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--no-pending-reviews (14 px noise)
+same   surfaces-workspace-admin-dashboard--one-urgent-review
+   note surfaces-workspace-admin-dashboard--large-aging-queue: 16 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--large-aging-queue (2 px noise)
+same   surfaces-workspace-admin-dashboard--no-actions-due (4 px noise)
+   note surfaces-workspace-admin-dashboard--no-submissions-this-quarter: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--no-submissions-this-quarter (4 px noise)
+   note surfaces-workspace-admin-dashboard--empty-portfolio: 34 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--empty-portfolio (18 px noise)
+same   surfaces-workspace-admin-dashboard--single-inventor
+same   surfaces-workspace-admin-dashboard--long-titles
+   note surfaces-workspace-admin-dashboard--loading: 3 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--loading
+same   surfaces-workspace-admin-dashboard--data-unavailable
+UNSTABLE surfaces-workspace-admin-dashboard--width-1280--at-1280x720: two clean renders differ by 399 pixels in [108,218,1247,719]
+UNSTABLE surfaces-workspace-admin-dashboard--width-1366--at-1366x768: two clean renders differ by 496 pixels in [915,93,1333,720]
+same   surfaces-workspace-admin-dashboard--width-1440--at-1440x900 (4 px noise)
+   note surfaces-workspace-admin-dashboard--width-1920--at-1920x1080: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--width-1920--at-1920x1080 (4 px noise)
+UNSTABLE surfaces-workspace-admin-dashboard--zoom-200--at-640x360@2: two clean renders differ by 380921 pixels in [40,0,1279,719]
+   note surfaces-workspace-admin-dashboard--reduced-motion--at-1440x900: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   surfaces-workspace-admin-dashboard--reduced-motion--at-1440x900
+same   foundations-radius--scale--at-1280x720
+same   foundations-radius--scale--at-1366x768
+same   foundations-radius--scale--at-1440x900
+same   foundations-radius--scale--at-1920x1080
+same   foundations-radius--scale--at-640x360@2
+same   foundations-tokens--color--at-1280x720
+same   foundations-tokens--color--at-1366x768
+same   foundations-tokens--color--at-1440x900
+same   foundations-tokens--color--at-1920x1080
+same   foundations-tokens--color--at-640x360@2
+same   foundations-tokens--typography--at-1280x720
+same   foundations-tokens--typography--at-1366x768
+same   foundations-tokens--typography--at-1440x900
+same   foundations-tokens--typography--at-1920x1080
+same   foundations-tokens--typography--at-640x360@2
+same   foundations-tokens--spacing--at-1280x720
+same   foundations-tokens--spacing--at-1366x768
+same   foundations-tokens--spacing--at-1440x900
+same   foundations-tokens--spacing--at-1920x1080
+same   foundations-tokens--spacing--at-640x360@2
+same   foundations-tokens--radius-and-borders--at-1280x720
+same   foundations-tokens--radius-and-borders--at-1366x768
+same   foundations-tokens--radius-and-borders--at-1440x900
+same   foundations-tokens--radius-and-borders--at-1920x1080
+same   foundations-tokens--radius-and-borders--at-640x360@2
+same   foundations-tokens--status-semantics--at-1280x720
+same   foundations-tokens--status-semantics--at-1366x768
+same   foundations-tokens--status-semantics--at-1440x900
+same   foundations-tokens--status-semantics--at-1920x1080
+same   foundations-tokens--status-semantics--at-640x360@2
+same   foundations-tokens--buttons-and-inputs--at-1280x720
+same   foundations-tokens--buttons-and-inputs--at-1366x768
+same   foundations-tokens--buttons-and-inputs--at-1440x900
+same   foundations-tokens--buttons-and-inputs--at-1920x1080
+same   foundations-tokens--buttons-and-inputs--at-640x360@2
+same   foundations-tokens--dense-tables--at-1280x720
+same   foundations-tokens--dense-tables--at-1366x768
+same   foundations-tokens--dense-tables--at-1440x900
+same   foundations-tokens--dense-tables--at-1920x1080
+same   foundations-tokens--dense-tables--at-640x360@2
+same   foundations-tokens--states--at-1280x720
+same   foundations-tokens--states--at-1366x768
+same   foundations-tokens--states--at-1440x900
+same   foundations-tokens--states--at-1920x1080
+same   foundations-tokens--states--at-640x360@2
+same   legacy-reference-foundations-tokens--colors
+same   legacy-reference-foundations-tokens--typography
+same   legacy-reference-foundations-tokens--spacing
+same   legacy-reference-foundations-tokens--status-vocabulary
+same   legacy-reference-foundations-tokens--icons
+same   legacy-reference-primitives-button--variants
+same   legacy-reference-primitives-button--sizes
+same   legacy-reference-primitives-button--with-icons
+same   legacy-reference-primitives-button--states
+same   legacy-reference-primitives-chips--status-tones
+same   legacy-reference-primitives-chips--kinds
+same   legacy-reference-primitives-chips--status-codes
+same   legacy-reference-primitives-form-controls--text-inputs
+same   legacy-reference-primitives-form-controls--text-input-error
+same   legacy-reference-primitives-form-controls--textarea-states
+same   legacy-reference-primitives-form-controls--choices
+same   legacy-reference-primitives-form-controls--select-closed
+same   legacy-reference-primitives-form-controls--progress-bars
+same   legacy-reference-primitives-overlays--dialog-open
+same   legacy-reference-primitives-overlays--confirmation
+same   legacy-reference-primitives-overlays--menu
+same   legacy-reference-primitives-overlays--popover-open
+same   legacy-reference-primitives-overlays--tooltip-hover
+same   legacy-reference-primitives-overlays--side-sheet
+same   legacy-reference-primitives-overlays--toasts
+same   legacy-reference-primitives-surfaces--cards
+same   legacy-reference-primitives-surfaces--badges
+same   legacy-reference-primitives-surfaces--tabs-and-segments
+same   legacy-reference-primitives-surfaces--separators-and-scroll
+same   legacy-reference-primitives-surfaces--command-palette
+same   legacy-reference-screens-assistant--placeholder
+same   legacy-reference-screens-authentication--signup-form
+same   legacy-reference-screens-authentication--invite-landing
+same   legacy-reference-screens-authentication--share-link
+same   legacy-reference-screens-authentication--forgot
+same   legacy-reference-screens-authentication--reset
+same   legacy-reference-screens-authentication--saml-landing
+same   legacy-reference-screens-clients--photon-admin
+same   legacy-reference-screens-clients--case-owner
+same   legacy-reference-screens-clients--detail
+same   legacy-reference-screens-clients--detail-case-owner
+same   legacy-reference-screens-clients--superadmin-bounced
+   note legacy-reference-screens-dashboard--tech-committee: 10 anti-aliasing pixel(s) between renders, within tolerance
+same   legacy-reference-screens-dashboard--tech-committee (22 px noise)
+same   legacy-reference-screens-dashboard--legal-counsel (19 px noise)
+   note legacy-reference-screens-dashboard--case-owner: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   legacy-reference-screens-dashboard--case-owner
+   note legacy-reference-screens-dashboard--photon-admin: 24 anti-aliasing pixel(s) between renders, within tolerance
+same   legacy-reference-screens-dashboard--photon-admin (17 px noise)
+same   legacy-reference-screens-dashboard--superadmin (16 px noise)
+   note legacy-reference-screens-dashboard--large-portfolio: 4 anti-aliasing pixel(s) between renders, within tolerance
+same   legacy-reference-screens-dashboard--large-portfolio (18 px noise)
+same   legacy-reference-screens-login--default
+same   legacy-reference-screens-login--validation-errors
+same   legacy-reference-screens-login--invalid-credentials
+same   legacy-reference-screens-login--signs-in
+same   legacy-reference-screens-not-found--missing
+same   legacy-reference-screens-workspace-and-profile--counsel-people
+same   legacy-reference-screens-workspace-and-profile--photon-admin-case-owners
+same   legacy-reference-screens-workspace-and-profile--inventor-redirected
+   note legacy-reference-screens-workspace-and-profile--profile-inventor: 6 anti-aliasing pixel(s) between renders, within tolerance
+same   legacy-reference-screens-workspace-and-profile--profile-inventor
+same   legacy-reference-screens-workspace-and-profile--profile-photon-admin
+same   legacy-reference-states-network-and-permissions--loading
+   note legacy-reference-states-network-and-permissions--failing-writes: 2 anti-aliasing pixel(s) between renders, within tolerance
+DIFF   legacy-reference-states-network-and-permissions--failing-writes: 162842 pixels in [288,235,1415,700] (actual saved beside the baseline)
+same   legacy-reference-states-network-and-permissions--permission-denied
+shots: 39 failure(s)
+

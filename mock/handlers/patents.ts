@@ -6,7 +6,7 @@ import { currentUser, visibleIdeas } from "./scope";
 import { allDueDates, allPatents, dueDateById, overrideDueDate, overridePatent, paginate, patentById, q, qi, scopeFor } from "../runtime/store";
 import type { DueDate, Patent } from "../runtime/types";
 
-const dueSummary = (d: DueDate) => ({ id: d.id, patent_id: d.patent_id, client_id: d.client_id, event_type: d.event_type, title: d.title, due_at: d.due_at, status: d.status, created_at: d.created_at, updated_at: d.updated_at });
+const dueSummary = (d: DueDate) => ({ id: d.id, patent_id: d.patent_id, client_id: d.client_id, event_type: d.event_type, title: d.title, due_at: d.due_at, status: d.status, created_at: d.created_at, updated_at: d.updated_at, data_issue: d.data_issue || null, source: d.source || "Manual Photon update", source_row: d.source_row || null, correction_note: d.correction_note || null, updated_by: d.updated_by || null });
 const ideaLinkFor = (p: Patent) => {
   const db = getDb();
   const link = (db as unknown as { links?: Array<{ idea_id: string; patent_id: string }> }).links?.find((l) => l.patent_id === p.id);
@@ -17,7 +17,7 @@ const ideaLinkFor = (p: Patent) => {
 };
 /** The list row as pulse-backend returns it: the patent, its next pending due date, and the idea link with inventors. */
 const listRow = (p: Patent) => {
-  const next = allDueDates([p.client_id]).filter((d) => d.patent_id === p.id && d.status === "PENDING").sort((a, b) => a.due_at.localeCompare(b.due_at))[0];
+  const next = allDueDates([p.client_id]).filter((d) => d.patent_id === p.id && d.status === "PENDING").sort((a, b) => (a.due_at || "").localeCompare(b.due_at || ""))[0];
   const client = getDb().clients.find((c) => c.id === p.client_id);
   return { ...p, due_dates: next && !(getDb().flags.v0 && currentUser()?.role === "INVENTOR") ? [dueSummary(next)] : [], idea_link: ideaLinkFor(p), client: client ? { id: client.id, name: client.name } : null };
 };
@@ -89,7 +89,7 @@ export const patentHandlers = [
       created.push({ id: uuid(rng), client_id: client.id, title: `Imported filing ${i + 1} from ${file.original_name}`, application_number: `IMP/${String(1000 + i)}`, jurisdiction: ["US", "EP", "IN"][i % 3], status: i % 4 === 0 ? "GRANTED" : "APPLIED", filing_date: clock.daysAgo(400 + i * 7), grant_date: i % 4 === 0 ? clock.daysAgo(60 + i) : null, tags: ["imported"], abstract: null, assignee_original: client.name, current_assignee: client.name, inventors: [], simple_family_members: [], ipc_all_versions: [], priority_details: null, additional_notes: null, current_status: null, prn: null, oc: null, next_steps_gpo: [], next_steps_legal: [], status_timeline_history: [], deleted_at: null, created_at: clock.iso(), updated_at: clock.iso() });
     }
     db.patents.push(...created);
-    const dues = created.slice(0, Math.floor(created.length / 2)).map((p, k) => ({ id: uuid(rng), patent_id: p.id, client_id: client.id, event_type: "Annuity Payment Due", title: "Annuity Payment Due", due_at: clock.daysAhead(30 + k * 11), status: "PENDING" as const, created_at: clock.iso(), updated_at: clock.iso() }));
+    const dues = created.slice(0, Math.floor(created.length / 2)).map((p, k) => ({ id: uuid(rng), patent_id: p.id, client_id: client.id, event_type: "Annuity Payment Due", title: "Annuity Payment Due", due_at: clock.daysAhead(30 + k * 11), status: "PENDING" as const, source: "Spreadsheet import", source_row: k + 2, created_at: clock.iso(), updated_at: clock.iso() }));
     db.dueDates.push(...dues);
     const result = { id: uuid(rng), client_id: client.id, file_id: file.id, status: (trouble ? "PARTIAL" : "COMPLETED") as "PARTIAL" | "COMPLETED", rows_total: rows, created_count: created.length, updated_count: trouble ? 9 : 0, unchanged_count: trouble ? 5 : 0, failed_count: trouble ? 19 : 0, due_dates_created: dues.length, duplicate_in_file: trouble ? 7 : 0, unmapped_columns: trouble ? ["Docket Ref", "Old Status"] : [], errors: trouble ? Array.from({ length: 19 }, (_, index) => ({ row: [14, 22, 57, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90][index], message: ["Application number is empty.", "Filing date is not a date: 'tbd'.", "Jurisdiction 'XX' is not recognised."][index % 3] })) : [], completed_at: clock.iso(), created_at: clock.iso(), imported_by_id: u?.id ?? "" };
     db.imports.push(result); touched();
@@ -118,7 +118,7 @@ export const patentHandlers = [
     if (!p) return { status: 404, body: { message: "Patent not found." } };
     const db = getDb(); const user = currentUser(); const scope = scopeFor(user);
     if (db.flags.v0 && (!user || (scope && !scope.includes(p.client_id)))) return { status: 404, body: { message: "Patent not found." } };
-    const dues = allDueDates([p.client_id]).filter((d) => d.patent_id === p.id).sort((a, b) => a.due_at.localeCompare(b.due_at)).map((d) => ({ ...dueSummary(d), action: db.actionRequests.find((a) => a.due_date_id === d.id) ?? null }));
+    const dues = allDueDates([p.client_id]).filter((d) => d.patent_id === p.id).sort((a, b) => (a.due_at || "").localeCompare(b.due_at || "")).map((d) => ({ ...dueSummary(d), action: db.actionRequests.find((a) => a.due_date_id === d.id) ?? null }));
     return { ...p, client: (() => { const client = db.clients.find(c => c.id === p.client_id); return client ? { id: client.id, name: client.name } : null; })(), ...(db.flags.v0 && user?.role === "INVENTOR" ? { next_steps_gpo: [], next_steps_legal: [], additional_notes: null } : {}), due_dates: db.flags.v0 && user?.role === "INVENTOR" ? [] : dues, idea_link: ideaLinkFor(p), files: db.files.filter((f) => f.category === `patent:${p.id}` && f.status === "STORED").map(({ content_base64: _bytes, ...f }) => f) };
   }),
   route("patch", "/v1/patents/:id", async ({ params, body }) => {
@@ -156,33 +156,53 @@ export const patentHandlers = [
     const { scope } = scoped(url);
     let rows = allDueDates(scope);
     const from = q(url, "from"); const to = q(url, "to");
-    if (from) rows = rows.filter((d) => d.due_at >= from);
-    if (to) rows = rows.filter((d) => d.due_at < to);
+    if (from) rows = rows.filter((d) => !!d.due_at && d.due_at >= from);
+    if (to) rows = rows.filter((d) => !!d.due_at && d.due_at < to);
     const now = clock.iso();
     const filter = q(url, "filter");
-    if (filter === "overdue") rows = rows.filter((d) => d.status === "PENDING" && d.due_at < now);
-    else if (filter === "upcoming") rows = rows.filter((d) => d.status === "PENDING" && d.due_at >= now);
-    else if (filter === "dueToday") rows = rows.filter((d) => d.due_at.slice(0, 10) === now.slice(0, 10));
+    if (filter === "overdue") rows = rows.filter((d) => d.status === "PENDING" && !!d.due_at && d.due_at.slice(0,10) < now.slice(0,10));
+    else if (filter === "upcoming") rows = rows.filter((d) => d.status === "PENDING" && !!d.due_at && d.due_at.slice(0,10) >= now.slice(0,10));
+    else if (filter === "dueToday") rows = rows.filter((d) => (d.due_at || "").slice(0, 10) === now.slice(0, 10));
+    else if (filter === "open") rows = rows.filter(d => d.status !== "COMPLETED");
+    else if (filter === "missing") rows = rows.filter(d => !d.due_at);
+    else if (filter === "issues") rows = rows.filter(d => !!d.data_issue);
+    else if (filter === "dueSoon") rows = rows.filter(d => d.status === "PENDING" && !!d.due_at && d.due_at.slice(0,10) >= now.slice(0,10) && d.due_at.slice(0,10) <= clock.daysAhead(7).slice(0,10));
     else if (filter === "completed") rows = rows.filter((d) => d.status === "COMPLETED");
     const search = (q(url, "search") ?? "").trim().toLowerCase();
     const patents = new Map<string, Patent | null>();
     const patentOf = (d: DueDate) => { if (!patents.has(d.patent_id)) patents.set(d.patent_id, patentById(d.patent_id)); return patents.get(d.patent_id); };
-    if (search) rows = rows.filter((d) => { const p = patentOf(d); return `${d.title} ${p?.title ?? ""} ${p?.application_number ?? ""}`.toLowerCase().includes(search); });
+    if (search) rows = rows.filter((d) => { const p = patentOf(d); return `${d.title} ${p?.title ?? ""} ${p?.application_number ?? ""} ${getDb().clients.find(c => c.id === d.client_id)?.name || ""}`.toLowerCase().includes(search); });
     const sort = q(url, "sort") ?? "due_at"; const order = q(url, "order") === "desc" ? -1 : 1;
-    rows.sort((a, b) => order * (sort === "title" ? a.title.localeCompare(b.title) : a.due_at.localeCompare(b.due_at)));
+    rows.sort((a, b) => order * ((sort === "title" || sort === "event_name") ? a.title.localeCompare(b.title) : (a.due_at || "").localeCompare(b.due_at || "")));
     const rawLimit = url.searchParams.get("limit");
     const limit = rawLimit === "0" ? Math.min(5000, rows.length || 1) : Math.min(200, qi(url, "limit", 25));
     const page = paginate(rows, qi(url, "page", 1), limit);
     const db = getDb();
-    return { ...page, data: page.data.map((d) => { const p = patentOf(d); const client = db.clients.find((c) => c.id === d.client_id); return { ...dueSummary(d), is_overdue: d.status === "PENDING" && d.due_at < now, patent: p ? { id: p.id, title: p.title, application_number: p.application_number, jurisdiction: p.jurisdiction, status: p.status, filing_date: p.filing_date, client: client ? { id: client.id, name: client.name } : null } : null, action: db.actionRequests.find((a) => a.due_date_id === d.id) ?? null }; }) };
+    return { ...page, data: page.data.map((d) => { const p = patentOf(d); const client = db.clients.find((c) => c.id === d.client_id); return { ...dueSummary(d), owner: (() => { const owner = db.users.find(u => u.role === "CASE_OWNER" && u.assigned_client_ids.includes(d.client_id)); return owner ? { id: owner.id, name: owner.name } : null; })(), is_overdue: d.status === "PENDING" && !!d.due_at && d.due_at.slice(0,10) < now.slice(0,10), patent: p ? { id: p.id, title: p.title, application_number: p.application_number, jurisdiction: p.jurisdiction, status: p.status, filing_date: p.filing_date, client: client ? { id: client.id, name: client.name } : null } : null, action: db.actionRequests.find((a) => a.due_date_id === d.id) ?? null }; }) };
   }),
   route("patch", "/v1/due-dates/:id", async ({ params, body }) => {
-    const b = (await body()) as { status?: string };
+    const b = (await body()) as { status?: string; due_at?: string | null; title?: string; correction_note?: string; resolve_issue?: boolean };
     const d = dueDateById(params.id as string);
     if (!d) return { status: 404, body: { message: "Due date not found." } };
-    const status = b.status === "OPEN" ? "PENDING" : b.status;
-    if (status !== "PENDING" && status !== "COMPLETED") return { status: 400, body: { message: "Status must be COMPLETED or PENDING; MISSED is derived." } };
-    return overrideDueDate(d.id, { status });
+    const db = getDb(), user = currentUser(), scope = scopeFor(user);
+    if (db.flags.v0 && (!user || !["CASE_OWNER", "PHOTON_ADMIN"].includes(user.role) || (scope && !scope.includes(d.client_id)))) return { status: 403, body: { message: "You cannot maintain this event." } };
+    const patch: Partial<DueDate> = {};
+    if (b.status !== undefined) {
+      const status = b.status === "OPEN" ? "PENDING" : b.status;
+      if (status !== "PENDING" && status !== "COMPLETED") return { status: 400, body: { message: "Choose Pending or Completed." } };
+      patch.status = status;
+    }
+    if (db.flags.v0 && (b.title !== undefined || b.due_at !== undefined || b.resolve_issue)) {
+      if (!b.title?.trim() || !b.correction_note?.trim()) return { status: 400, body: { message: "Enter the event and a correction note." } };
+      if (b.due_at !== null && (!b.due_at || !/^\d{4}-\d{2}-\d{2}$/.test(b.due_at) || Number.isNaN(Date.parse(b.due_at)) || new Date(b.due_at).toISOString().slice(0,10) !== b.due_at)) return { status: 400, body: { message: "Enter a valid date or leave it unrecorded." } };
+      if (b.resolve_issue && !b.due_at) return { status: 400, body: { message: "Record a confirmed date before resolving the import issue." } };
+      patch.title = b.title.trim(); patch.due_at = b.due_at ? b.due_at + "T00:00:00.000Z" : null;
+      patch.correction_note = b.correction_note.trim(); patch.updated_by = user?.name || null;
+      if (b.resolve_issue) patch.data_issue = null;
+    }
+    if (!Object.keys(patch).length) return { status: 400, body: { message: "No event changes supplied." } };
+    if (db.flags.v0) patch.updated_by = user?.name || null;
+    return overrideDueDate(d.id, patch);
   }),
   route("post", "/v1/due-dates/:id/remind", ({ params }) => {
     const db = getDb();

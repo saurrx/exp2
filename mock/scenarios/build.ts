@@ -116,7 +116,7 @@ export function seedOperations(rng: Rng, data: Data, opts: { requestsPerClient?:
     const g = generatePortfolio(client, spec);
     const counsel = data.users.find((u) => u.client_id === client.id && u.role === "LEGAL_COUNSEL");
     if (!counsel) continue;
-    const pending = g.dueDates.filter((d) => d.status === "PENDING" && Date.parse(d.due_at) > clock.now()).sort((a, b) => a.due_at.localeCompare(b.due_at)).slice(0, perClient);
+    const pending = g.dueDates.filter((d) => d.status === "PENDING" && Date.parse(d.due_at || "") > clock.now()).sort((a, b) => (a.due_at || "").localeCompare(b.due_at || "")).slice(0, perClient);
     pending.forEach((dd, k) => {
       const [status, submission] = statuses[k % statuses.length];
       const tpl = data.actionTemplates.find((t) => t.event_types.includes(dd.event_type)) ?? data.actionTemplates[0];

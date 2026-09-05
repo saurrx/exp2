@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
+import { expect, userEvent, within, waitFor } from "storybook/test";
 import IdeasPage from "@/pages/IdeasPage";
 import { route } from "../../../mock/runtime/registry";
 const meta = { title: "Surfaces/Ideas list", component: IdeasPage,
@@ -13,8 +13,8 @@ const seen = (text: string | RegExp) => async ({ canvasElement }: { canvasElemen
 export const InventorEmpty: Story = { parameters: { pulse: { scenario: "v0/inventor/first-run" } }, play: seen("Your first idea starts here") };
 export const InventorDraftsOnly: Story = { parameters: { pulse: { scenario: "v0/ideas/drafts-only" } }, play: seen("Not evaluated") };
 export const InventorMixed: Story = { tags: defaults, play: async ({ canvasElement }) => { const c = within(canvasElement); await expect(await c.findByText("Evaluation running", {}, { timeout: 15000 })).toBeVisible(); await expect(c.getByText("Update disclosure")).toBeVisible(); await expect(c.getByText("6.2 / 10")).toBeVisible(); await expect(c.getByRole("button", { name: "Submit an idea" })).toBeEnabled(); } };
-export const WorkspaceAdminPending: Story = { tags: defaults, parameters: { pulse: { scenario: "v0/workspace-admin/queue", persona: "LEGAL_COUNSEL" } }, play: async ({ canvasElement }) => { await expect(await within(canvasElement).findByRole("button", { name: "Send to Photon Legal" })).toBeEnabled(); } };
-export const WorkspaceAdminLargeQueue: Story = { parameters: { pulse: { scenario: "v0/workspace-admin/large-aging-queue", persona: "LEGAL_COUNSEL" } }, play: async ({ canvasElement }) => { await expect(await within(canvasElement).findByRole("button", { name: "Send to Photon Legal" })).toBeEnabled(); } };
+export const WorkspaceAdminPending: Story = { tags: defaults, parameters: { pulse: { scenario: "v0/workspace-admin/queue", persona: "LEGAL_COUNSEL" } }, play: async ({ canvasElement }) => { const button = await within(canvasElement).findByRole("button", { name: "Send to Photon Legal" }); await waitFor(() => expect(button).toBeEnabled()); } };
+export const WorkspaceAdminLargeQueue: Story = { parameters: { pulse: { scenario: "v0/workspace-admin/large-aging-queue", persona: "LEGAL_COUNSEL" } }, play: async ({ canvasElement }) => { const button = await within(canvasElement).findByRole("button", { name: "Send to Photon Legal" }); await waitFor(() => expect(button).toBeEnabled()); } };
 export const WorkspaceAdminFilteredEmpty: Story = { parameters: { pulse: { scenario: "v0/workspace-admin/queue", persona: "LEGAL_COUNSEL", route: "/ideas" } }, play: async ({ canvasElement }) => { const c = within(canvasElement); await userEvent.type(await c.findByPlaceholderText("Search title or inventor"), "unmatched-disclosure"); await expect(await c.findByText("No matching ideas.")).toBeVisible(); } };
 export const CaseOwner: Story = { tags: defaults, parameters: { pulse: { scenario: "v0/case-owner/my-work", persona: "CASE_OWNER" } }, play: seen(/Case Owner ·/) };
 export const PhotonAdmin: Story = { tags: defaults, parameters: { pulse: { scenario: "v0/photon-admin/firm", persona: "PHOTON_ADMIN" } }, play: seen(/Case Owner ·/) };

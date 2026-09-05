@@ -361,6 +361,13 @@ const ideasListStates = ["drafts-only", "mixed", "long-titles"].map((slug) => v0
   return data;
 }));
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const reviewMissingDetail = v0("v0/review/missing-detail", "Review: missing detail", "Submitted disclosure with unanswered mechanism and no supporting files.", U.admin.email, [U.admin.email], () => {
+  const data = northwindBuild("v0/review/missing-detail", SMALL, [{ invention: 0, author: U.inventor, state: "LEGAL_REVIEW", completion: 20, ageDays: 6 }]);
+  data.ideas[0].body = "A passive cable arrangement for an articulated joint. The inventor has not yet supplied the correction mechanism.";
+  data.drafts[0].answers = { __meta_data: [{ id: "solution", title: "Solution", questions: [{ id: "sol1", text: "How does your invention work?", answer: "" }] }] };
+  return data;
+});
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

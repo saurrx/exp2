@@ -30,3 +30,13 @@ A has the lowest load and preserves the reference interaction. Low-fidelity rend
 
 ## Validation and evaluator
 Pending. Coverage remains null until the required evidence and independent PASS.
+
+## What changed and what stayed
+The existing two-pane reference, queue filters, brief sections, decision footer, route, adapter and mutation routes stay. Defect corrections add pending protection and an inline recoverable error to the existing confirmation; the reason survives failure. Saved/competing decisions retain the selected idea and show the recorded outcome and actor from the existing transitions endpoint. The exact approval button is “Send to Photon Legal.” Request/rejection prompts ask for a specific reason and reject blank input. No score gates a review.
+
+The queue now reads the API's files field and separate submitted-by attribution. Attachments download in place; full evaluation opens in a named new-tab link, preserving the brief. Partial scores are identified as provisional; no-evaluation/missing-answer states are explicit. Activity removes obsolete committee/counsel copy and the unsupported filing-time estimate. Selected-row age uses the existing secondary text token to correct a contrast failure. No new visual values, dependency, route or proposed contract was needed; existing BF-0010 files data remains conceptual as already declared.
+
+## Story and scenario coverage
+All twelve intended `surfaces-review-decision--` ids are present: typical, no-evaluation, partial-evaluation, long-disclosure, missing-detail, decision-in-progress, concurrent-decision-completed, approve-confirmation, request-changes, reject, success, failure-retry. Scenarios: `v0/idea-detail/under-review`, `missing-evaluation`, `partial-evaluation`, `long-content`, and new `v0/review/missing-detail`. All use Workspace Admin (`LEGAL_COUNSEL`). Pending/failure use the mock's supported latency/write-failure flags. The concurrent interaction records Noor Rahman's real synthetic transition before the current Admin submits and receives 409. Success uses the real mock review mutation. Retry is additionally exercised to successful persistence by the supplemental browser check.
+
+The replaced legacy ReviewQueue story file and eight baseline/actual PNGs are removed. The retired committee journey is removed and the legal-counsel journey retains only its not-yet-replaced Actions steps. The smoke review step now uses the V0 handoff; the isolation probe targets two V0 stories and remains informational (shared-cookie identity is not isolated, so serial tests remain required).

@@ -33,34 +33,8 @@ const { page } = session;
 const j = new Journey('LEGAL_COUNSEL review + actions loop');
 console.log(`  (session ${session.reused ? 'reused' : 'fresh login'})`);
 
-const rows = () => page.locator('button:has(> h2)');
-
 try {
-  /* ---------------------------------------------------------------- review */
-
-  await j.step('/ideas is the review queue at the LEGAL stage', async () => {
-    await page.goto(`${BASE}/ideas`, { waitUntil: 'networkidle' });
-    await assertPageContains(page, /Review queue/, '/ideas must render the review queue for counsel');
-    await page.waitForTimeout(1500);
-    const n = await rows().count();
-    assert(n > 0, 'the counsel review queue rendered zero disclosures — nothing here is actually being tested');
-    return `${n} disclosure(s) awaiting a legal decision`;
-  });
-
-  await j.step('counsel approves TO PHOTON, not to itself', async () => {
-    // The committee's approve is "Send to Legal Counsel"; counsel's is "Send
-    // to Photon Legal". Offering counsel the committee's label would send an
-    // idea back into the stage it just left.
-    const approve = page.getByRole('button', { name: /^Send to Photon Legal$/ });
-    assert(await approve.isVisible({ timeout: 15000 }).catch(() => false),
-      'the counsel approve control "Send to Photon Legal" is missing');
-    assert(!(await page.getByRole('button', { name: /^Send to Legal Counsel$/ }).count()),
-      'counsel is being offered "Send to Legal Counsel" — that is the committee stage');
-    assert(await page.getByRole('button', { name: /Request Update from Inventor/ }).isVisible(),
-      '"Request Update from Inventor" is missing');
-    return 'Send to Photon Legal · Request Update from Inventor';
-  });
-
+  // Review decisions are covered by Surfaces/Review decision (DSN-0010).
   /* --------------------------------------------------------------- actions */
 
   let instructedRow = null;

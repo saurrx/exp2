@@ -1,0 +1,25 @@
+ok   typecheck (4s) 
+ok   lint:roles (0s) 
+skip routes: every handler is real, every reachable route served
+skip credentials and inert hosts
+skip manifest and graph parity
+ok   tokens: generated outputs match src/styles/tokens.json (0s) 
+skip fidelity: adapter boundary, OpenAPI bodies, state machine
+ok   v0 semantic gate (four personas, one stage, coverage, exclusions, optional evaluation, badges, declared contracts) (2s) 
+ok   v0 coverage matrix rendered and current (0s) 
+skip build:design
+skip storybook:build
+skip test:stories (interaction, serial)
+skip shots (stable across two clean renders, no egress, matches baselines)
+skip a11y ratchet (no new fingerprints, zero in redesigned content)
+skip isolation probe (parallel stories safe?)
+skip smoke (full app on mock)
+skip crawl (every persona, every page and detail route)
+skip qa invariant: desktop gate
+skip qa invariant: layout rules, 6 roles x 2 viewports
+skip qa invariant: no visible uuid
+skip qa conformance: structure against baseline-mock
+skip lockfile reproduces with npm ci
+ok   runtime graph react=1 react-dom=1 root=5.4.21 react-vite=5.4.21 builder-vite=5.4.21
+
+gates: 6/6 passed

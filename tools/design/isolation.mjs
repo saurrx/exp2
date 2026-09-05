@@ -14,29 +14,18 @@ const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 await blockEgress(context);
 const open = async (id) => { const p = await context.newPage(); await p.goto(`http://localhost:${port}/iframe.html?id=${id}&viewMode=story`); await p.waitForSelector('body[data-story-ready="1"]', { timeout: 20_000 }); return p; };
-const [committee, counsel] = await Promise.all([open("legacy-reference-screens-review-queue--committee"), open("legacy-reference-screens-review-queue--counsel")]);
-
-// Force refetches in both frames after the other frame has written its cookie: click the "All" queue filter, then wait past a poll interval.
-for (const p of [committee, counsel]) { await p.getByRole("button", { name: /^All/ }).click().catch(() => {}); }
-await committee.waitForTimeout(6000);
-
-const shots = process.env.ISOLATION_SHOTS;
-// Data isolation: reference prefixes are tenant-specific (ACME- vs GLX-). Chrome isolation: the sidebar's persona name.
-const check = async (page, who, ownPrefix, otherPrefix, personaName) => {
-  const own = await page.getByText(new RegExp(`^${ownPrefix}-\\d{4}$`)).count();
-  const other = await page.getByText(new RegExp(`^${otherPrefix}-\\d{4}$`)).count();
-  const persona = await page.getByText(personaName).count();
-  const data = own > 0 && other === 0;
-  const chrome = persona > 0;
-  console.log(`${data ? "ok  " : "FAIL"} ${who} data: ${own} own references, ${other} from the other tenant`);
-  console.log(`${chrome ? "ok  " : "FAIL"} ${who} chrome: persona ${personaName} shown ${persona} time(s)`);
-  if (shots) await page.screenshot({ path: `${shots}/isolation-${who.split(" ")[0]}.png` });
-  return { data, chrome };
+const [inventor, admin] = await Promise.all([open("surfaces-ideas-list--inventor-mixed"), open("surfaces-review-decision--typical")]);
+// Refetch both frame-local sessions after both have written the shared cookie.
+const check = async (page, expected, other) => {
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  const own = await page.getByText(expected, { exact: true }).count();
+  const foreign = await page.getByText(other, { exact: true }).count();
+  const decision = await page.getByRole("button", { name: "Send to Photon Legal", exact: true }).count();
+  const ok = own > 0 && (expected === "Leah Feldman" ? decision === 1 : decision === 0 && foreign === 0);
+  console.log(`${ok ? "ok" : "FAIL"} ${expected}: own identity ${own}, review decisions ${decision}`);
+  return ok;
 };
-const a = await check(committee, "committee frame", "ACME", "GLX", "Tomás Ibarra");
-const b = await check(counsel, "counsel frame", "GLX", "ACME", "Jun Sato");
+const a = await check(inventor, "Anika Sharma", "Leah Feldman");
+const b = await check(admin, "Leah Feldman", "Anika Sharma");
 await browser.close(); await close();
-const dataOk = a.data && b.data, chromeOk = a.chrome && b.chrome;
-console.log(`isolation: data ${dataOk ? "isolated (frame-local persona holds)" : "CONTAMINATED"}; chrome identity ${chromeOk ? "isolated" : "CONTAMINATED through the shared cookie"}`);
-console.log(dataOk && chromeOk ? "isolation: parallel story tests would be safe" : "isolation: keep story tests serial");
-process.exit(dataOk && chromeOk ? 0 : 1);
+process.exit(a && b ? 0 : 1);

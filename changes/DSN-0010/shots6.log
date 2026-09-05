@@ -1,0 +1,8 @@
+wrote  surfaces-review-decision--concurrent-decision-completed--at-1280x720
+wrote  surfaces-review-decision--concurrent-decision-completed--at-1440x900
+wrote  surfaces-review-decision--success--at-1280x720
+wrote  surfaces-review-decision--success--at-1440x900
+wrote  surfaces-review-decision--failure-retry--at-1280x720
+   note surfaces-review-decision--failure-retry--at-1440x900: 4 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-review-decision--failure-retry--at-1440x900
+shots: all stories rendered, stable within 40 pixels, no egress

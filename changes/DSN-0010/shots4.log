@@ -1,0 +1,7 @@
+wrote  surfaces-review-decision--request-changes--at-1280x720
+wrote  surfaces-review-decision--request-changes--at-1440x900
+wrote  surfaces-review-decision--reject--at-1280x720
+wrote  surfaces-review-decision--reject--at-1440x900
+wrote  surfaces-review-decision--failure-retry--at-1280x720
+wrote  surfaces-review-decision--failure-retry--at-1440x900
+shots: all stories rendered, stable within 40 pixels, no egress

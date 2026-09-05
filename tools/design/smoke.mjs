@@ -34,30 +34,14 @@ await step("committee persona logs in and lands on the dashboard", async () => {
   await page.getByText("Tomás Ibarra").first().waitFor({ timeout: 10000 });
   await page.screenshot({ path: `${shots}/02-dashboard-committee.png` });
 });
-await step("review queue renders the committee's ideas and the header portal", async () => {
-  await page.getByRole("link", { name: /Review queue/ }).click();
-  await page.waitForURL(base + "/ideas");
-  await page.waitForLoadState("networkidle");
-  await page.getByText("Self-tensioning cable harness", { exact: false }).first().waitFor({ timeout: 10000 });
-  const title = await page.locator("header h1, header [class*=title], main header").first().textContent().catch(() => "");
-  console.log("     header text:", (title || "").trim().slice(0, 80));
-  await page.screenshot({ path: `${shots}/03-review-queue.png` });
-});
-await step("a decision moves the idea and the queue badge refetches", async () => {
-  const badge = async () => Number(((await page.getByRole("link", { name: /Review queue/ }).textContent()) || "").replace(/\D/g, "") || 0);
-  const before = await badge();
-  await page.getByRole("button", { name: /Send to Legal Counsel/ }).first().click();
-  await page.getByText(/Approved and sent/).first().waitFor({ timeout: 8000 });
-  await page.waitForTimeout(800);
-  const after = await badge();
-  console.log("     review badge before/after:", before, after);
-  if (after !== before - 1) throw new Error(`badge went ${before} -> ${after}`);
-});
-await step("counsel persona via the chip sees the counsel queue", async () => {
-  await page.goto(base + "/ideas?scenario=counsel/queue&role=LEGAL_COUNSEL", { waitUntil: "networkidle" });
-  await page.getByText("Jun Sato").first().waitFor({ timeout: 10000 });
-  await page.getByText("Graded-porosity ceramic filter", { exact: false }).first().waitFor({ timeout: 10000 });
-  await page.screenshot({ path: `${shots}/04-review-queue-counsel.png` });
+// DSN-0010: V0 review decision replaces the retired committee/counsel journeys.
+await step("Workspace Admin records a filing handoff", async () => {
+  await page.goto(base + "/ideas?scenario=v0/idea-detail/under-review&role=LEGAL_COUNSEL", { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Send to Photon Legal", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("heading", { name: "Send to Photon Legal for filing?" }).waitFor();
+  await dialog.getByRole("button", { name: "Send to Photon Legal", exact: true }).click();
+  await page.getByText(/Sent to Photon Legal by Leah Feldman/).waitFor();
 });
 console.log("external hosts contacted:", external.size ? [...external].join(", ") : "none");
 console.log("v1 requests seen:", v1.length, "distinct:", [...new Set(v1.map((x) => x.split("?")[0]))].length);

@@ -1,0 +1,34 @@
+PASS typical 1280 720 no overflow, decision reachable
+PASS typical 1366 768 no overflow, decision reachable
+PASS typical 1440 900 no overflow, decision reachable
+PASS typical 1920 1080 no overflow, decision reachable
+PASS typical 640 360 no overflow, decision reachable
+PASS approve-confirmation 640 360 no overflow, decision reachable
+PASS request-changes 640 360 no overflow, decision reachable
+PASS reject 640 360 no overflow, decision reachable
+PASS failure-retry 640 360 no overflow, decision reachable
+PASS retry saved original reason
+PASS decision-in-progress 640 360 no overflow, decision reachable
+PASS partial-evaluation 640 360 no overflow, decision reachable
+PASS no-evaluation 640 360 no overflow, decision reachable
+PASS missing-detail 640 360 no overflow, decision reachable
+PASS long-disclosure 640 360 no overflow, decision reachable
+PASS attachment download retained brief
+PASS concurrent-decision-completed 640 360 no overflow, decision reachable
+PASS success 640 360 no overflow, decision reachable
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Activity', exact: true })[22m
+
+    at /private/tmp/dsn10-supplemental.mjs:12:80 {
+  log: [
+    "  - waiting for getByRole('button', { name: 'Activity', exact: true })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.2.1

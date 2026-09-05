@@ -29,7 +29,7 @@ A has the lowest load and preserves the reference interaction. Low-fidelity rend
 - No-evaluation, partial/missing disclosure, concurrent decision and attachment-context states need concrete scenarios and interaction evidence.
 
 ## Validation and evaluator
-Pending. Coverage remains null until the required evidence and independent PASS.
+Completed. Independent round 2 PASS; coverage is DSN-0010.
 
 ## What changed and what stayed
 The existing two-pane reference, queue filters, brief sections, decision footer, route, adapter and mutation routes stay. Defect corrections add pending protection and an inline recoverable error to the existing confirmation; the reason survives failure. Saved/competing decisions retain the selected idea and show the recorded outcome and actor from the existing transitions endpoint. The exact approval button is “Send to Photon Legal.” Request/rejection prompts ask for a specific reason and reject blank input. No score gates a review.
@@ -80,3 +80,17 @@ REFERENCE MATCH: yes — preserves the approved two-pane queue, restrained typog
 Round 2 corrections: at compact widths, the brief header and content share the scroll region while the existing decision footer remains sticky. The title and attribution can scroll away to release reading space. The outcome omits a boilerplate filing comment that merely repeats its status; useful recorded comments remain. Desktop composition and decision routes are unchanged.
 
 Round 2 verification: full stories 271/271, gates 6/6, both builds, all changed-story captures stable within the unchanged 40-pixel tolerance (`shots5.log`), eight focused axe contexts zero findings, and all sixteen supplemental geometry/state checks pass. The additional zoom reading capture shows full paragraphs after the title scrolls away; the concurrent banner contains one outcome/actor line. There are now 45 PNGs. A final ordering guard keeps the pending dialog open until the refreshed outcome is available; focused review stories remain 12/12, with saved/competing/retry captures rechecked against the rebuilt result. No change to the API paths or permissions.
+
+## Evaluator round 2 — PASS
+```text
+VERDICT: PASS
+SURFACE: review-decision.md  PERSONA: Workspace Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, my six answers agree with the record: invention first, filing action dominant, relevant substance before optional evidence, no context to remember, no unrelated content, and clear confirmation and recovery.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none
+REFERENCE MATCH: yes — preserves the approved two-pane queue, restrained typography, hairline separation and dominant filing action; all 45 PNGs inspected.
+```
+
+Coverage-aware final gates: 6/6 pass after setting DSN-0010 and rendering the matrix. Coverage is 8/17.

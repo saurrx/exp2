@@ -126,3 +126,6 @@ Twelve intended Review decision stories pass through V0 scenarios and existing d
 
 ### DSN-0010 evaluator corrections
 Fresh evaluator round 1 NEEDS_WORK: long disclosure at 200% zoom left too little reading space under a fixed title; concurrent completion repeated its status as a comment. Corrected compact scrolling so title/attribution can move away while the footer remains sticky; boilerplate status comments no longer repeat in the outcome. Typecheck passes. Refreshed captures, interaction checks and fresh review round 2 are pending; coverage remains 7/17.
+
+### DSN-0010 complete — evaluator PASS
+Fresh evaluator round 2 PASS: all seven categories 4, cognitive-load pass, no findings or missing states across 45 screenshots. Full stories 271/271, focused review 12/12 after pending-refresh guard, final coverage-aware gates 6/6, both builds, stable changed-story captures, focused axe and supplemental recovery/navigation checks pass. Coverage 8/17; ready for no-ff merge. Next uncovered lane A surface is DSN-0012 Patent portfolio; Workspace Admin dashboard is already complete under DSN-0002.

@@ -568,18 +568,20 @@
       "businessGoal": "Faster review and more suitable ideas sent to Photon Legal.",
       "routes": [
         {
-          "path": "/ideas/:id",
+          "path": "/ideas",
           "personas": [
             "WORKSPACE_ADMIN"
           ],
           "exists": true,
-          "note": "one decision workspace on the idea; no preview screen"
+          "note": "the approved two-pane review workspace; full evaluation opens the existing idea-detail route on demand"
         }
       ],
       "scenarios": [
-        "v0/workspace-admin/queue",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/idea-detail/under-review",
+        "v0/idea-detail/missing-evaluation",
+        "v0/idea-detail/partial-evaluation",
+        "v0/idea-detail/long-content",
+        "v0/review/missing-detail"
       ],
       "states": {
         "loading": "decision in progress keeps the button label and shows activity",
@@ -601,8 +603,8 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "none",
-      "backendNotes": "POST /v1/drafts/:id/review with APPROVED, CHANGES_REQUESTED or REJECTED exists; APPROVED at the legal stage moves the idea to SENT_TO_PHOTON. Transitions carry the actor for the concurrent-decision state.",
+      "backendImpact": "conceptual",
+      "backendNotes": "Existing review routes record APPROVED, CHANGES_REQUESTED or REJECTED and transitions expose the actor. No new endpoint or field. Supporting files use the previously declared BF-8 Idea.files / StoredFile.idea_id contract; it remains conceptual.",
       "storyIds": [
         "surfaces-review-decision--typical",
         "surfaces-review-decision--no-evaluation",
@@ -622,7 +624,7 @@
         "silent edits to inventor content",
         "technical and legal review stages"
       ],
-      "dsn": null
+      "dsn": "DSN-0010"
     },
     {
       "brief": "surfaces/workspace-admin-dashboard.md",

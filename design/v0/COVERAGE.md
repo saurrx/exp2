@@ -23,7 +23,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none | DSN-0007 |
 | Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | conceptual | DSN-0009 |
 | Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 16 | 17 | conceptual | DSN-0008 |
-| Review decision | Workspace Admin | `/ideas/:id` | 3 | 12 | none |  |
+| Review decision | Workspace Admin | `/ideas` | 5 | 12 | conceptual | DSN-0010 |
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
 | Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 7 | 12 | none |  |
 | Patent detail | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents/:patentId` | 6 | 15 | unwired |  |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 209 intended stories, 52 V0 scenarios; backend impact conceptual on 5, unwired on 5, none on 7.
+17 surfaces, 209 intended stories, 53 V0 scenarios; backend impact conceptual on 6, unwired on 5, none on 6.
 
 ## Inventor home
 
@@ -135,17 +135,17 @@ Brief: `product-context/surfaces/idea-detail.md` · Storybook title: `Surfaces/I
 
 ## Review decision
 
-Brief: `product-context/surfaces/review-decision.md` · Storybook title: `Surfaces/Review decision` · DSN: none yet
+Brief: `product-context/surfaces/review-decision.md` · Storybook title: `Surfaces/Review decision` · DSN: DSN-0010
 
 - **Personas:** Workspace Admin
 - **User goal:** Understand an invention quickly enough to make a defensible client decision.
 - **Business goal:** Faster review and more suitable ideas sent to Photon Legal.
-- **Routes:** `/ideas/:id` (Workspace Admin) — one decision workspace on the idea; no preview screen
-- **Required scenarios:** `v0/workspace-admin/queue`, `v0/shape/slow`, `v0/shape/failure`
+- **Routes:** `/ideas` (Workspace Admin) — the approved two-pane review workspace; full evaluation opens the existing idea-detail route on demand
+- **Required scenarios:** `v0/idea-detail/under-review`, `v0/idea-detail/missing-evaluation`, `v0/idea-detail/partial-evaluation`, `v0/idea-detail/long-content`, `v0/review/missing-detail`
 - **States:** loading — decision in progress keeps the button label and shows activity; empty — no evaluation: decide from the disclosure; success — Approve & send confirmed; status Sent to Photon Legal; error — decision failed with retry, reason preserved; permission — a second Workspace Admin sees the recorded outcome and actor
 - **Surface-specific states:** typical, no-evaluation, partial-evaluation, long-disclosure, missing-detail, decision-in-progress, concurrent-decision-completed, approve-confirmation, request-changes, reject
 - **Navigation badge:** none
-- **Backend impact:** none — POST /v1/drafts/:id/review with APPROVED, CHANGES_REQUESTED or REJECTED exists; APPROVED at the legal stage moves the idea to SENT_TO_PHOTON. Transitions carry the actor for the concurrent-decision state.
+- **Backend impact:** conceptual — Existing review routes record APPROVED, CHANGES_REQUESTED or REJECTED and transitions expose the actor. No new endpoint or field. Supporting files use the previously declared BF-8 Idea.files / StoredFile.idea_id contract; it remains conceptual.
 - **Intended story ids:** `surfaces-review-decision--typical`, `surfaces-review-decision--no-evaluation`, `surfaces-review-decision--partial-evaluation`, `surfaces-review-decision--long-disclosure`, `surfaces-review-decision--missing-detail`, `surfaces-review-decision--decision-in-progress`, `surfaces-review-decision--concurrent-decision-completed`, `surfaces-review-decision--approve-confirmation`, `surfaces-review-decision--request-changes`, `surfaces-review-decision--reject`, `surfaces-review-decision--success`, `surfaces-review-decision--failure-retry`
 - **Excluded here:** preview screen, silent edits to inventor content, technical and legal review stages
 

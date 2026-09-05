@@ -1,6 +1,6 @@
 # DSN-0000 — V0 preflight
 
-Status: verified for merge from `codex/dsn-0000-preflight`.
+Status: merged into main with --no-ff as ce33ded; pushed.
 
 Restore the two explicitly named prerequisites for the screen run. The Inventor must be able to submit a complete idea without evaluation; Case Owner and Photon Admin navigation must not badge Ideas.
 

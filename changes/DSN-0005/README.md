@@ -1,6 +1,6 @@
 # DSN-0005 — Inventor home
 
-Status: approved; awaiting merge.
+Status: merged into main with --no-ff as b2ee9b5; pushed.
 
 ## Persona and intent
 

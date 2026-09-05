@@ -37,3 +37,27 @@ BF-14 supplies the assigned-client dashboard summary and stored access-request t
 The existing client record exposes View as client. A full-app probe successfully enters Northwind Instruments as its Workspace Admin, then selects Exit client view. The original Case Owner is not restored: client mode remains true and role remains LEGAL_COUNSEL. The mock's parameterized view-as route precedes its literal exit route; the literal handler also hardcodes Photon Admin. This violates the brief's easy-exit rule. RUN-GOALS.md explicitly excludes auth changes; authorization for this specific fix has been requested. No pass or completion is claimed while this boundary remains unresolved. Evidence: client-view3.log.
 
 The response trace confirms entry HTTP 200 and exit HTTP 404 (`client-view-trace3.log`); `client-view-exit-failure.png` was opened and shows the client Overview after attempted exit. The final repeated functional probe (`functional4.log`) passes the implemented work queue, stored requests, exact links/Back, map controls and primary-action visibility at 200% zoom.
+
+## Rendered review checkpoint
+Opened all 34 current captures individually, including the default at 1280×720, 1366×768, 1440×900, 1920×1080 and 640×360@2. The work record stays prominent, the primary action fits even with the long title at 200%, and urgent items distinguish a client instruction from a recorded event. Access error keeps both retry and explanation visible. Setup and no-assignment states name the responsible next step. The map remains below work and names assigned scope. These captures were collected from the broad runner's current render; the explicit scoped re-baseline is queued after that runner releases its capture server.
+
+Repeated accessibility review passes all 28 main-content/overflow contexts (14 stories × 1440 and 640) with zero findings. This validates the new content, not the defective external client-view boundary.
+
+### Scorecard — provisional, not ready
+| Category | Score | Rendered evidence / remaining gap |
+| --- | --- | --- |
+| Product fit | 3 | Work hierarchy and assigned scope fit; the required client-view exit fails. |
+| Hierarchy | 4 | One selected brief and primary action lead; map and client context follow. |
+| Usability | 3 | Exact links, Back, retained requests and recovery pass; client-view exit blocks overall readiness. |
+| Trust | 3 | Dates and scope are grounded; a failed identity restoration remains unresolved. |
+| Craft | 4 | Token-based typography, hairline groups and consistent controls across the inspected widths. |
+| Accessibility and resilience | 4 | Long-title and error zoom controls remain visible; 28 axe/overflow contexts pass. |
+| Business | 4 | New approvals and urgent events lead into existing records; no measured outcome claim. |
+
+### Cognitive-load check on the render
+As Devika, I first see the selected newly approved idea, with client and reference adjacent. I read its client, approval age, title and next step before Open approved idea; I skip the lower map, filing history and client roster. I retain no cross-column values because the selected queue row yields to the coherent brief. I do not see rankings, general metrics or a badge. Work-level uncertainty has a named next action. The overall check remains **fail** because entering client view currently leaves me without a working exit; that cannot be waived by the quality of My work itself.
+
+### Story and viewport evidence
+Every ID starts `surfaces-case-owner-my-work--`: no-assigned-clients, newly-assigned-client, new-approved-idea, urgent-action, overdue-date, onboarding-incomplete, access-expired, data-error, loading, long-title, quiet, access-request-error, access-requested, portfolio-context. All select synthetic `v0/` scenarios as Case Owner. Every state has 1280×720 and 1440×900 captures; new-approved-idea also has 1366×768, 1920×1080 and 640×360@2; long-title, access-expired and access-request-error add 640×360@2. The client-view failure screenshot is separate boundary evidence, outside the new-content shots directory.
+
+Shared-navigation baseline checkpoint: 19 completed broad captures differ from their prior baseline only by the reviewed My work label: 490 pixels, bounds [54,124,116,137]. Representative Actions, idea detail, patent detail and portfolio images were opened. These exact current captures were accepted; mixed or other-surface differences remain unaccepted. The file list and pixel evidence are in sidebar-diffs-initial.json.

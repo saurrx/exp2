@@ -71,3 +71,8 @@ Round 1 NEEDS_WORK identified action emphasis, offscreen re-evaluation confirmat
 
 ### DSN-0007 ready to merge — evaluator PASS
 Round 2 inspected all 39 V0 PNGs and returned PASS: all seven scorecard categories 4; cognitive load pass; findings none; missing states none; reference match yes. Final output is pasted verbatim in changes/DSN-0007/README.md. All eight selected gates pass; full stories 244/244 and V0 33/33, both builds pass, refreshed screenshots stable with no egress. Evaluation result coverage now points to DSN-0007. No product-context, adapter, auth, analytics, query-hook, dependency or approved-reference edits. Merge and final recap next.
+
+## DSN-0007 merged recap
+Evaluation result is complete and merged to main with --no-ff (dbcd679), pushed to origin. Assessment, differences and strengthening prompts lead; prior-art evidence is progressively disclosed; actual status, explicit reload and visible re-evaluation confirmation support recovery without gating submission. Evaluator round 2 PASS, all seven scores 4, no findings or missing states; 39 V0 screenshots inspected. Full stories 244/244, V0 33/33, selected gates 8/8, design/Storybook builds and stable screenshots pass. Coverage is now 5/17 surfaces complete. No founder decision required.
+
+Next surface: **DSN-0008 — Idea detail and status** (`product-context/surfaces/idea-detail.md`), all four personas. Overall RUN COMPLETE condition remains unmet; continue after the normal steering and concurrency check.

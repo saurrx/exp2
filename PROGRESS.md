@@ -171,3 +171,8 @@ Round 1 NEEDS_WORK identified an offscreen removal prompt, duplicate editor iden
 
 ### DSN-0013 complete — evaluator PASS
 Round 2 PASS: all seven scorecard categories 4, no findings or missing states across 72 inspected screenshots. Final required gates 8/8, both builds, focused accessibility 25/25, four-persona stored-data/document/navigation checks and retained recovery at zoom pass. Twenty-three V0 stories replace two legacy detail stories; all 15 intended IDs exist. Coverage now 10/17. Ready for no-ff merge; next DSN-0014 Actions.
+
+## DSN-0013 merged recap — 2026-09-05 06:42 UTC
+Patent detail is complete and merged to main with --no-ff (eb41ab3), pushed to origin. Progressive record, focused operational editor, truthful canonical metadata and document recovery serve all four personas. Twenty-three V0 stories replace two legacy detail stories; 72 captures inspected by the fresh evaluator, round 2 PASS with all seven scores 4. Final required gates 8/8, both builds, 25-context accessibility, four-persona stored-data/document/navigation checks and zoom recovery pass. Coverage is 10/17. Preserved the concurrent firing yield entry in the PROGRESS-only merge conflict. Broader unrelated accessibility findings remain recorded for the final run sweep. No founder decision required.
+
+Next surface: **DSN-0014 — Actions** (`product-context/surfaces/actions.md`). No surface remains in progress. The overall RUN COMPLETE condition remains unmet.

@@ -1,0 +1,67 @@
+
+> design@0.0.0 test:stories
+> vitest run --project=storybook design/stories/surfaces/Authentication.stories.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+8:15:59 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+│
+▲  No story files found for the specified pattern:
+│  design/stories/**/*.mdx
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+8:16:00 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+8:16:00 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+8:16:00 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+
+ RUN  v4.1.11 /Users/saurabh/PL/exp2
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+8:16:00 PM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+You or a plugin you are using have set `optimizeDeps.esbuildOptions` but this option is now deprecated. Vite now uses Rolldown to optimize the dependencies. Please use `optimizeDeps.rolldownOptions` instead.
+8:16:03 PM [vite] (client) [console.warn] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+8:16:03 PM [vite] (client) [console.warn] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+8:16:04 PM [vite] (client) [console.error] Error sending invitation: AxiosError: Request failed with status code 404
+    at settle (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:2078:14)
+    at XMLHttpRequest.onloadend (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:2539:4)
+    at Axios$1.request (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:3391:37)
+    at async dispatch (http://localhost:63315/src/lib/realAdapter.ts:1752:25)
+    at async Object.mutationFn (http://localhost:63315/src/pages/auth/Invite.tsx:70:34)
+8:16:05 PM [vite] (client) [console.error] Error resetting password: AxiosError: Request failed with status code 400
+    at settle (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:2078:14)
+    at XMLHttpRequest.onloadend (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:2539:4)
+    at Axios$1.request (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:3391:37)
+    at async dispatch (http://localhost:63315/src/lib/realAdapter.ts:1752:25)
+    at async Object.mutationFn (http://localhost:63315/src/pages/auth/ResetPassword.tsx:103:32)
+8:16:05 PM [vite] (client) [console.error] Error sending forgot password email: AxiosError: Request failed with status code 503
+    at settle (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:2078:14)
+    at XMLHttpRequest.onloadend (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:2539:4)
+    at Axios$1.request (http://localhost:63315/node_modules/.cache/storybook/10.6.0/c384be1cc10b6b0403e7b4238bae4fd74fed17479014d777a613f5618de148ae/sb-vitest/deps/axios.js?v=3a0c9768:3391:37)
+    at async dispatch (http://localhost:63315/src/lib/realAdapter.ts:1752:25)
+    at async Object.mutationFn (http://localhost:63315/src/pages/auth/ForgotPassword.tsx:37:34)
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  20:16:00
+   Duration  5.46s (transform 0ms, setup 1.66s, import 71ms, tests 2.98s, environment 0ms)
+

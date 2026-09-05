@@ -1,0 +1,435 @@
+
+> design@0.0.0 storybook:build
+> storybook build --output-dir /tmp/dsn19-review-static
+
+
+┌  Building storybook v10.6.0
+│
+◇  Cleaning outputDir: ../../../../tmp/dsn19-review-static
+│
+◇  Loading presets
+│
+◇  Building manager..
+│
+●  Building open services..
+│
+●  Building preview..
+│
+▲  No story files found for the specified pattern:
+│  design/stories/**/*.mdx
+│  Vite vite v5.4.21 building for production...
+│  Vite transforming...
+│
+●  Copying static files: public at ../../../../tmp/dsn19-review-static
+│  Vite ✓ 4433 modules transformed.
+│  Vite rendering chunks...
+│  Vite computing gzip size...
+│  Vite ../../../../tmp/dsn19-review-static/iframe.html
+│  19.25 kB │ gzip:   5.32 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/pdf.worker.min-yatZIOMy.mjs
+│  1,375.84 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/iframe-CjzkXvyO.css
+│  119.38 kB │ gzip:  20.31 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/constants-CBpXd0Y3.js
+│  0.04 kB │ gzip:   0.06 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/pdf.worker.min-DgRcL-GR.js
+│  0.09 kB │ gzip:   0.11 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/roleAccess-Ovt14rZi.js
+│  0.14 kB │ gzip:   0.13 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/index-D17hSi50.js
+│  0.15 kB │ gzip:   0.15 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/formatter-L2YTDE3Q-D7VpNBZh.js
+│  0.26 kB │ gzip:   0.22 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/IdeaDraftPage-DVZ83r91.js
+│  0.27 kB │ gzip:   0.23 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/chevron-up-CPSCQraB.js
+│  0.30 kB │ gzip:   0.25 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/chevron-down-H1lZIXNO.js
+│  0.30 kB │ gzip:   0.25 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/plus-3aod2rFs.js
+│  0.32 kB │ gzip:   0.26 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/filter-BwZi9CCw.js
+│  0.33 kB │ gzip:   0.26 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/arrow-right-BUx4sZsL.js
+│  0.33 kB │ gzip:   0.27 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/search-vpTh5qd3.js
+│  0.34 kB │ gzip:   0.27 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/mail-B1j8QpXI.js
+│  0.39 kB │ gzip:   0.30 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/columns-3-C0OGsqbn.js
+│  0.39 kB │ gzip:   0.29 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/ellipsis-7AFP7KYG.js
+│  0.40 kB │ gzip:   0.27 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/arrow-up-down-DtEHwYRi.js
+│  0.41 kB │ gzip:   0.30 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/external-link-BLdzExeB.js
+│  0.42 kB │ gzip:   0.30 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/message-square-text-HVeCYPwr.js
+│  0.43 kB │ gzip:   0.30 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/eye-CNhUsdtB.js
+│  0.43 kB │ gzip:   0.31 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/link-Ca5l8Pal.js
+│  0.43 kB │ gzip:   0.30 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/upload-BWDr5kek.js
+│  0.43 kB │ gzip:   0.32 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/file-question-Dhc43E7i.js
+│  0.45 kB │ gzip:   0.32 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/users-DaegBesy.js
+│  0.47 kB │ gzip:   0.33 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/BlockedRedirect-BujX-4cJ.js
+│  0.49 kB │ gzip:   0.34 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/file-text-BYBQrda4.js
+│  0.50 kB │ gzip:   0.32 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/trash-2-CBsZ0FU7.js
+│  0.53 kB │ gzip:   0.35 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/product-surfaces-CcH-nQeT.js
+│  0.60 kB │ gzip:   0.32 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/dateRange-CBDP7qe6.js
+│  0.65 kB │ gzip:   0.39 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/label-D_UlbwZQ.js
+│  0.67 kB │ gzip:   0.46 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/sparkles-CHq-RfOD.js
+│  0.68 kB │ gzip:   0.40 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/AuthLoadingOverlay-CV7_feMT.js
+│  0.76 kB │ gzip:   0.47 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/pen-line-LYO3YoUD.js
+│  0.79 kB │ gzip:   0.41 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/badge-Mhzi9FcH.js
+│  0.80 kB │ gzip:   0.43 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/react-18-B1U8H6xg.js
+│  0.80 kB │ gzip:   0.48 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/textarea-B0ii_qx_.js
+│  0.82 kB │ gzip:   0.49 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/pencil-D8gSWsda.js
+│  0.83 kB │ gzip:   0.44 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/s3Upload-Bp-o6mkC.js
+│  0.90 kB │ gzip:   0.47 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/separator-DkCjtuMB.js
+│  0.95 kB │ gzip:   0.55 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/badge.stories-BFEicfrq.js
+│  1.03 kB │ gzip:   0.60 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/preload-helper-C1FmrZbK.js
+│  1.14 kB │ gzip:   0.68 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/textarea.stories-PCVzKTVu.js
+│  1.27 kB │ gzip:   0.70 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/card.stories-ByrFzxt4.js
+│  1.33 kB │ gzip:   0.67 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/StatusChip-BlK8sP9q.js
+│  1.38 kB │ gzip:   0.74 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/tooltip.stories-wnJNBtYe.js
+│  1.41 kB │ gzip:   0.69 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/card-Dh2ar6oW.js
+│  1.48 kB │ gzip:   0.49 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/switch.stories-CBxghRdv.js
+│  1.48 kB │ gzip:   0.75 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/filter-button-FKSQk8MG.js
+│  1.74 kB │ gzip:   0.86 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/patentLegalStatus-CXs_s3vP.js
+│  1.77 kB │ gzip:   0.50 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Assistant.stories-Ma8z7K8k.js
+│  1.79 kB │ gzip:   0.93 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/GradientBlobs-KrilZRUU.js
+│  1.83 kB │ gzip:   0.87 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/documentText-BaGVJfrg.js
+│  1.85 kB │ gzip:   0.98 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/radio-group.stories-BY9wwwWE.js
+│  1.93 kB │ gzip:   0.92 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/NotFound.stories-DwFftDdl.js
+│  2.04 kB │ gzip:   1.05 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/dialog.stories-DXZuNHTu.js
+│  2.07 kB │ gzip:   0.94 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/popover.stories-Q3M4su93.js
+│  2.11 kB │ gzip:   1.02 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/BrandIcons-CMfv3jkr.js
+│  2.15 kB │ gzip:   0.93 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/collapsible-BIUn7vR0.js
+│  2.32 kB │ gzip:   1.04 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/tabs.stories-Yx0K5ciW.js
+│  2.35 kB │ gzip:   1.04 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/checkbox.stories-Ci7A-jV4.js
+│  2.48 kB │ gzip:   0.94 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/input.stories-CJmVUHdj.js
+│  2.50 kB │ gzip:   0.96 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/progress-DD6PUaqe.js
+│  2.62 kB │ gzip:   1.26 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/input-B3OGdhQK.js
+│  2.72 kB │ gzip:   1.32 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/sheet-Bs75AKkQ.js
+│  2.75 kB │ gzip:   1.02 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/zoom-out-D445tmVT.js
+│  2.81 kB │ gzip:   0.70 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/product-chip-DvyJ85Ck.js
+│  2.88 kB │ gzip:   1.01 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Chips.stories-C0zwXmqD.js
+│  2.89 kB │ gzip:   1.09 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/product-chip.stories-uKIlnu3a.js
+│  2.92 kB │ gzip:   1.27 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/dateRange.stories-DkW7YCL3.js
+│  2.99 kB │ gzip:   1.09 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/alert-dialog.stories-Cq-s2404.js
+│  3.04 kB │ gzip:   1.18 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Dashboard.stories-BzseEJz4.js
+│  3.12 kB │ gzip:   1.22 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Button.stories-BT0gDGz8.js
+│  3.20 kB │ gzip:   1.05 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/useMutation-DEQPfGcV.js
+│  3.22 kB │ gzip:   1.31 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/misc-primitives.stories-BEtakFuN.js
+│  3.43 kB │ gzip:   1.27 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/States.stories-Bwl4M3qh.js
+│  3.45 kB │ gzip:   1.45 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/tabs-Clna7tfc.js
+│  3.47 kB │ gzip:   1.48 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/StatusChip.stories-DGNAhxoA.js
+│  3.51 kB │ gzip:   1.39 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ReviewQueueWorkspace.stories-njwMHhq5.js
+│  3.67 kB │ gzip:   1.13 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/menu-radio-item.stories-DI1O68O1.js
+│  3.78 kB │ gzip:   1.81 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/button.stories-DqyBV1EZ.js
+│  3.79 kB │ gzip:   1.31 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/DateRangeFilter-DPF739lO.js
+│  3.83 kB │ gzip:   1.27 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/alert-dialog-DJBbxKbW.js
+│  4.23 kB │ gzip:   1.40 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/switch-KJDTpNbR.js
+│  4.23 kB │ gzip:   1.84 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/checkbox-BPJgCAkM.js
+│  4.50 kB │ gzip:   1.96 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/filter-button.stories-BarNKZyd.js
+│  4.51 kB │ gzip:   1.59 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/tokens.tailwind-lbOp-r2d.js
+│  4.64 kB │ gzip:   1.78 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/BrandIcons.stories-9xEg6e3J.js
+│  4.97 kB │ gzip:   1.84 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/popover-KKHaB7hT.js
+│  5.12 kB │ gzip:   1.97 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/GradientBlobs.stories-BExrK5Pr.js
+│  5.51 kB │ gzip:   1.79 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/DateRangeFilter.stories-BC25Z7v8.js
+│  5.76 kB │ gzip:   1.88 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PortfolioImport-GQrGR9cz.js
+│  5.77 kB │ gzip:   2.14 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/radio-group-pdSvCfSk.js
+│  6.08 kB │ gzip:   2.44 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/AuthLoadingOverlay.stories-BqQwj8fz.js
+│  6.11 kB │ gzip:   2.24 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PatentFieldsForm-CekLfRZi.js
+│  6.13 kB │ gzip:   2.09 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Inputs.stories-DQScOD8m.js
+│  6.59 kB │ gzip:   1.97 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Surfaces.stories-DM7OyCO7.js
+│  7.06 kB │ gzip:   2.23 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/user-DStQLJ6u.js
+│  7.22 kB │ gzip:   1.81 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/IdeaSubmissionModal-C2khyalJ.js
+│  7.85 kB │ gzip:   3.18 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/LinkedIdeaBadge.stories-DDZmevM7.js
+│  7.92 kB │ gzip:   2.85 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PatentFieldsForm.stories-C0A7vLcD.js
+│  8.17 kB │ gzip:   2.55 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/actionsView.stories-g7rqdzXG.js
+│  8.41 kB │ gzip:   2.90 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Overlays.stories-n5ykkfIj.js
+│  8.55 kB │ gzip:   2.46 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Ideas.stories-DdWvYeET.js
+│  8.86 kB │ gzip:   2.42 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/StartIdea.stories-90y9p9P1.js
+│  9.56 kB │ gzip:   2.75 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/InventorHome.stories-DLGE7cOc.js
+│  9.57 kB │ gzip:   2.36 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PhotonAdminDashboard.stories-C9ZFWB3B.js
+│  10.71 kB │ gzip:   2.54 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Evaluation.stories-V0duMCyX.js
+│  11.32 kB │ gzip:   2.77 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ReviewDecision.stories-BsWE6DdH.js
+│  12.41 kB │ gzip:   2.94 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/CaseOwnerMyWork.stories-DlUkdTeG.js
+│  13.67 kB │ gzip:   3.04 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/scroll-area-XFh5HLF0.js
+│  13.80 kB │ gzip:   4.37 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/command-BFPr8mDC.js
+│  14.04 kB │ gzip:   5.26 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/DisclosureWorkspace.stories-BpFz2NtZ.js
+│  14.37 kB │ gzip:   3.36 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/IdeasPage-DcAq52UG.js
+│  14.78 kB │ gzip:   5.06 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Actions.stories-hy-BjbXp.js
+│  15.77 kB │ gzip:   3.59 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PhotonDueDates.stories-i8mfGHhq.js
+│  17.03 kB │ gzip:   3.78 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Radius.stories-DFhFHeDh.js
+│  17.42 kB │ gzip:   4.82 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PatentPortfolio.stories-D6AUrB5s.js
+│  18.77 kB │ gzip:   3.71 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/Loader-Ccgdb-1R.js
+│  19.98 kB │ gzip:   7.61 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PatentDetail.stories-Bf1khg2p.js
+│  20.21 kB │ gzip:   4.06 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/WorkspaceAdminDashboard.stories-BKiEa_Iw.js
+│  21.66 kB │ gzip:   4.52 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/select-Dg57tqH1.js
+│  22.34 kB │ gzip:   7.74 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ActionsWorkspace-BVyhpwYO.js
+│  25.46 kB │ gzip:   7.17 kB
+│  Vite ../../../../tmp/dsn19-review-static/vite-inject-mocker-entry.js
+│  28.53 kB │ gzip:   9.89 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ClientsPage-Brwi3j-G.js
+│  28.61 kB │ gzip:   8.00 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/matchers-JIUQ3HVY-CAdg16Fl.js
+│  29.35 kB │ gzip:  10.00 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Color-6AOWCN3U-CLVfDeRM.js
+│  30.37 kB │ gzip:  11.38 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ActionsPage-BiHNiRCg.js
+│  30.75 kB │ gzip:   8.54 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/WithTooltip-CDUNV5IS-DVb4fc5e.js
+│  33.21 kB │ gzip:  11.65 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Tokens.stories-BCDogKUk.js
+│  46.36 kB │ gzip:  10.68 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/DraftWorkspace-BH9DMHcV.js
+│  49.32 kB │ gzip:  14.94 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/PatentsPage-Ctq_9JvD.js
+│  49.69 kB │ gzip:  14.20 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Authentication.stories-CnNlH0rb.js
+│  50.52 kB │ gzip:  10.88 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ReviewQueueWorkspace-0O3NxTph.js
+│  56.69 kB │ gzip:  17.22 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/IdeaDetail.stories-BVaczslQ.js
+│  56.81 kB │ gzip:  14.11 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/moment-C5S46NFB.js
+│  60.81 kB │ gzip:  19.58 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/ClientsAndOnboarding.stories-Dcym7nO3.js
+│  65.23 kB │ gzip:  16.14 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/index.esm-Jidc37RG.js
+│  70.54 kB │ gzip:  22.80 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/syntaxhighlighter-4REYKNEV-oBYZTOiZ.js
+│  77.81 kB │ gzip:  27.00 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/proxy-BL6I1Zwx.js
+│  124.76 kB │ gzip:  40.70 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Workspace.stories-hgBYYyNi.js
+│  182.44 kB │ gzip:  47.23 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/pdf-BnPRJEQ6.js
+│  365.12 kB │ gzip: 107.40 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/mammoth.browser-CNtZ8PIE.js
+│  499.90 kB │ gzip: 124.75 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/axe-C9H91ytJ.js
+│  601.10 kB │ gzip: 165.31 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/Index-tkEUaS3k.js
+│  664.29 kB │ gzip: 178.05 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/Foundations.stories-wQj0m42b.js
+│  761.60 kB │ gzip: 136.72 kB
+│  Vite
+│  ../../../../tmp/dsn19-review-static/assets/DocsRenderer-JROSPFPF-Dd_PwWu3.js
+│  850.65 kB │ gzip: 270.37 kB
+│  Vite ../../../../tmp/dsn19-review-static/assets/iframe-B_7v4BoX.js
+│  2,474.42 kB │ gzip: 738.07 kB
+│
+▲  Vite
+│  (!) Some chunks are larger than 500 kB after minification. Consider:
+│  - Using dynamic import() to code-split the application
+│  - Use build.rollupOptions.output.manualChunks to improve chunking:
+│  ]8;;https://rollupjs.org/configuration-options/#output-manualchunkshttps://rollupjs.org/configuration-options/#output-manualchunks]8;;
+│  - Adjust chunk size limit for this warning via
+│  build.chunkSizeWarningLimit.
+│  Vite ✓ built in 12.50s
+│
+◇  Output directory: /tmp/dsn19-review-static
+│
+└  Storybook build completed successfully
+

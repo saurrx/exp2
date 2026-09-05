@@ -24,6 +24,7 @@ import WorkspaceAdminOverview from "../components/dashboard/WorkspaceAdminOvervi
 import InventorHomeContext from "../components/dashboard/InventorHomeContext";
 
 import CaseOwnerMyWork from "../components/dashboard/CaseOwnerMyWork";
+import PhotonAdminDashboard from "../components/dashboard/PhotonAdminDashboard";
 
 const DAY_MS = 86400000;
 
@@ -425,6 +426,7 @@ const LegacyIndex = () => {
   };
 
   const totalPatents = Number(data?.data?.total_patents) || 0;
+  if (user?.role === "PHOTON_ADMIN") return <PhotonAdminDashboard data={data?.data?.photon_admin_work} loading={isLoading} error={isDashboardError} retry={() => refetchDashboard()} />;
   if (user?.role === "CASE_OWNER") return <CaseOwnerMyWork data={data?.data?.case_owner_work} loading={isLoading} error={isDashboardError} retry={() => refetchDashboard()} />;
   return (
     <>

@@ -1,0 +1,13 @@
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"
+model_reasoning_summary = "none"
+tool_output_token_limit = 10000
+model_auto_compact_token_limit = 244800
+model_auto_compact_token_limit_scope = "total"
+
+[features]
+goals = true
+
+[features.token_budget]
+enabled = true
+use_history_notes_extension = true

@@ -70,6 +70,7 @@ export const clientHandlers = [
     const db = getDb(); const u = currentUser();
     if (!db.clients.some((x) => x.id === params.id)) return { status: 404, body: { message: "Client not found." } };
     if (!u || u.role !== "CASE_OWNER") return { status: 403, body: { message: "Only a case owner requests access." } };
+    if (db.flags.v0) { for (const access of db.access) if (access.user_id === u.id && access.client_id === params.id && !access.revoked_at) access.requested_at = clock.iso(); touched(); }
     return { status: 202, body: { requested: true, client_id: params.id, message: "Your request has been sent to the Photon admin." } };
   }),
   route("patch", "/v1/users/:id", async ({ params, body }) => {

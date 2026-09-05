@@ -5,6 +5,8 @@ import { currentUser, visibleIdeas } from "./scope";
 import { allDueDates, allPatents, scopeFor, q } from "../runtime/store";
 import type { Idea, Patent } from "../runtime/types";
 
+import { caseOwnerWork } from "./caseOwnerWork";
+
 const DAY = 86_400_000;
 const quarterStart = (t: number) => { const d = new Date(t); return Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / 3) * 3, 1); };
 const previousQuarterStart = (t: number) => { const d = new Date(quarterStart(t)); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 3, 1); };
@@ -90,6 +92,7 @@ export const dashboardHandlers = [
     const v0 = db.flags.v0 ? v0Aggregates(ideas, patents, scope) : {};
     return {
       ...v0,
+      ...(db.flags.v0 && u?.role === "CASE_OWNER" ? { case_owner_work: caseOwnerWork(u, ideas) } : {}),
       // BF-6: only collective company counts cross the Inventor's idea scope.
       ...(db.flags.v0 && u?.role === "INVENTOR" ? { inventor_home: {
         pipeline: {

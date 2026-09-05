@@ -1,0 +1,192 @@
+[
+  {
+    "f": "surfaces-case-owner-my-work--access-expired--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--access-request-error--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--access-requested--at-1440x900.png",
+    "count": 3,
+    "box": [
+      24,
+      110,
+      320,
+      834
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--loading--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--long-title--at-1280x720.png",
+    "count": 10915,
+    "box": [
+      14,
+      86,
+      471,
+      719
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--long-title--at-1440x900.png",
+    "count": 20385,
+    "box": [
+      320,
+      540,
+      1407,
+      881
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--new-approved-idea--at-1280x720.png",
+    "count": 11119,
+    "box": [
+      108,
+      504,
+      471,
+      719
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--new-approved-idea--at-1366x768.png",
+    "count": 14003,
+    "box": [
+      14,
+      86,
+      1333,
+      763
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--new-approved-idea--at-1440x900.png",
+    "count": 22935,
+    "box": [
+      320,
+      504,
+      1407,
+      896
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--new-approved-idea--at-1920x1080.png",
+    "count": 41347,
+    "box": [
+      24,
+      110,
+      1839,
+      1079
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--newly-assigned-client--at-1280x720.png",
+    "count": 12868,
+    "box": [
+      14,
+      86,
+      1247,
+      718
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--newly-assigned-client--at-1440x900.png",
+    "count": 78702,
+    "box": [
+      320,
+      551,
+      1407,
+      899
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--no-assigned-clients--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--onboarding-incomplete--at-1280x720.png",
+    "count": 13266,
+    "box": [
+      14,
+      86,
+      1247,
+      718
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--onboarding-incomplete--at-1440x900.png",
+    "count": 79100,
+    "box": [
+      320,
+      551,
+      1407,
+      899
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--portfolio-context--at-1280x720.png",
+    "count": 129,
+    "box": [
+      165,
+      239,
+      1236,
+      654
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--portfolio-context--at-1440x900.png",
+    "count": 106,
+    "box": [
+      351,
+      577,
+      1214,
+      834
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--quiet--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "f": "surfaces-case-owner-my-work--urgent-action--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  }
+]

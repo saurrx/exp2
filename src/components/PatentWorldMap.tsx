@@ -376,7 +376,7 @@ const PatentWorldMap = (props: any) => {
     | { title: string; subtitle: string; heading?: "h2" | "h3" }
     | undefined;
 
-  const { isFetching: isFetchingPatents, data: patentData } = useQuery({
+  const { isFetching: isFetchingPatents, data: queriedPatentData } = useQuery({
     queryKey: ["patents", user?.client_id],
     queryFn: async () => {
       const response = await API_CONFIG.get(`/api/v1/patent/all-stats/client`);
@@ -385,9 +385,11 @@ const PatentWorldMap = (props: any) => {
         return response?.data?.data;
       }
     },
-    enabled: !!user?.client_id,
+    enabled: !!user?.client_id && props.jurisdictionStats === undefined,
     refetchOnMount: true,
   });
+
+  const patentData = props.jurisdictionStats ?? queriedPatentData;
 
   // Country position mapping - using longitude/latitude coordinates for react-simple-maps
   const countryPositions: CountryPosition[] = [

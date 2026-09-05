@@ -16,12 +16,11 @@ import {
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import { toast } from "@/lib/toast";
 
 import API_CONFIG from "@/lib/apiConfig";
 import { clearAuthSession } from "@/lib/auth";
-import { track, identifyUser, resetUser } from "@/lib/analytics";
+import { track } from "@/lib/analytics";
 import { getClientLogoSrc } from "@/lib/clientBranding";
 import useUserCookie from "@/hooks/use-auth";
 import {
@@ -36,6 +35,8 @@ import {
 interface SidebarProps {
   collapsed: boolean;
   toggleSidebar: () => void;
+  onExitClientView?: () => void;
+  exitingClientView?: boolean;
 }
 
 type Role = "INVENTOR" | "TECH_COMMITTEE" | "LEGAL_COUNSEL" | "CASE_OWNER" | "PHOTON_ADMIN" | "PHOTON_SUPERADMIN";
@@ -111,7 +112,7 @@ const navForRole = (role: Role | undefined, reviewCount: number): NavItem[] => {
   }
 
   const operationalItems: NavItem[] = [
-    { label: "Overview", path: "/", icon: LayoutDashboard },
+    { label: role === "CASE_OWNER" ? "My work" : "Overview", path: "/", icon: LayoutDashboard },
     { label: "Clients", path: "/clients", icon: Building2 },
     { label: "Ideas", path: "/ideas", icon: Lightbulb },
     { label: "Patents", path: "/patents", icon: FileStack },
@@ -133,7 +134,7 @@ const navForRole = (role: Role | undefined, reviewCount: number): NavItem[] => {
   return operationalItems;
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
+const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar, onExitClientView, exitingClientView }) => {
   const { user } = useUserCookie();
   const location = useLocation();
   const navigate = useNavigate();
@@ -182,30 +183,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
           location.pathname.startsWith(`${pathname}/`);
   };
 
-
-  /** Leave "view as client": restore the admin token server-side, restore the
-   *  saved admin identity, and land back on the clients list. */
-  const exitClientView = async () => {
-    try {
-      const r = await API_CONFIG.post("/api/v1/auth/exit-client-view");
-      const original = sessionStorage.getItem("pl_original_admin_user");
-      sessionStorage.removeItem("pl_client_mode");
-      sessionStorage.removeItem("pl_original_admin_user");
-      const restored = r?.data?.user ? JSON.stringify({ ...JSON.parse(original ?? "{}"), ...r.data.user }) : original;
-      if (restored) Cookies.set("pl_user", restored, { secure: true, sameSite: "lax", path: "/" });
-      // Leaving the view-as session: drop the viewed identity, then re-identify
-      // the restored admin so events land on the right person. Ids/enums only.
-      resetUser();
-      try {
-        const admin = restored ? JSON.parse(restored) : null;
-        if (admin?.id) identifyUser(admin.id, { role: admin.role, client_id: admin.client_id ?? admin.clientId });
-      } catch { /* best-effort */ }
-      track("view_as_exited");
-      window.location.replace("/clients");
-    } catch {
-      window.location.replace("/clients");
-    }
-  };
 
   const logout = async () => {
     track("logout_clicked");
@@ -343,7 +320,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleSidebar }) => {
           >
             {sessionStorage.getItem("pl_client_mode") === "true" && (
               <DropdownMenuItem
-                onClick={exitClientView}
+                onClick={onExitClientView}
+                disabled={exitingClientView}
                 className="cursor-pointer rounded-sm px-2 py-2 text-sm font-medium text-amber-700"
               >
                 <ArrowLeftRight className="mr-2 h-4 w-4" />

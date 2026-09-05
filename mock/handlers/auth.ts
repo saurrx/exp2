@@ -82,16 +82,27 @@ export const authHandlers = [
     if (client && email && !email.endsWith("@" + client.domain)) return { status: 403, body: { message: `Only ${client.domain} addresses can join ${client.name}.` } };
     return { ok: true, existing: db.users.some((x) => x.email === email), organization_name: client?.name ?? "Photon Legal" };
   }),
+  // Literal exit must precede :clientId. The saved origin belongs to this
+  // browser tab, just like the mock's readable session cookie.
+  route("post", "/v1/auth/view-as/exit", () => {
+    const db = getDb();
+    try {
+      const original = JSON.parse(sessionStorage.getItem("pl_original_admin_user") ?? "null");
+      const origin = db.users.find((u) => u.id === original?.id && u.role === original?.role);
+      if (sessionStorage.getItem("pl_client_mode") !== "true" || !origin ||
+          !["CASE_OWNER", "PHOTON_ADMIN"].includes(origin.role)) {
+        return { status: 403, body: { message: "Your original session could not be restored. Sign in again." } };
+      }
+      return { user: presentUser(origin, db) };
+    } catch {
+      return { status: 403, body: { message: "Your original session could not be restored. Sign in again." } };
+    }
+  }),
   route("post", "/v1/auth/view-as/:clientId", ({ params }) => {
     const db = getDb();
     const counsel = db.users.find((x) => x.client_id === params.clientId && x.role === "LEGAL_COUNSEL");
     if (!counsel) return { status: 404, body: { message: "Client not found." } };
     const client = db.clients.find((c) => c.id === counsel.client_id);
     return { user: { ...presentUser(counsel, db), client: client ? { id: client.id, name: client.name, logo_file: client.logo_file_id ? { id: client.logo_file_id } : null } : null, view_as: true } };
-  }),
-  route("post", "/v1/auth/view-as/exit", () => {
-    const db = getDb();
-    const admin = db.users.find((x) => x.role === "PHOTON_ADMIN")!;
-    return { user: presentUser(admin, db) };
   }),
 ];

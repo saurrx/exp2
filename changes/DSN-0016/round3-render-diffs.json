@@ -1,0 +1,254 @@
+[
+  {
+    "name": "surfaces-case-owner-my-work--access-expired--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-expired--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-expired--at-640x360@2.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-request-error--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-request-error--at-1440x900.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-request-error--at-640x360@2.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-requested--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--access-requested--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-active--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-active--at-1366x768.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-active--at-1440x900.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-active--at-1920x1080.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-active--at-640x360@2.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-exit-error--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-exit-error--at-1440x900.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--client-view-exit-error--at-640x360@2.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--data-error--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--data-error--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--loading--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--loading--at-1440x900.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--long-title--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--long-title--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--long-title--at-640x360@2.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--new-approved-idea--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--new-approved-idea--at-1366x768.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--new-approved-idea--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--new-approved-idea--at-1920x1080.png",
+    "count": 4605,
+    "box": [
+      24,
+      110,
+      1839,
+      1074
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--new-approved-idea--at-640x360@2.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--newly-assigned-client--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--newly-assigned-client--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--no-assigned-clients--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--no-assigned-clients--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--onboarding-incomplete--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--onboarding-incomplete--at-1440x900.png",
+    "count": 2,
+    "box": [
+      24,
+      110,
+      25,
+      110
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--overdue-date--at-1280x720.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--overdue-date--at-1440x900.png",
+    "count": 10260,
+    "box": [
+      24,
+      110,
+      1407,
+      899
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--portfolio-context--at-1280x720.png",
+    "count": 104,
+    "box": [
+      108,
+      397,
+      1247,
+      677
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--portfolio-context--at-1440x900.png",
+    "count": 26268,
+    "box": [
+      24,
+      0,
+      1415,
+      857
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--quiet--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--quiet--at-1440x900.png"
+  },
+  {
+    "name": "surfaces-case-owner-my-work--urgent-action--at-1280x720.png",
+    "count": 8,
+    "box": [
+      14,
+      86,
+      62,
+      121
+    ]
+  },
+  {
+    "name": "surfaces-case-owner-my-work--urgent-action--at-1440x900.png",
+    "count": 7553,
+    "box": [
+      24,
+      110,
+      1407,
+      896
+    ]
+  }
+]

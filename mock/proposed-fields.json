@@ -91,6 +91,13 @@
       "type": "Nullable ISO date, derived existing client owner, source and correction metadata; V0 operator-only correction fields and filters",
       "finding": "BF-13",
       "reason": "DSN-0015: display missing or disputed imported dates truthfully and permit assigned Case Owners and Photon Admins to maintain the existing event. Existing route and states retained. Source provenance survives correction; completion remains separate from Actions. An exact request_id queue filter follows the related instruction even when several events share a patent. Conceptual until backend verification."
+    },
+    {
+      "entity": "Dashboard / ClientAccess",
+      "field": "case_owner_work; ClientAccess.requested_at",
+      "type": "Scoped approved ideas, urgent events, setup/access context, assignment health, recent filing updates and active-patent jurisdiction aggregates; timestamp for existing access-request route",
+      "finding": "BF-14",
+      "reason": "DSN-0016: show the Case Owner the next assigned-client responsibility before portfolio context. Existing dashboard and request-access routes; no ranking, additional permission or new lifecycle state. Expired-access metadata only names a previously assigned client and grants no work access. Source transitions supply approval age; event instructions link to exact requests. Conceptual until backend verification."
     }
   ],
   "collections": [

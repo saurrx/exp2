@@ -4,6 +4,11 @@ import Sidebar from "./Sidebar";
 import Header, { type DashboardHeaderConfig } from "./Header";
 import useUserCookie from "@/hooks/use-auth";
 import { DashboardSlotProvider } from "./DashboardChrome";
+import Cookies from "js-cookie";
+import API_CONFIG from "@/lib/apiConfig";
+import { clearAuthSession } from "@/lib/auth";
+import { track, identifyUser, resetUser } from "@/lib/analytics";
+import { Button } from "@/components/ui/button";
 
 interface DashboardLayoutProps {
   /** Omitted when used as a ROUTE layout — the router's Outlet fills it. */
@@ -103,6 +108,34 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   const { pathname, search: locationSearch } = useLocation();
   const { user } = useUserCookie();
+  const clientView = sessionStorage.getItem("pl_client_mode") === "true";
+  const [exitingClientView, setExitingClientView] = React.useState(false);
+  const [exitError, setExitError] = React.useState(false);
+  const exitInFlight = React.useRef(false);
+  const exitClientView = async () => {
+    if (exitInFlight.current) return;
+    exitInFlight.current = true;
+    setExitingClientView(true);
+    setExitError(false);
+    try {
+      const original = JSON.parse(sessionStorage.getItem("pl_original_admin_user") ?? "null");
+      if (!original?.id || !["CASE_OWNER", "PHOTON_ADMIN"].includes(original.role)) throw new Error("Missing original session");
+      const response = await API_CONFIG.post("/api/v1/auth/exit-client-view");
+      const restored = response?.data?.data?.user;
+      if (!restored || restored.id !== original.id || restored.role !== original.role) throw new Error("Session mismatch");
+      Cookies.set("pl_user", JSON.stringify(restored), { secure: true, sameSite: "lax", path: "/" });
+      sessionStorage.removeItem("pl_client_mode");
+      sessionStorage.removeItem("pl_original_admin_user");
+      resetUser();
+      identifyUser(restored.id, { role: restored.role, client_id: restored.client_id ?? restored.clientId });
+      track("view_as_exited");
+      window.location.replace("/clients");
+    } catch {
+      setExitError(true);
+      setExitingClientView(false);
+      exitInFlight.current = false;
+    }
+  };
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(() => {
     try {
       if (window.matchMedia("(max-width: 1439px)").matches) return true;
@@ -176,40 +209,36 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     [ready],
   );
 
+  const content = (
+      <main className={`flex min-w-0 flex-1 flex-col overflow-auto bg-[var(--pulse-canvas)] ${className || ""}`}>
+        {resolvedHeader && <Header {...resolvedHeader} titleSlotRef={titleSlotRef} actionsSlotRef={actionsSlotRef} titleSlotFilled={titleSlotFilled} />}
+        {children ?? <Suspense fallback={<ContentFallback />}><Outlet /></Suspense>}
+      </main>
+  );
+
   return (
     <DashboardSlotProvider value={slots}>
     <div className="flex h-dvh min-h-[640px] bg-[var(--pulse-canvas)] text-[var(--pulse-ink)]">
-      <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebarCollapse} />
-      {/* A flex column, so a page can say flex-1 and mean "the space left under
-          the header" instead of doing viewport arithmetic. h-full or
-          h-[calc(100dvh-64px)] both ignore the header that sits above them in
-          here, which is where the persistent 64px overhang came from. Still
-          overflow-auto: short pages scroll main, tall ones own their scrolling
-          via min-h-0 flex-1. */}
-      <main className={`flex min-w-0 flex-1 flex-col overflow-auto bg-[var(--pulse-canvas)] ${className || ""}`}>
-        {resolvedHeader && (
-          <Header
-            {...resolvedHeader}
-            titleSlotRef={titleSlotRef}
-            actionsSlotRef={actionsSlotRef}
-            titleSlotFilled={titleSlotFilled}
-          />
-        )}
-        {/* The page's OWN Suspense boundary.
-            Every page is React.lazy, and the app's only <Suspense> used to sit
-            outside <Routes> — so while a chunk loaded, its fallback replaced
-            the entire tree, sidebar and header included. Measured on demo: the
-            sidebar was gone for ~700-960ms on every first navigation, which is
-            the "it reloads the whole page" people were reporting. Making the
-            layout a route stopped it REMOUNTING; only a boundary inside the
-            layout stops it DISAPPEARING. The nearest boundary wins, so the
-            outer one never fires for these routes any more. */}
-        {children ?? (
-          <Suspense fallback={<ContentFallback />}>
-            <Outlet />
-          </Suspense>
-        )}
-      </main>
+      <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebarCollapse} onExitClientView={exitClientView} exitingClientView={exitingClientView} />
+      {clientView ? (
+        <div data-client-view className="flex min-w-0 flex-1 flex-col">
+          <section aria-label="Client view" className="shrink-0 border-b border-[var(--pulse-line)] bg-[var(--pulse-surface)] px-6 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="min-w-0 break-words text-sm text-[var(--pulse-ink-secondary)]">Client view · {user?.organization_name || user?.client?.name || "Client workspace"}</p>
+              <Button variant="outline" size="sm" onClick={exitClientView} disabled={exitingClientView}>{exitingClientView ? "Exiting…" : "Exit client view"}</Button>
+            </div>
+            {exitError && <div role="alert" className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--pulse-ink-secondary)]">
+              <p>Could not restore your session. Try Exit client view again, or sign in again.</p>
+              <Button variant="outline" size="sm" onClick={async () => {
+                try { await API_CONFIG.post("/api/v1/auth/logout"); } catch { /* Local recovery must remain available. */ }
+                clearAuthSession();
+                window.location.replace("/login");
+              }}>Sign in again</Button>
+            </div>}
+          </section>
+          {content}
+        </div>
+      ) : content}
     </div>
     </DashboardSlotProvider>
   );

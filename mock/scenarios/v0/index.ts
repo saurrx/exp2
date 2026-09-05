@@ -435,6 +435,34 @@ const dueDatesStates = ["upcoming", "due-soon", "overdue", "completed", "missing
   return data;
 }));
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const myWorkStates = ["no-assigned-clients", "newly-assigned-client", "new-approved-idea", "urgent-action", "overdue-date", "onboarding-incomplete", "access-expired", "long-title", "quiet", "access-request-error"].map(slug => v0(`v0/my-work/${slug}`, `Case Owner my work: ${slug}`, "Assigned-client approved work, urgent events and client setup; deterministic V0 evidence.", U.caseOwner.email, [U.caseOwner.email, U.caseOwner2.email, U.photonAdmin.email, U.admin.email], () => {
+  const specs: IdeaSpec[] = [
+    {invention:8,author:U.inventor,state:"SENT_TO_PHOTON",ageDays:1,reviewer:U.admin},
+    {invention:9,author:U.coinventor,state:"SENT_TO_PHOTON",ageDays:12,reviewer:U.admin},
+    {invention:10,author:U.inventor,state:"FILED",ageDays:35,reviewer:U.admin},
+  ];
+  const d = structuredClone(northwindBuild(`v0/my-work/${slug}`,{[NORTHWIND.id]:portfolio(14,"my-work-northwind",NORTHWIND,0),[BEACON.id]:portfolio(3,"my-work-beacon",BEACON,0),[ORBITAL.id]:portfolio(7,"my-work-orbital",ORBITAL,0)},specs));
+  d.dueDates=[]; d.actionRequests=[];
+  const owner=d.users.find(u=>u.id===U.caseOwner.id)!;
+  const rng=rngFor(`v0/my-work/${slug}`), pats=generatePortfolio(NORTHWIND,d.portfolios[NORTHWIND.id]).patents;
+  if(["new-approved-idea","urgent-action","overdue-date","long-title"].includes(slug))for(let n=0;n<2;n++) {
+    const id=uuid(rng);d.patentOverrides[pats[n].id]={application_number:`SYN-US-2025-${String(42+n).padStart(4,"0")}`};
+    d.dueDates.push({id,patent_id:pats[n].id,client_id:NORTHWIND.id,title:n===0?"Response to examination report":"Patent renewal",event_type:n===0?"Office Action Response Due":"Renewal Fee Due",due_at:clock.daysAhead(n===0?2:-3),status:"PENDING",created_at:clock.daysAgo(20),updated_at:clock.daysAgo(2)});
+    if(n===0 && slug!=="overdue-date") {const template=d.actionTemplates.find(t=>t.event_types.includes("Office Action Response Due"))!;d.actionRequests.push({id:uuid(rng),client_id:NORTHWIND.id,due_date_id:id,template_id:template.id,instruction:template.label,selected_countries:[],note:null,status:"NEW",submission_state:"SUBMITTED",version:1,requested_by_id:U.admin.id,requested_at:clock.daysAgo(1),updated_at:clock.daysAgo(1)});}
+  }
+  if(!["new-approved-idea","long-title"].includes(slug)){d.ideas=d.ideas.filter(i=>i.state==="FILED");d.transitions=d.transitions.filter(t=>d.ideas.some(i=>i.id===t.idea_id));}
+  if(slug==="urgent-action") d.dueDates=d.dueDates.filter(e=>e.event_type==="Office Action Response Due");
+  if(slug==="overdue-date") d.dueDates=d.dueDates.filter(e=>e.event_type==="Renewal Fee Due");
+  if(slug==="no-assigned-clients") {owner.assigned_client_ids=[];d.access=d.access.filter(a=>a.user_id!==owner.id);}
+  if(["newly-assigned-client","onboarding-incomplete"].includes(slug)){owner.assigned_client_ids=[BEACON.id];d.access=d.access.filter(a=>a.client_id===BEACON.id);d.access.forEach(a=>a.granted_at=clock.daysAgo(slug==="newly-assigned-client"?1:18));}
+  if(slug==="onboarding-incomplete")d.users=d.users.filter(u=>u.id!==U.beaconAdmin.id);
+  if(["access-expired","access-request-error"].includes(slug)){owner.assigned_client_ids=[NORTHWIND.id];const a=d.access.find(a=>a.client_id===BEACON.id)!;a.kind="TEMPORARY";a.expires_at=clock.daysAgo(1);a.granted_at=clock.daysAgo(8);a.requested_at=null;}
+  if(slug==="access-request-error")d.flags.mutationsFail=true;
+  if(slug==="quiet")owner.assigned_client_ids=[NORTHWIND.id];
+  if(slug==="long-title") {d.ideas.find(i=>i.state==="SENT_TO_PHOTON")!.title=LONG_TITLE; d.clients.find(c=>c.id===NORTHWIND.id)!.name="Northwind Instruments and Advanced Measurement Research Laboratories";}
+  return d;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

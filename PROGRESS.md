@@ -111,3 +111,8 @@ Round 2 found one remaining trust issue: the Workspace Admin AI assessment did n
 
 ### DSN-0009 complete — evaluator PASS
 Fresh evaluator round 3 PASS: all seven categories 4, cognitive-load pass, no findings or missing states across 45 screenshots. Coverage now 7/17; final coverage-aware gates 6/6 pass (typecheck, roles, tokens, V0, matrix, runtime graph). Earlier full story suite 263/263 and focused axe/build/navigation checks pass. Ready for no-ff merge; next is DSN-0010 Review decision.
+
+## DSN-0009 merged recap — 2026-09-05 04:02 UTC
+Ideas list is complete and merged to main with --no-ff (7ce2bd4), pushed to origin. Inventor drafts/submissions expose state, advisory evaluation and next step; Photon lists show client and Case Owner with direct record navigation. Reference defects exposed by this run (zoom navigation, missing disclosure evidence, repeated selected information and advisory wording) are corrected and recorded. Evaluator round 3 PASS, all seven scores 4, no findings or missing states across 45 screenshots. Full stories 263/263, V0 38/38, final gates 6/6, builds, stable captures, focused axe and navigation checks pass. Coverage is 7/17. Preserved the concurrent firing’s yield entry in the PROGRESS-only merge conflict. No founder decision required.
+
+Next surface: **DSN-0010 — Review decision** (`product-context/surfaces/review-decision.md`). No surface remains in progress. The overall RUN COMPLETE condition remains unmet.

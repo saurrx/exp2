@@ -38,6 +38,7 @@ type ClientDetailsProps = {
   refetchClientData: any;
   isEditMode?: boolean;
   onSaveComplete?: () => void;
+  onSaveError?: (message: string | null) => void;
   onCancel?: () => void;
 };
 
@@ -53,6 +54,7 @@ const ClientDetails = forwardRef<ClientDetailsRef, ClientDetailsProps>(
       refetchClientData,
       isEditMode = false,
       onSaveComplete,
+      onSaveError,
       onCancel,
     },
     ref
@@ -69,7 +71,7 @@ const ClientDetails = forwardRef<ClientDetailsRef, ClientDetailsProps>(
       logo: null,
     });
     const [newAdminEmail, setNewAdminEmail] = useState("");
-    const [saveError, setSaveError] = useState<string | null>(null);
+    const setSaveError = (message: string | null) => onSaveError?.(message);
 
     // Initialize form data when clientData changes or edit mode is enabled
     useEffect(() => {
@@ -162,10 +164,6 @@ const ClientDetails = forwardRef<ClientDetailsRef, ClientDetailsProps>(
                 resolve();
               },
               onError: (error: any) => {
-                toast.error(
-                  error?.response?.data?.message ||
-                    "Error updating client personal info"
-                );
                 reject(error);
               },
             });
@@ -176,7 +174,7 @@ const ClientDetails = forwardRef<ClientDetailsRef, ClientDetailsProps>(
           }
         } catch (error: any) {
           setSaveError(error?.response?.data?.message || "Client information could not be saved. Your changes are still here.");
-          // Error already handled in mutation
+          // The parent keeps one persistent recovery message by the save controls.
         }
       },
     }));
@@ -307,7 +305,7 @@ const ClientDetails = forwardRef<ClientDetailsRef, ClientDetailsProps>(
         <div><label htmlFor="edit-client-domain" className="text-sm font-medium">Allowed domain</label><Input id="edit-client-domain" value={formData.allowed_domain} onChange={event=>handleChange("allowed_domain",event.target.value)} placeholder="company.test" className="mt-2 h-9 border-pl-border" aria-invalid={!!validationErrors.allowed_domain}/><p className="mt-2 text-xs text-pl-text-2">Use the company domain for workspace entry. Invitations are managed separately.</p>{validationErrors.allowed_domain && <p role="alert" className="mt-2 text-sm text-pl-red-text">{validationErrors.allowed_domain}</p>}</div>
         <div><label htmlFor="edit-client-about" className="text-sm font-medium">Organization information</label><Textarea id="edit-client-about" value={formData.about} onChange={event=>handleChange("about",event.target.value)} className="mt-2 min-h-24 border-pl-border"/></div>
         <details className="border-t border-pl-border pt-4"><summary className="cursor-pointer text-sm font-medium">Organization logo</summary>{resolvedClientLogo && <img src={resolvedClientLogo} alt="Current organization logo" className="mt-3 h-12 max-w-32 object-contain"/>}<label htmlFor="edit-client-logo" className="mt-3 block text-sm">Upload logo</label><Input id="edit-client-logo" type="file" accept="image/*" disabled={isFileUploading} onChange={handleLogoChange} className="mt-2 border-pl-border"/>{isFileUploading && <p role="status" className="mt-2 text-sm text-pl-text-2">Uploading logo…</p>}</details>
-        {isUpdating && <p role="status" className="text-sm text-pl-text-2">Saving client information…</p>}{saveError && <p role="alert" className="text-sm text-pl-red-text">{saveError}</p>}
+        {isUpdating && <p role="status" className="text-sm text-pl-text-2">Saving client information…</p>}
       </> : <dl className="space-y-4 text-sm"><div><dt className="text-xs text-pl-text-2">Allowed domain</dt><dd className="mt-2 break-words">{clientData?.allowed_domain || "Not configured"}</dd></div><div><dt className="text-xs text-pl-text-2">Organization information</dt><dd className="mt-2 whitespace-pre-wrap break-words">{clientData?.about || "No organization information added"}</dd></div></dl>}
     </section>;
   }

@@ -31,10 +31,10 @@ BF-16 in proposed-fields.json adds derived `onboarding` evidence to the existing
 ## Stories and capture contract
 All story IDs use `surfaces-clients-and-onboarding--` under `Surfaces/Clients and onboarding`. Suffixes: photon-admin, case-owner, potential-client, new-client, no-owner, no-admin, no-inventors, no-portfolio, import-in-progress, import-errors, ready, ready-case-owner, disabled, access-request, loading, error, empty, long-title, invite-admin, invite-link, import-result, confirm-readiness, edit-domain, save-failed, client-support, client-settings, shared-invitation and owner-assignment. Every story selects a deterministic `v0/clients/` scenario. The 12 intended ledger IDs are included.
 
-Each story has 1280×720 and 1440×900 captures. Both personas' default list and ready record also have 1366×768, 1920×1080 and 640×360@2 captures. Long title has an additional zoom capture: 69 images total. All 69 story images plus two full-app zoom chooser images were opened and inspected. Corrections include list spacing, repeated status, the persistent identity header and canonical import-history totals/date/actor. Coverage remains null until every required check and independent review has passed.
+Each story has 1280×720 and 1440×900 captures. Both personas' default list and ready record also have 1366×768, 1920×1080 and 640×360@2 captures. Long title has an additional zoom capture: 69 images total. All 69 story images plus two full-app zoom chooser images were opened and inspected. Corrections include list spacing, repeated status, the persistent identity header and canonical import-history totals/date/actor. Coverage records DSN-0018 following independent PASS.
 
 ## Validation
-All 383 repository interaction tests passed after the four supplemental support/settings/link/ownership stories were added. The current 28-story scope passes. V0 53/53, both builds, roles/tokens and the first required serial gate set 7/7 pass. The previous 69-capture set was stable with no egress; 56 accessibility/overflow contexts passed. The final required serial set also passed 7/7. Exact 69-story re-baselining passed twice, with no egress. A subsequent visual review caught import-history field-name mismatches; that display is corrected and the refreshed two import-result images are stable and inspected. All 28 scoped interaction tests and 56 current accessibility/overflow contexts pass after the correction. Final serial checks and the broad repository run remain in progress.
+All 383 repository interaction tests passed after the four supplemental support/settings/link/ownership stories were added. The current 28-story scope passes. V0 53/53, both builds, roles/tokens and the first required serial gate set 7/7 pass. The previous 69-capture set was stable with no egress; 56 accessibility/overflow contexts passed. The final required serial set also passed 7/7. Exact 69-story re-baselining passed twice, with no egress. A subsequent visual review caught import-history field-name mismatches; that display is corrected and the refreshed two import-result images are stable and inspected. All 28 scoped interaction tests and 56 current accessibility/overflow contexts pass after the correction. The final round-2 serial required gates pass 7/7, with all 56 current accessibility/overflow contexts clean. The broad repository run and exact final baseline refresh remain in progress.
 
 Full-app browser evidence: the complete creation-to-readiness sequence passes. It saves a new synthetic client/domain, assigns a Case Owner, sends the mock Workspace Admin invitation, creates an inventor link, imports 12 patent records and six dates from the existing synthetic export, then records readiness. The explicit Back link restores search. Case Owner client view enters and exits back to assigned scope. Additional browser checks pass exact client-filtered approved/filed idea links, all client dates and the specific upcoming Action. The two initial probe failures were a duplicate Back-link selector and a transient development reload; the corrected complete run passes (functional3.log, links1.log).
 
@@ -52,3 +52,32 @@ Known compromises: readiness confirms operational setup rather than account acti
 | Business | 4 | Shorter time to completed client setup is the intended signal, guarded by real ownership, source evidence and recoverable imports; not yet measured. |
 
 Post-render roleplay for Tobias and Devika agrees with the six opening answers: first the selected client and next setup/support responsibility; open that record with one dominant action; read client, owner and consequence together and skip disclosed details; remember no separated counts/status; no unrelated firm metrics or people rankings; explicit source/recovery copy resolves ownership and save anxiety. Hard rules pass: one primary action per context; destructive record/link changes disclosed or confirmed; no metric without scoped work/evidence; no decorative cards, horizontal scroll, invented lifecycle stage, repeated default title/status, or unauthorized badge. Supporting details are disclosed. Client identity persists while scrolling. Both personas' zoom chooser retains the selected client's name. Known compromises above are unchanged.
+
+## Independent review — round 1
+```text
+VERDICT: NEEDS_WORK
+SURFACE: clients-and-onboarding  PERSONA: Case Owner and Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 3 · trust 3 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — Both personas’ default-state roleplays at 1280×720 and 1440×900 support the recorded hierarchy and scope, but import recovery requires guessing and save failure repeats a status.
+FINDINGS (most severe first, max 7):
+
+1. Import result, both widths — “1 duplicates” gives neither the affected row nor its disposition; the operator must guess whether to remove, correct, or retain it when importing the corrected file — identify the duplicate row and state what happened to it and what to do next.
+2. Save failure — at 1440×900 the identical failure status appears inline and in a toast, breaking the no-repeated-status hard rule; at 1280×720 only the toast is visible, separating recovery feedback from Save — show one persistent failure message beside the save action, with the retry instruction.
+
+STATES MISSING: none
+REFERENCE MATCH: yes — restrained typography, amber primary actions, hairline separation, compact controls, and two-pane client selection follow the reference language.
+```
+
+Round 1 corrections: import evidence now identifies row 11 as a skipped duplicate of row 4 and instructs the operator to retain one row for that application number. The count explains that duplicates were skipped. Save failure has one persistent message directly under the header controls, with a Save client retry instruction; the duplicate toast is removed. Inputs remain intact. These are display/recovery corrections; existing mutations and access rules are preserved. The four refreshed import-result/save-failure captures are stable and opened at both widths; all 28 scoped interaction tests pass. Current screenshots are ready for independent round 2.
+
+## Independent review — round 2
+```text
+VERDICT: PASS
+SURFACE: clients-and-onboarding  PERSONA: Case Owner and Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — Independent six-question roleplays for both personas at 1280×720 and 1440×900 agree with the record: client, ownership and next step lead, supporting evidence recedes, and recovery requires no avoidable guessing.
+FINDINGS (most severe first, max 7):
+None. All 71 images inspected; import corrections identify affected rows and disposition, and save failure provides one visible message with preserved inputs and retry guidance.
+STATES MISSING: none
+REFERENCE MATCH: yes — restrained typography, amber primary actions, compact controls, hairline separation and two-pane client selection follow the approved reference language.
+```

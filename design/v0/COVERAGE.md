@@ -30,7 +30,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Actions | Workspace Admin, Case Owner, Photon Admin | `/due-dates`, `/actions` | 16 | 14 | conceptual | DSN-0014 |
 | Photon due dates | Case Owner, Photon Admin | `/due-dates` | 13 | 20 | conceptual | DSN-0015 |
 | Workspace, people and profile | Workspace Admin, Inventor, Case Owner, Photon Admin | `/workspace`, `/profile` | 6 | 12 | unwired |  |
-| Case Owner my work | Case Owner | `/` | 3 | 9 | unwired |  |
+| Case Owner my work | Case Owner | `/` | 3 | 9 | unwired | DSN-0016 |
 | Clients and onboarding | Case Owner, Photon Admin | `/clients` | 4 | 12 | none |  |
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
@@ -247,7 +247,7 @@ Brief: `product-context/surfaces/workspace.md` · Storybook title: `Surfaces/Wor
 
 ## Case Owner my work
 
-Brief: `product-context/surfaces/case-owner-my-work.md` · Storybook title: `Surfaces/Case Owner my work` · DSN: none yet
+Brief: `product-context/surfaces/case-owner-my-work.md` · Storybook title: `Surfaces/Case Owner my work` · DSN: DSN-0016
 
 - **Personas:** Case Owner
 - **User goal:** Know which assigned client needs attention and move approved work forward.

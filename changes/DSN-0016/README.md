@@ -21,7 +21,7 @@ The current home leads with aggregate portfolio panels and a client ranking, the
 | C · Work lanes | Parallel lanes for approved ideas, urgent events and client setup; map below | Fast broad scanning when work types are balanced | Three competing starting points and narrow items cost more at laptop widths. |
 
 ## Validation
-In progress; coverage stays null until rendered evidence, required checks and independent PASS.
+Approved after independent round 3. Coverage records DSN-0016; required checks and rendered evidence pass, with the disclosed optional reference-edge rasterization limitation.
 
 All three low-fidelity renders were opened before UI changes. A is selected: the stable focused brief avoids comparing client groups or three lanes. The map follows assigned-client work. BF-14 adds scoped dashboard context on the existing route; no adapter or shared hook changes.
 
@@ -139,3 +139,18 @@ The sole round-2 finding is corrected: the supporting client roster now suppress
 
 ### Final review evidence
 After the roster correction, both builds pass, all 34 core captures pass two-context stability/no-egress and are copied into the record, and the required gates pass 7/7. Axe/overflow remains clean in all 32 contexts. Opened the five final default viewports and all materially changed urgent, overdue and map captures. round3-render-diffs.json identifies the five material changes; all other differences are small rendering noise or unchanged. A separate full-app test confirms Sign in again calls logout, reaches /login and clears both saved client-mode keys (signin-recovery.log).
+
+## Independent review round 3 — approved
+```text
+VERDICT: PASS
+SURFACE: case-owner-my-work  PERSONA: Case Owner
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, my six answers agree with the record: approved work leads, Open approved idea dominates, necessary context stays together, nothing requires cross-pane memory, secondary content recedes, and scope and recovery are clear.
+FINDINGS (most severe first, max 7):
+None. Setup responsibility and age appear only in the queue in urgent/overdue 1440 and default 1920; the roster duplication is resolved.
+STATES MISSING: none — All 42 story images and 7 supplementary boundary images inspected; latest validation records successful persona restoration and sign-in recovery.
+REFERENCE MATCH: yes — Typography, amber primary controls, hairline separation and list/detail composition follow the approved language; three directions and the chosen tradeoff are recorded.
+```
+
+## Completion
+All ten surface conditions are satisfied for merge: persona/roleplay and three rendered directions recorded; selected implementation built in place; all intended stories and boundary states covered; replaced legacy home coverage retired; required viewports captured and opened; both builds, 7/7 required gates, roles, 50 V0 tests and 32 accessibility/overflow contexts pass; independent PASS received within three rounds; scorecard all 4 and cognitive-load pass; coverage records DSN-0016. The branch is ready for the pre-authorized merge. The earlier full broad-gate findings remain documented follow-ups and are not claimed clean.

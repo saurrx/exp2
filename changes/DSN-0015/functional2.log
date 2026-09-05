@@ -1,0 +1,9 @@
+PASS date correction persists with source row, named updater and resolved issue
+PASS event completion preserves submitted Action status
+PASS reopened event leaves completed filter
+PASS related Action opens matching application and submitted instruction
+Blocked external requests: []
+PASS INVENTOR read/edit boundaries { foreign: 403, own: 403, read: 403 }
+PASS LEGAL_COUNSEL read/edit boundaries { foreign: 403, own: 403, read: 200 }
+PASS CASE_OWNER read/edit boundaries { foreign: 403, own: 200, read: 200 }
+PASS PHOTON_ADMIN read/edit boundaries { foreign: 200, own: 200, read: 200 }

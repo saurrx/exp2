@@ -1,0 +1,741 @@
+2026-09-05T08:34:00.790162Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-09-05T08:34:00.790780Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+OpenAI Codex v0.153.2
+--------
+workdir: /Users/saurabh/PL/exp2
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a070b4-03a9-7890-9831-a90352232502
+--------
+user
+---
+name: evaluator
+description: Fresh-context design evaluator. Grades one rendered V0 surface against its brief, the scorecard and the cognitive-load charter from screenshots, without seeing the builder's reasoning. Returns PASS or NEEDS_WORK.
+tools: Read, Glob, Grep, Bash
+---
+
+You are the reviewer of a Pulse V0 surface. You did not build it and you
+must not read the builder's reasoning; you judge only what is rendered and
+what the record claims.
+
+Read, in this order:
+1. `product-context/AGENTS.md` (design rules, boundaries, evaluation rules)
+2. `product-context/PERSONAS.md` for the persona named in the request
+3. The surface brief named in the request (`product-context/surfaces/<brief>.md`)
+4. `design/v0/COGNITIVE-LOAD.md`
+5. `product-context/DESIGN-SCORECARD.md`
+6. The change record `changes/DSN-xxxx/README.md` and every screenshot under
+   its `shots/` directory. Open each screenshot with the Read tool and look
+   at it. If a screenshot the brief's states require is missing, that is a
+   finding.
+
+Then run the cognitive-load roleplay yourself as the persona, on the
+1280×720 and 1440×900 screenshots of the default state, and compare your six
+answers with the builder's answers in the record. Score the scorecard
+categories 1–5 from the screenshots.
+
+Report in exactly this shape, nothing before the first line:
+
+```
+VERDICT: PASS | NEEDS_WORK
+SURFACE: <brief>  PERSONA: <persona>
+SCORECARD: product-fit N · hierarchy N · usability N · trust N · craft N · accessibility N · business N
+COGNITIVE LOAD: pass | fail — <one sentence>
+FINDINGS (most severe first, max 7):
+1. <element> — <what the persona had to read/remember/guess> — <fix>
+...
+STATES MISSING: <list or none>
+REFERENCE MATCH: <does it match the Workspace Admin Overview / Ideas queue language: yes | no — what differs>
+```
+
+PASS requires: every scorecard category ≥ 4 or an explained exception in the
+record; cognitive load pass; no product-boundary violation (fifth persona,
+badge outside Workspace Admin, Inventor seeing Actions/dates/rankings, score
+cutoff, evaluation gating submission, notification bell, chat assistant); no
+hard rule in COGNITIVE-LOAD.md broken; the three directions and the chosen
+tradeoff written in the record.
+
+Report only findings that affect the persona's task, trust, or a stated
+rule. Do not list style preferences. Do not propose new features.
+
+
+Surface: due-dates. Personas: Case Owner and Photon Admin. Inventor refusal is a required boundary state; Workspace Admin continues to Actions. Record: changes/DSN-0015/README.md. Inspect every image in changes/DSN-0015/shots using view_image. Read-only independent evaluation in a fresh context. Use only local files and this evaluator workflow; do not edit files or delegate. Return the exact verdict format.
+
+warning: Under-development features enabled: token_budget. Under-development features are incomplete and may behave unpredictably. To suppress this warning, set `suppress_unstable_features_warning = true` in /Users/saurabh/.codex/config.toml.
+2026-09-05T08:34:01.028033Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/
+2026-09-05T08:34:01.028053Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/
+hook: SessionStart
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+exec
+/bin/zsh -lc 'cat product-context/AGENTS.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Instructions for AI Design Work
+
+You are designing Pulse V0, a high-trust B2B intellectual-property workflow
+product. Read the required context before producing visual output or code.
+
+## Operating contract
+
+- Start with the persona, job, product object, consequence, and success metric.
+- Roleplay the persona before laying out the screen: what do they need to see
+  first, what do they decide here, what would they never read on this screen?
+- Resolve information architecture before styling.
+- Produce three meaningfully different directions for material new surfaces,
+  select the one with the lowest cognitive load for that persona and screen
+  (design/v0/COGNITIVE-LOAD.md), and record all three with the tradeoff. The
+  founder has pre-authorised this selection for the V0 run; stop and ask only
+  when a direction would change product behaviour, scope, permissions,
+  vocabulary or a reference screen.
+- Explain the hierarchy, tradeoffs, and elements deliberately omitted.
+- Build using the repository's real components, tokens, and supported stack.
+  The mock is the backend: extend it when a screen needs what the API lacks.
+- Render and inspect the real result. Code inspection is not visual review.
+- Cover every reachable state relevant to the active surface.
+- Run the design scorecard and the cognitive-load check after rendering and
+  address the largest gaps.
+- Prefer reduction and hierarchy over adding cards, labels, and decoration.
+
+## Product boundaries
+
+- There are four V0 personas: Inventor, Workspace Admin, Case Owner, Photon Admin.
+- Evaluation is optional, started by the inventor with a button, and advisory.
+  No score blocks submission.
+- Workspace Admin approval sends the idea to Photon Legal for filing.
+- Pulse contains no purchasing, checkout, billing, or service-price selection.
+- Drafting and filing legal work occur outside Pulse.
+- Inventors see the full company patent portfolio but no due dates or Actions.
+- Workspace Admins see Actions and dates but cannot import or edit patent data.
+- Case Owners and Photon Admins maintain patent and due-date data.
+- Trademark is later roadmap, not V0.
+- A general-purpose AI chat assistant is not V0.
+- There is no notification center or bell in V0; email is the durable channel.
+
+## Design rules
+
+- Pulse must feel calm, credible, premium, intelligent, human, precise,
+  encouraging, and professionally expressive.
+- The Workspace Admin Overview and the Workspace Admin Ideas queue are the
+  approved visual reference. Match their tokens, type, radius scale, button
+  sizes, hairline separation and two-pane list/detail pattern on every other
+  screen. Preserve Photon Legal's core brand colors.
+- Avoid old enterprise software, spreadsheet decoration, aqua/glass styling,
+  generic AI dashboards, loud color, childish illustration, and excessive motion.
+- One task leads on every screen. Supporting UI recedes.
+- Do not put data on a dashboard merely because it exists.
+- The patent world map is part of every V0 dashboard (all four home screens)
+  as the portfolio's geographic view. It never leads: work and next steps
+  come first, the map sits below them. Jurisdiction counts and filters also
+  belong in the Patent Portfolio.
+- Use noticeable but professional motion only to explain change, progress, or
+  successful completion.
+- Desktop and laptop only, but support common laptop widths and 200% browser zoom.
+
+## Evaluation rules
+
+- Use the term `prior art`, never `prior arts`.
+- Retain a numeric 0–10 patentability score. The score may carry one band
+  label (Highly novel, Moderately novel, Marginally novel, Closely matched,
+  Not evaluated) and, inside the draft, a live patentability signal that
+  reads the sections back before the full score exists.
+- Never communicate an approval cutoff or imply that a score guarantees a patent.
+- Present inventor results in this order: Assessment, What appears different,
+  How to strengthen. Put detailed prior art behind progressive disclosure.
+- State once that the result is AI-assisted and advisory. Present the substance
+  confidently, directly, and with evidence rather than timid repeated warnings.
+
+## Never
+
+- Invent a persona, permission, workflow stage, product module, or legal promise.
+- Turn an external reference into a copied visual system.
+- Optimize for visual novelty at the expense of task completion or trust.
+- Add a full-screen chatbot as a shortcut for designing the product.
+- Add a notification bell, cost module, trademark module, docketing
+  integration, or purchase flow to V0.
+- Put a navigation badge on anything but the Workspace Admin's pending reviews.
+- Rank named inventors where an Inventor can see it. The Workspace Admin
+  Overview's Top inventors list is the one authorised ranking.
+- Use real inventions, customer names, emails, patent data, credentials, or
+  call transcripts in fixtures, screenshots, or prompts.
+- Declare a design successful based only on an AI critic's score.
+
+## Completion requirements
+
+Before presenting a design as ready, verify it against
+`DESIGN-SCORECARD.md`, `design/v0/COGNITIVE-LOAD.md`, the relevant surface
+brief, accessibility requirements, all supported laptop widths, long content,
+empty/loading/error states, and the named business outcome.
+
+codex
+I’ll review the local brief, evaluation criteria, record, and every screenshot independently.
+
+exec
+/bin/zsh -lc 'cat product-context/PERSONAS.md product-context/surfaces/due-dates.md design/v0/COGNITIVE-LOAD.md product-context/DESIGN-SCORECARD.md changes/DSN-0015/README.md' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+# Personas and Jobs
+
+V0 has exactly four product personas. Do not import the six-role model from a
+previous implementation.
+
+## 1. Inventor
+
+### Who they are
+
+An employee, engineer, researcher, product builder, or technical leader who may
+have created something worth protecting. Patent work is not their daily job.
+
+### Job to be done
+
+Turn an idea and scattered supporting material into a disclosure that the
+company can review and Photon Legal can understand.
+
+### Context and anxiety
+
+- They may not know patent vocabulary.
+- They may not know what detail is sufficient.
+- A traditional questionnaire feels like work unrelated to their main job.
+- They fear saying something incorrectly or wasting time.
+- They may start with a deck, technical document, notes, code, or pasted text.
+
+### Desired feeling
+
+Inspired, guided, capable, reassured, and proud of contributing.
+
+### Success
+
+- Starts with almost no friction
+- Sees useful prefilled content quickly
+- Understands gaps without feeling judged
+- Completes and submits confidently
+- Understands the advisory evaluation
+- Knows what happens after submission
+
+### Permissions
+
+- Domain self-signup or invitation
+- Create and manage own/credited ideas
+- Add co-inventors
+- Upload or paste source material
+- Evaluate and re-evaluate
+- Submit at any score
+- Respond to requested changes and resubmit
+- View own idea timeline
+- View the complete company patent portfolio read-only
+- Cannot see due dates, Actions, clients, or administration
+
+## 2. Workspace Admin
+
+### Who they are
+
+Usually the General Counsel or legal leader, and sometimes the CTO, innovation
+leader, or members of an internal review/IP committee. A workspace may have
+several Workspace Admins.
+
+### Job to be done
+
+Encourage invention submissions, review them efficiently, decide which ideas
+should be filed, and maintain visibility over the company's program and patent
+portfolio.
+
+### Context and anxiety
+
+- Patent review is one responsibility among many.
+- A growing queue can become invisible in email or spreadsheets.
+- Decisions should be defensible without requiring a full internal IP team.
+- They need enough evidence to decide, not every available data point.
+
+### Desired feeling
+
+Focused, confident, decisive, and informed.
+
+### Success
+
+- Pending reviews are unmistakable
+- Oldest work and days waiting are visible
+- A decision can be made from one coherent screen
+- The consequence of approval is explicit
+- Portfolio and upcoming responsibilities are easy to understand
+
+### Permissions
+
+- See all ideas in the workspace
+- Submit own ideas
+- Submit on behalf of a selected real inventor
+- Review, request changes, reject, or approve for filing
+- Invite and manage workspace users
+- View the patent portfolio and patent details read-only
+- View and submit patent-event Actions
+- See due dates within Actions and patent details
+- Cannot import or directly edit patent/due-date records
+
+## 3. Case Owner
+
+### Who they are
+
+A Photon Legal team member responsible for a set of assigned client companies.
+
+### Job to be done
+
+Keep assigned clients onboarded, supported, and moving from approved ideas to
+organized Photon Legal work while maintaining accurate portfolio visibility.
+
+### Desired feeling
+
+Prepared, responsive, and in control.
+
+### Success
+
+- Sees which assigned client needs attention
+- Receives approved ideas as clear briefs
+- Can find attachments and review history immediately
+- Can maintain portfolio and dates without crossing client boundaries
+- Can process assigned Actions without hunting
+
+### Permissions
+
+- Assigned clients only
+- Help onboard clients
+- Add Workspace Admins and invite inventors
+- View assigned-client ideas, portfolio, Actions, and dates
+- Receive approved ideas
+- Import and manually update assigned-client patents and due dates
+- Process assigned-client Action requests
+- Enter client view when authorized
+- Does not normally make the client's internal review decision
+
+## 4. Photon Admin
+
+### Who they are
+
+A Photon Legal administrator with firm-wide operational responsibility.
+
+### Job to be done
+
+Configure clients and access, allocate Case Owners, maintain data quality, and
+ensure firm-wide client work is visible and controlled.
+
+### Desired feeling
+
+Calm, informed, precise, and confident that nothing is being missed.
+
+### Success
+
+- Client ownership and access are clear
+- Unassigned or stuck work is visible
+- Firm-level queues prioritize action over vanity metrics
+- Data corrections are possible and auditable
+
+### Permissions
+
+- See all clients and their V0 data
+- Create and configure clients
+- Assign Case Owners
+- Manage Photon users and access
+- View all approved ideas, portfolios, dates, and Actions
+- Import and manually update all client patents and due dates
+- Process Action requests
+- Does not normally replace the client's Workspace Admin review
+
+# Photon Due Dates
+
+## Personas
+
+Case Owner and Photon Admin. Workspace Admin sees dates contextually in Actions
+and patent details. Inventor never sees them.
+
+## Job
+
+Find upcoming or overdue client patent events and maintain accurate visibility.
+
+## Data source
+
+Manual Photon update and spreadsheet import only. No docketing integration.
+
+## Hierarchy
+
+- Urgency/days remaining
+- Event
+- Patent/application
+- Client
+- Owner
+- Date
+- Status
+- Related Action
+
+## Views
+
+Default list optimized for urgency; calendar may be secondary when it helps
+capacity planning. Large calendars must not hide the actionable queue.
+
+## States
+
+Upcoming, due soon, overdue, completed, missing date, disputed/import problem,
+large same-day group, no upcoming dates, loading, error.
+
+# Cognitive-load charter
+
+Every V0 screen is judged by one question: **how much does this persona have
+to read, compare and remember before they can do the one thing they came
+here to do?** The answer depends on the persona and the screen, so the check
+is a roleplay, not a number. The agent and the evaluator both run it; a
+screen ships only when both pass it.
+
+## The roleplay (run it before designing and again on the render)
+
+Become the persona. Use the scenario's name, their job, and the moment that
+brought them here (the surface brief's *Job* and the persona's *triggering
+situation* in PERSONAS.md). Then answer, in writing, in the change record:
+
+1. **First glance (3 seconds).** What did I see first? Is it the thing I came
+   for? If my eye landed on a metric, a map, a card border or a label before
+   the task, the hierarchy is wrong.
+2. **The one thing.** What is the single action this screen exists for, for
+   me, now? Is it the most visually dominant control? Is its consequence
+   obvious from its label?
+3. **What I had to read to get there.** List every element I read or skipped
+   before acting. Each one is a cost. Which could be removed, merged, moved
+   below the fold, or shown only on demand without losing anything I needed?
+4. **What I had to remember.** Did I have to hold a number, a status or a
+   name in my head while moving between two places on the screen (or two
+   screens)? Put those side by side or remove one.
+5. **What I never need here.** Name the elements that serve another persona,
+   another moment, or nobody. They go.
+6. **What I'd be anxious about.** Anything unclear about what happens next,
+   who owns it, or whether my work is saved? That gets one plain sentence,
+   not a warning box.
+
+## Persona defaults (starting assumptions, overridden by the brief)
+
+- **Inventor** — occasional user, no patent vocabulary, often arriving with
+  material already written. Wants: where is my idea, what happens next, how
+  do I start one. Never needs: firm metrics, due dates, Actions, rankings of
+  colleagues, evaluation evidence before the conclusion. Tolerates the least
+  density of the four.
+- **Workspace Admin** — decision-maker, scans daily. Wants: what needs my
+  decision, how old is it, is the programme moving. Reads tables well but
+  decides from a brief, not a questionnaire. Tolerates a dense overview
+  (the reference screen) because every tile answers "so what do I do".
+- **Case Owner** — operator with several clients. Wants: which client needs
+  me today, the next date, the next action. Needs client scope visible at all
+  times; everything else can be one click away.
+- **Photon Admin** — controller. Wants exceptions, ownership gaps and incoming
+  work. Reads dense lists if grouped; never needs vanity totals.
+
+## Hard rules (fail regardless of persona)
+
+- One primary action per screen, visually dominant. Destructive actions live
+  behind a menu or a confirmation.
+- No element exists only because the data exists. A metric without a next
+  step, comparison or consequence is decoration.
+- Conclusion before evidence: score → meaning → what differs → evidence on
+  demand. This order holds on every surface that shows an evaluation.
+- No card around a grouping that whitespace, a rule or a heading can hold.
+  The reference screens use cards for tiles that are read as units; copy
+  that, not a card per block.
+- No horizontal scroll at the five review widths. A table that needs it has
+  too many default columns.
+- No lifecycle stage shown as reached when it is not (a draft is not
+  "Submitted").
+- No repeated score, status or title on the same screen.
+- Progressive disclosure for anything longer than a paragraph that is not the
+  task: disclosure sections, prior art, history, attachments.
+- Copy names the object and the consequence (`Send to Photon Legal`, not
+  `Approve`); no boilerplate repeated per block; the advisory note appears once.
+- The Inventor sees no ranking of named people, no due dates, no Actions.
+- A navigation badge exists only for the Workspace Admin's pending reviews.
+
+## Direction selection
+
+When three directions are on the table, the one with the lowest cognitive
+load for **this persona on this screen** wins unless it fails the brief's
+hierarchy or a product boundary. "Lowest load" means: fewest elements read
+before the primary action, fewest things to remember, fewest decisions the
+persona has to make that Pulse could make for them. Write the comparison in
+the change record as a table; the evaluator reads that table.
+
+## Evaluator verdict
+
+PASS only when the roleplay answers are written, the six answers show nothing
+the persona had to read or remember that the screen could have spared them,
+and every hard rule holds on the rendered screenshots at 1280×720 and
+1440×900. Otherwise NEEDS_WORK with the specific element and the specific
+persona cost.
+# Pulse Design Scorecard
+
+Score each category 1–5 after inspecting the rendered interface. Explain every
+score below 4 and address the largest gaps before presenting the design.
+
+The score is a critique aid, not proof of user or business success.
+
+## Product fit
+
+- Is the persona and job explicit?
+- Is the screen's reason for existing obvious?
+- Does the interface preserve V0 permissions and workflow?
+- Is the intended business behavior named?
+- Has roadmap scope stayed out of V0?
+
+## Hierarchy
+
+- Is one primary task unmistakable?
+- Does secondary UI recede?
+- Is metric scope clear: personal, workspace, client, or firm?
+- Is prime space used for something actionable or motivating?
+- Can the screen be understood quickly?
+
+## Usability
+
+- Are next steps and consequences explicit?
+- Can the user recover without losing work?
+- Are loading, empty, error, dense, and long-content states coherent?
+- Does navigation preserve context?
+- Are complex details progressively disclosed?
+
+## Trust
+
+- Are evaluation conclusions explained by evidence?
+- Is advisory AI labelled once without timid repetition?
+- Are important actions attributable and auditable?
+- Does the product avoid guarantees or false objectivity?
+- Does the design feel appropriate for confidential IP work?
+
+## Craft
+
+- Are typography, spacing, borders, icons, and alignment deliberate?
+- Are controls and states consistent?
+- Does anything look like a generic AI-generated SaaS template?
+- Has every card, label, metric, and animation earned its place?
+- Is the Photon Legal identity recognizable without overwhelming the task?
+
+## Accessibility and resilience
+
+- Keyboard, focus, semantics, contrast, and zoom?
+- Reduced-motion equivalent?
+- Long titles, large totals, missing data, and localization?
+- No information conveyed by color alone?
+- No internal IDs or raw system language?
+
+## Business
+
+- Which behavior should improve?
+- What metric detects it?
+- What guardrail prevents a hollow improvement?
+- Does the design reduce friction in the submission-to-filing revenue loop?
+- Is there a simpler intervention with equal impact?
+
+# DSN-0015 · Photon due dates
+
+## Intent and persona frame
+Devika, Case Owner, arrives to find the next responsibility across her assigned clients. Tobias, Photon Admin, arrives to catch overdue work and ownership or data-quality gaps across the firm. The object is a recorded patent event with a deadline, owner and related instruction. The job is to keep that event visible and accurate. The primary consequence is saving a corrected event; completion removes it from upcoming work without silently completing a separate Action. The intended success signal is fewer unresolved or missed responsibilities, guarded by client scope, truthful missing/disputed dates and retained edits. No measured improvement is claimed.
+
+## Cognitive-load roleplay
+1. First glance: urgency and the next event, with its client scope immediately visible.
+2. One thing: open the relevant event and maintain its accurate date or completion state; Edit event leads the selected record.
+3. Read: event, urgency/date, patent reference, client, Case Owner and current state. Source details and related Action evidence unfold when needed.
+4. Remember: identity, deadline and edit/confirmation stay together. Preserve filtering when returning from related records.
+5. Never needed: spreadsheet decoration, patent legal-state columns, a large calendar before the queue, a badge, client instruction controls, docketing integrations or Inventor access.
+6. Anxiety: missing dates and import issues are named honestly; saving and completion have separate explicit consequences; failed changes remain available to retry.
+
+## Three directions
+| Direction | What leads and recedes | Hypothesis and risk | Choice |
+| --- | --- | --- | --- |
+| A · Urgency queue and focused event record | Urgency/event list leads into one coherent record/editor; source and calendar context recede | Lowest memory cost when correcting a date; the selected row must avoid duplicating the record | Selected after visual review |
+| B · Day-grouped agenda with expanding rows | Work grouped by day, with editing inside a row | Strong same-day scanning, but a large day or open editor displaces subsequent work | Rejected: less stable reading position during correction |
+| C · Month navigator with an urgent side list | Calendar capacity leads while urgent work remains alongside | Helps distribution planning but delays the everyday event correction and competes at laptop widths | Rejected: calendar is secondary to the brief's urgency job |
+
+The choice is pre-authorized by the run's cognitive-load contract. All three low-fidelity HTML/PNG renders in `directions/` were opened before UI changes. A keeps a stable event identity while editing; B displaces the agenda and C makes the calendar compete. The calendar may remain a small secondary planning aid; it must never hide the actionable queue.
+
+## Boundaries
+Keep /due-dates and the scoped all_due_dates query, existing adapter and shared hooks. Workspace Admin continues into the completed Actions design on the same technical route. Inventor receives the existing blocked-redirect behavior instead of any due-date content. Photon manual maintenance and spreadsheet import follow the brief; any missing fields or routes are declared in the mock. References, product context, auth, analytics and dependencies remain unchanged.
+
+## Validation
+Final review in progress. Coverage remains null until the required gates and independent PASS. All 19 states pass focused interaction checks; V0 passes 43/43. Forty-nine captures pass two-clean-render stability checks with no egress (shots3.log plus the targeted save-error rerun in shots-save-final.log); the first refresh had one intermittent save-error zoom difference. All 38 accessibility/zoom contexts are clean (axe3.log). Full-app correction, recovery, import, scope and exact Action/Back navigation checks pass (functional2.log, extra1.log, recovery1.log, navigation1.log). Final required serial gate will be recorded below.
+
+## Implementation checkpoint
+The 1,800-line legacy table wrapper is replaced in place by the same scoped query feeding a token-based urgency list and focused event record. Source and latest correction recede; missing dates and disputed records remain honest. Date edits require a correction note and retain source/row provenance. Completion has its own confirmation and preserves the related Action. Existing spreadsheet import is reused with a due-date count and return label. A month filter acts on the server's full result set, replacing the misleading page-only calendar. The old calendar and unused reminder component, two legacy stories/captures and their accessibility fingerprints are retired.
+
+BF-13 declares nullable dates, owner derived from existing Case Owner assignments, source and correction metadata, operator-only existing PATCH corrections and additional date filters. Missing dates are excluded from overdue checks in dependent mock readers. No adapter, shared hook, auth, analytics, product-context, reference screen or dependency changes. The /actions component now honors the exact related request as well as its application search. Browser Back restores client, month, deadline filter and selected event, including a patent with two instructions. At 200%, client/reference/date stay in the compact record and secondary owner/status/patent title can be expanded. This surface joins the existing desktop-zoom CSS exceptions; the device gate is unchanged.
+
+Eighteen new stories and all 332 story tests passed in the first full run; V0 38/38. API/UI probes pass for saved corrections with source row and named updater, event completion independent of Action status, reopening, scoped writes for all four roles, invalid-date refusal, missing-date filtering, retained edits across selection, spreadsheet import and 200% editing/navigation. A later serial gate exposed a focus timing race; synchronous layout focus now fixes it. Final validation remains in progress.
+
+## Rendered review and cognitive-load check
+All 49 final captures have been reviewed (the original 47 were opened in full, followed by the refreshed recovery and navigation captures and defaults): every story at 1280×720 and 1440×900; Case Owner and Photon Admin defaults also at 1366×768, 1920×1080 and 640×360@2; editing, failure, confirmation, long content and import also at 200%. The first pass exposed the legacy body width floor and a save-error message below sticky controls. The surface now reflows at 200%; error recovery scrolls its message above the save controls and was functionally checked at 1280 and 640. Final captures show the recovery message and retry controls together.
+
+| Scorecard | Score | Rendered evidence |
+| --- | --- | --- |
+| Product fit | 4 | Scoped patent-event maintenance; missing/disputed dates and unassigned ownership stay explicit. |
+| Hierarchy | 4 | Event urgency and one selected record lead; Edit event is primary, completion secondary, provenance below. |
+| Usability | 4 | Retained edits, retry, cancel and reopening; scoped search/month/pagination; matching Action link. |
+| Trust | 4 | Recorded dates are never inferred; source row survives correction; named updater and distinct completion consequences. |
+| Craft | 4 | Reference token/type/button language, hairline separation, bounded reading width and no ornamental data cards. |
+| Accessibility | 4 | All 38 accessibility/zoom contexts have zero violations and zero horizontal overflow; keyboard and zoom recovery checked. |
+| Business | 4 | Makes unresolved events easier to find and correct; completion and source checks guard against merely clearing a queue. |
+
+Case Owner post-render roleplay: (1) I first see the next recorded event and urgency in my assigned scope. (2) Edit event leads, then Save event commits the correction. (3) I read the event, reference, client, date and owner; I skip source details unless checking a discrepancy. (4) Client/reference stay with the editor and confirmation; retained edits avoid remembering changes when selecting another event. (5) I do not need a full month grid, patent lifecycle columns, client-instruction controls or decoration. (6) The correction note, visible retry and explicit independent event completion tell me what is saved and what changes.
+
+Photon Admin post-render roleplay: (1) The missing-date event leads, with Orbital Foods and Unassigned ownership visible at ordinary laptop widths. (2) I correct the recorded event. (3) I read urgency, event, client/owner and date; I open the Action or provenance only when required. (4) The same focused record prevents a cross-row comparison while editing. (5) There are no firm vanity totals, leading calendar or navigation badge. (6) The source remains traceable and completing an event cannot silently complete a client's Action. At 200%, client/reference/date and the primary action stay together; owner/status and full patent title use one compact disclosure.
+
+Known compromises: the optional calendar is a server month filter with the actionable list preserved; it makes no day-grid capacity-count claim. The mock import models deterministic outcomes rather than parsing a real docketing system. Only the latest correction is exposed, labelled honestly; BF-13 is conceptual until backend verification. The existing Case Owner sidebar Overview label belongs to the upcoming My work surface and is not changed here. No founder decision is required.
+
+## Story and capture inventory
+Every ID below is prefixed `surfaces-photon-due-dates--`. Every state has 1280×720 and 1440×900 captures. Upcoming and photon-admin additionally have 1366×768, 1920×1080 and 640×360@2; edit-date, save-error, completion-confirmation, long-title and spreadsheet-import additionally have 640×360@2.
+
+| Story suffix | Persona | Scenario |
+| --- | --- | --- |
+| `upcoming` | Case Owner | `v0/due-dates/upcoming` |
+| `due-soon` | Case Owner | `v0/due-dates/due-soon` |
+| `overdue` | Case Owner | `v0/due-dates/overdue` |
+| `completed` | Case Owner | `v0/due-dates/completed` |
+| `missing-date` | Case Owner | `v0/due-dates/missing-date` |
+| `import-problem` | Case Owner | `v0/due-dates/import-problem` |
+| `large-same-day-group` | Case Owner | `v0/due-dates/large-same-day-group` |
+| `no-upcoming-dates` | Case Owner | `v0/due-dates/no-upcoming-dates` |
+| `loading` | Case Owner | `v0/due-dates/upcoming` |
+| `error` | Case Owner | `v0/due-dates/upcoming` |
+| `photon-admin` | Photon Admin | `v0/due-dates/firm-scope` |
+| `case-owner-scope` | Case Owner | `v0/due-dates/firm-scope` |
+| `edit-date` | Case Owner | `v0/due-dates/missing-date` |
+| `save-error` | Case Owner | `v0/due-dates/upcoming` |
+| `completion-confirmation` | Case Owner | `v0/due-dates/upcoming` |
+| `long-title` | Case Owner | `v0/due-dates/long-title` |
+| `spreadsheet-import` | Case Owner | `v0/due-dates/upcoming` |
+| `inventor-refused` | Inventor | `v0/inventor/portfolio` |
+| `related-instruction` | Case Owner | `v0/due-dates/same-patent-events` |
+
+exec
+/bin/zsh -lc 'rg --files changes/DSN-0015/shots' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+changes/DSN-0015/shots/surfaces-photon-due-dates--case-owner-scope--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--save-error--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--edit-date--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--spreadsheet-import--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--long-title--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--missing-date--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--no-upcoming-dates--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--overdue--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1366x768.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--no-upcoming-dates--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--overdue--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--long-title--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--missing-date--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--save-error--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--edit-date--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--spreadsheet-import--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--case-owner-scope--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--due-soon--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--loading--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--edit-date--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--inventor-refused--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1920x1080.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1920x1080.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--long-title--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--import-problem--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1366x768.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--large-same-day-group--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completed--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completion-confirmation--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--related-instruction--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--error--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completion-confirmation--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--related-instruction--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--error--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--spreadsheet-import--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--large-same-day-group--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completed--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--inventor-refused--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--save-error--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completion-confirmation--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--import-problem--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--due-soon--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--loading--at-1440x900.png
+
+exec
+/bin/zsh -lc 'rg --files changes/DSN-0015/shots' in /Users/saurabh/PL/exp2
+ succeeded in 0ms:
+changes/DSN-0015/shots/surfaces-photon-due-dates--case-owner-scope--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--save-error--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--edit-date--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--spreadsheet-import--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--long-title--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--missing-date--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--no-upcoming-dates--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--overdue--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1366x768.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--no-upcoming-dates--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--overdue--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--long-title--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--missing-date--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--save-error--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--edit-date--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--spreadsheet-import--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--case-owner-scope--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--due-soon--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--loading--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--edit-date--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--inventor-refused--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1920x1080.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--photon-admin--at-1920x1080.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--long-title--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--import-problem--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1366x768.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--large-same-day-group--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completed--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completion-confirmation--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--related-instruction--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--error--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completion-confirmation--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--related-instruction--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--error--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--spreadsheet-import--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--large-same-day-group--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completed--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--upcoming--at-1280x720.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--inventor-refused--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--save-error--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--completion-confirmation--at-640x360@2.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--import-problem--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--due-soon--at-1440x900.png
+changes/DSN-0015/shots/surfaces-photon-due-dates--loading--at-1440x900.png
+
+codex
+The “completed” captures show an empty Open events view, so they do not demonstrate the required completed-event state. I’m checking the remaining defaults, zoom views, and recovery captures.
+
+codex
+VERDICT: NEEDS_WORK
+SURFACE: due-dates  PERSONA: Case Owner and Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, both personas can identify the event, urgency, client and owner, then edit without remembering information across screens; this supports the recorded roleplays.
+FINDINGS (most severe first, max 7):
+1. Completed-state evidence — Both completed captures show “No open patent events” with “Open events” selected, leaving completed-record status and reopening unreviewable — Capture the completed filter with a selected completed event at both review widths.
+2. Workspace Admin continuation — No capture demonstrates this persona reaching Actions through /due-dates, leaving the stated permission boundary unverified visually — Capture that continuation with contextual dates and without Photon maintenance controls.
+STATES MISSING: Completed-event list/detail; Workspace Admin continuation to Actions. Inventor refusal is present.
+REFERENCE MATCH: yes — Consistent two-pane layout, hairline separation, restrained typography and amber primary controls.
+hook: Stop
+hook: Stop Completed
+tokens used
+83,745
+VERDICT: NEEDS_WORK
+SURFACE: due-dates  PERSONA: Case Owner and Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, both personas can identify the event, urgency, client and owner, then edit without remembering information across screens; this supports the recorded roleplays.
+FINDINGS (most severe first, max 7):
+1. Completed-state evidence — Both completed captures show “No open patent events” with “Open events” selected, leaving completed-record status and reopening unreviewable — Capture the completed filter with a selected completed event at both review widths.
+2. Workspace Admin continuation — No capture demonstrates this persona reaching Actions through /due-dates, leaving the stated permission boundary unverified visually — Capture that continuation with contextual dates and without Photon maintenance controls.
+STATES MISSING: Completed-event list/detail; Workspace Admin continuation to Actions. Inventor refusal is present.
+REFERENCE MATCH: yes — Consistent two-pane layout, hairline separation, restrained typography and amber primary controls.

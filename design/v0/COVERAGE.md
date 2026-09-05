@@ -28,14 +28,14 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 9 | 16 | none | DSN-0012 |
 | Patent detail | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents/:patentId` | 6 | 15 | conceptual | DSN-0013 |
 | Actions | Workspace Admin, Case Owner, Photon Admin | `/due-dates`, `/actions` | 16 | 14 | conceptual | DSN-0014 |
-| Photon due dates | Case Owner, Photon Admin | `/due-dates` | 5 | 10 | none |  |
+| Photon due dates | Case Owner, Photon Admin | `/due-dates` | 13 | 20 | conceptual | DSN-0015 |
 | Workspace, people and profile | Workspace Admin, Inventor, Case Owner, Photon Admin | `/workspace`, `/profile` | 6 | 12 | unwired |  |
 | Case Owner my work | Case Owner | `/` | 3 | 9 | unwired |  |
 | Clients and onboarding | Case Owner, Photon Admin | `/clients` | 4 | 12 | none |  |
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 213 intended stories, 70 V0 scenarios; backend impact conceptual on 8, unwired on 4, none on 5.
+17 surfaces, 223 intended stories, 81 V0 scenarios; backend impact conceptual on 9, unwired on 4, none on 4.
 
 ## Inventor home
 
@@ -215,18 +215,18 @@ Brief: `product-context/surfaces/actions.md` · Storybook title: `Surfaces/Actio
 
 ## Photon due dates
 
-Brief: `product-context/surfaces/due-dates.md` · Storybook title: `Surfaces/Photon due dates` · DSN: none yet
+Brief: `product-context/surfaces/due-dates.md` · Storybook title: `Surfaces/Photon due dates` · DSN: DSN-0015
 
 - **Personas:** Case Owner, Photon Admin
 - **User goal:** Find upcoming or overdue client patent events and maintain accurate visibility.
 - **Business goal:** Nothing is missed across assigned or all clients.
 - **Routes:** `/due-dates` (Case Owner, Photon Admin)
-- **Required scenarios:** `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/large`, `v0/shape/slow`, `v0/shape/failure`
+- **Required scenarios:** `v0/due-dates/upcoming`, `v0/due-dates/due-soon`, `v0/due-dates/overdue`, `v0/due-dates/completed`, `v0/due-dates/missing-date`, `v0/due-dates/import-problem`, `v0/due-dates/large-same-day-group`, `v0/due-dates/no-upcoming-dates`, `v0/due-dates/firm-scope`, `v0/due-dates/long-title`, `v0/due-dates/same-patent-events`, `v0/inventor/portfolio`, `v0/actions/action-required`
 - **States:** loading — urgency list skeleton; empty — no upcoming dates; success — upcoming, due soon, overdue, completed, large same-day groups; calendar secondary; error — list unavailable; import problem flagged on a row; permission — Workspace Admin sees dates only in Actions and patent detail; Inventor never
 - **Surface-specific states:** upcoming, due-soon, overdue, completed, missing-date, import-problem, large-same-day-group, no-upcoming-dates
 - **Navigation badge:** none
-- **Backend impact:** none — GET /v1/due-dates with filters, PATCH status and remind exist. Data comes from manual update and spreadsheet import only.
-- **Intended story ids:** `surfaces-photon-due-dates--upcoming`, `surfaces-photon-due-dates--due-soon`, `surfaces-photon-due-dates--overdue`, `surfaces-photon-due-dates--completed`, `surfaces-photon-due-dates--missing-date`, `surfaces-photon-due-dates--import-problem`, `surfaces-photon-due-dates--large-same-day-group`, `surfaces-photon-due-dates--no-upcoming-dates`, `surfaces-photon-due-dates--loading`, `surfaces-photon-due-dates--error`
+- **Backend impact:** conceptual — BF-13 models nullable recorded dates, source/row and latest named correction, assignment-derived owner, scoped operator corrections on existing PATCH, server date filters and exact related request_id filtering. Event completion remains independent of Actions. Manual updates and synthetic spreadsheet import only; backend verification pending.
+- **Intended story ids:** `surfaces-photon-due-dates--upcoming`, `surfaces-photon-due-dates--due-soon`, `surfaces-photon-due-dates--overdue`, `surfaces-photon-due-dates--completed`, `surfaces-photon-due-dates--missing-date`, `surfaces-photon-due-dates--import-problem`, `surfaces-photon-due-dates--large-same-day-group`, `surfaces-photon-due-dates--no-upcoming-dates`, `surfaces-photon-due-dates--loading`, `surfaces-photon-due-dates--error`, `surfaces-photon-due-dates--photon-admin`, `surfaces-photon-due-dates--case-owner-scope`, `surfaces-photon-due-dates--edit-date`, `surfaces-photon-due-dates--save-error`, `surfaces-photon-due-dates--completion-confirmation`, `surfaces-photon-due-dates--long-title`, `surfaces-photon-due-dates--spreadsheet-import`, `surfaces-photon-due-dates--inventor-refused`, `surfaces-photon-due-dates--related-instruction`, `surfaces-photon-due-dates--workspace-admin-continuation`
 - **Excluded here:** docketing integration, calendar hiding the actionable queue
 
 ## Workspace, people and profile

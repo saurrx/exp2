@@ -24,17 +24,16 @@ The choice is pre-authorized by the run's cognitive-load contract. All three low
 Keep /due-dates and the scoped all_due_dates query, existing adapter and shared hooks. Workspace Admin continues into the completed Actions design on the same technical route. Inventor receives the existing blocked-redirect behavior instead of any due-date content. Photon manual maintenance and spreadsheet import follow the brief; any missing fields or routes are declared in the mock. References, product context, auth, analytics and dependencies remain unchanged.
 
 ## Validation
-Final review in progress. Coverage remains null until the required gates and independent PASS. All 19 states pass focused interaction checks; V0 passes 43/43. Forty-nine captures pass two-clean-render stability checks with no egress (shots3.log plus the targeted save-error rerun in shots-save-final.log); the first refresh had one intermittent save-error zoom difference. All 38 accessibility/zoom contexts are clean (axe3.log). Full-app correction, recovery, import, scope and exact Action/Back navigation checks pass (functional2.log, extra1.log, recovery1.log, navigation1.log). Final required serial gate will be recorded below.
+Independent evaluator round 2 PASS, seven scores of 4, no findings or missing states. Final required serial gate passes 7/7 (`gates-final2.log`), including typecheck, tokens, V0, current coverage and all story interactions; lint:roles separately passes. Both final builds pass. V0 API/semantic tests pass 43/43. All 20 surface stories exist. Fifty-one captures pass two-clean-render stability with no egress (`shots3.log`, targeted save recovery `shots-save-final.log`, completed/Workspace Admin refresh `shots-review2.log`). The initial refresh had one intermittent save-error zoom difference; the targeted two-render rerun passed. All 40 accessibility/zoom contexts are clean (`axe4.log`). Full-app correction, recovery, import, scope and exact Action/Back navigation checks pass (`functional2.log`, `extra1.log`, `recovery1.log`, `navigation1.log`).
 
-## Implementation checkpoint
+## What changed and what stayed
 The 1,800-line legacy table wrapper is replaced in place by the same scoped query feeding a token-based urgency list and focused event record. Source and latest correction recede; missing dates and disputed records remain honest. Date edits require a correction note and retain source/row provenance. Completion has its own confirmation and preserves the related Action. Existing spreadsheet import is reused with a due-date count and return label. A month filter acts on the server's full result set, replacing the misleading page-only calendar. The old calendar and unused reminder component, two legacy stories/captures and their accessibility fingerprints are retired.
 
 BF-13 declares nullable dates, owner derived from existing Case Owner assignments, source and correction metadata, operator-only existing PATCH corrections and additional date filters. Missing dates are excluded from overdue checks in dependent mock readers. No adapter, shared hook, auth, analytics, product-context, reference screen or dependency changes. The /actions component now honors the exact related request as well as its application search. Browser Back restores client, month, deadline filter and selected event, including a patent with two instructions. At 200%, client/reference/date stay in the compact record and secondary owner/status/patent title can be expanded. This surface joins the existing desktop-zoom CSS exceptions; the device gate is unchanged.
 
-Eighteen new stories and all 332 story tests passed in the first full run; V0 38/38. API/UI probes pass for saved corrections with source row and named updater, event completion independent of Action status, reopening, scoped writes for all four roles, invalid-date refusal, missing-date filtering, retained edits across selection, spreadsheet import and 200% editing/navigation. A later serial gate exposed a focus timing race; synchronous layout focus now fixes it. Final validation remains in progress.
 
 ## Rendered review and cognitive-load check
-All 49 final captures have been reviewed (the original 47 were opened in full, followed by the refreshed recovery and navigation captures and defaults): every story at 1280×720 and 1440×900; Case Owner and Photon Admin defaults also at 1366×768, 1920×1080 and 640×360@2; editing, failure, confirmation, long content and import also at 200%. The first pass exposed the legacy body width floor and a save-error message below sticky controls. The surface now reflows at 200%; error recovery scrolls its message above the save controls and was functionally checked at 1280 and 640. Final captures show the recovery message and retry controls together.
+All 51 final captures have been reviewed (the original 47 were opened in full, followed by refreshed recovery, navigation, completed and Workspace Admin captures and defaults): every story at 1280×720 and 1440×900; Case Owner and Photon Admin defaults also at 1366×768, 1920×1080 and 640×360@2; editing, failure, confirmation, long content and import also at 200%. The first pass exposed the legacy body width floor and a save-error message below sticky controls. The surface now reflows at 200%; error recovery scrolls its message above the save controls and was functionally checked at 1280 and 640. Final captures show the recovery message and retry controls together.
 
 | Scorecard | Score | Rendered evidence |
 | --- | --- | --- |
@@ -43,7 +42,7 @@ All 49 final captures have been reviewed (the original 47 were opened in full, f
 | Usability | 4 | Retained edits, retry, cancel and reopening; scoped search/month/pagination; matching Action link. |
 | Trust | 4 | Recorded dates are never inferred; source row survives correction; named updater and distinct completion consequences. |
 | Craft | 4 | Reference token/type/button language, hairline separation, bounded reading width and no ornamental data cards. |
-| Accessibility | 4 | All 38 accessibility/zoom contexts have zero violations and zero horizontal overflow; keyboard and zoom recovery checked. |
+| Accessibility | 4 | All 40 accessibility/zoom contexts have zero violations and zero horizontal overflow; keyboard and zoom recovery checked. |
 | Business | 4 | Makes unresolved events easier to find and correct; completion and source checks guard against merely clearing a queue. |
 
 Case Owner post-render roleplay: (1) I first see the next recorded event and urgency in my assigned scope. (2) Edit event leads, then Save event commits the correction. (3) I read the event, reference, client, date and owner; I skip source details unless checking a discrepancy. (4) Client/reference stay with the editor and confirmation; retained edits avoid remembering changes when selecting another event. (5) I do not need a full month grid, patent lifecycle columns, client-instruction controls or decoration. (6) The correction note, visible retry and explicit independent event completion tell me what is saved and what changes.
@@ -76,3 +75,37 @@ Every ID below is prefixed `surfaces-photon-due-dates--`. Every state has 1280×
 | `spreadsheet-import` | Case Owner | `v0/due-dates/upcoming` |
 | `inventor-refused` | Inventor | `v0/inventor/portfolio` |
 | `related-instruction` | Case Owner | `v0/due-dates/same-patent-events` |
+| `workspace-admin-continuation` | Workspace Admin | `v0/actions/action-required` |
+
+## Independent review, round 1
+```text
+VERDICT: NEEDS_WORK
+SURFACE: due-dates  PERSONA: Case Owner and Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, both personas can identify the event, urgency, client and owner, then edit without remembering information across screens; this supports the recorded roleplays.
+FINDINGS (most severe first, max 7):
+1. Completed-state evidence — Both completed captures show “No open patent events” with “Open events” selected, leaving completed-record status and reopening unreviewable — Capture the completed filter with a selected completed event at both review widths.
+2. Workspace Admin continuation — No capture demonstrates this persona reaching Actions through /due-dates, leaving the stated permission boundary unverified visually — Capture that continuation with contextual dates and without Photon maintenance controls.
+STATES MISSING: Completed-event list/detail; Workspace Admin continuation to Actions. Inventor refusal is present.
+REFERENCE MATCH: yes — Consistent two-pane layout, hairline separation, restrained typography and amber primary controls.
+```
+
+Both requested evidence corrections are addressed: Completed now opens the completed filter directly, removing interaction timing from its initial capture; Workspace Admin continuation has an explicit V0 Actions scenario on the existing /due-dates route. No product change is required.
+
+
+## Broad regression result
+The full runner finished 18/23. It passed typecheck, role/routes, manifest, tokens, adapter fidelity, V0, coverage, both builds, 332 pre-final story tests, smoke, all-persona crawl, desktop gate, visible-UUID checks and lockfile/runtime graph. Required surface gates are evaluated separately below. Failures retained in `broad-gate-details/`: older-log documentation-host allowlist; 39 other-surface screenshot failures; accessibility ratchet (27 new fingerprints and one blocking Ideas reference contrast finding, none in due dates); layout (54 reports, principally screen-reader-only portfolio elements and other surfaces; due dates/Actions all checked combinations pass); 1,213 structural deviations against the historical mock baseline, including intentional redesign changes. The informational parallel-isolation probe also fails; story checks remain serial. These are recorded as run follow-ups; unrelated baselines are not accepted.
+
+## Independent review, round 2
+```text
+VERDICT: PASS
+SURFACE: due-dates  PERSONA: Case Owner and Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — Independent six-question roleplays at 1280×720 and 1440×900 support the recorded answers: urgency leads, Edit event is clear, necessary context stays together, secondary evidence recedes, and correction and completion consequences are explicit.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none — All 51 screenshots inspected, including completed records, Inventor refusal and Workspace Admin continuation to Actions.
+REFERENCE MATCH: yes — Two-pane list/detail, restrained typography, hairline separation and amber primary controls match the approved visual language.
+```
+
+Post-ledger validation: V0 passes 43/43 (`v0-ledger.log`); coverage is 12/17 with this surface recorded as DSN-0015.

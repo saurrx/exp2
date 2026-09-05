@@ -990,11 +990,19 @@
         }
       ],
       "scenarios": [
-        "v0/case-owner/my-work",
-        "v0/photon-admin/firm",
-        "v0/shape/large",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/due-dates/upcoming",
+        "v0/due-dates/due-soon",
+        "v0/due-dates/overdue",
+        "v0/due-dates/completed",
+        "v0/due-dates/missing-date",
+        "v0/due-dates/import-problem",
+        "v0/due-dates/large-same-day-group",
+        "v0/due-dates/no-upcoming-dates",
+        "v0/due-dates/firm-scope",
+        "v0/due-dates/long-title",
+        "v0/due-dates/same-patent-events",
+        "v0/inventor/portfolio",
+        "v0/actions/action-required"
       ],
       "states": {
         "loading": "urgency list skeleton",
@@ -1014,8 +1022,8 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "none",
-      "backendNotes": "GET /v1/due-dates with filters, PATCH status and remind exist. Data comes from manual update and spreadsheet import only.",
+      "backendImpact": "conceptual",
+      "backendNotes": "BF-13 models nullable recorded dates, source/row and latest named correction, assignment-derived owner, scoped operator corrections on existing PATCH, server date filters and exact related request_id filtering. Event completion remains independent of Actions. Manual updates and synthetic spreadsheet import only; backend verification pending.",
       "storyIds": [
         "surfaces-photon-due-dates--upcoming",
         "surfaces-photon-due-dates--due-soon",
@@ -1026,13 +1034,23 @@
         "surfaces-photon-due-dates--large-same-day-group",
         "surfaces-photon-due-dates--no-upcoming-dates",
         "surfaces-photon-due-dates--loading",
-        "surfaces-photon-due-dates--error"
+        "surfaces-photon-due-dates--error",
+        "surfaces-photon-due-dates--photon-admin",
+        "surfaces-photon-due-dates--case-owner-scope",
+        "surfaces-photon-due-dates--edit-date",
+        "surfaces-photon-due-dates--save-error",
+        "surfaces-photon-due-dates--completion-confirmation",
+        "surfaces-photon-due-dates--long-title",
+        "surfaces-photon-due-dates--spreadsheet-import",
+        "surfaces-photon-due-dates--inventor-refused",
+        "surfaces-photon-due-dates--related-instruction",
+        "surfaces-photon-due-dates--workspace-admin-continuation"
       ],
       "excludes": [
         "docketing integration",
         "calendar hiding the actionable queue"
       ],
-      "dsn": null
+      "dsn": "DSN-0015"
     },
     {
       "brief": "surfaces/workspace.md",

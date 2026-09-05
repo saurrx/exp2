@@ -1,0 +1,54 @@
+wrote  surfaces-photon-due-dates--upcoming--at-1280x720
+wrote  surfaces-photon-due-dates--upcoming--at-1440x900
+wrote  surfaces-photon-due-dates--upcoming--at-1366x768
+wrote  surfaces-photon-due-dates--upcoming--at-1920x1080
+wrote  surfaces-photon-due-dates--upcoming--at-640x360@2
+wrote  surfaces-photon-due-dates--due-soon--at-1280x720
+wrote  surfaces-photon-due-dates--due-soon--at-1440x900
+wrote  surfaces-photon-due-dates--overdue--at-1280x720
+wrote  surfaces-photon-due-dates--overdue--at-1440x900
+wrote  surfaces-photon-due-dates--completed--at-1280x720
+wrote  surfaces-photon-due-dates--completed--at-1440x900
+wrote  surfaces-photon-due-dates--missing-date--at-1280x720
+wrote  surfaces-photon-due-dates--missing-date--at-1440x900
+wrote  surfaces-photon-due-dates--import-problem--at-1280x720
+wrote  surfaces-photon-due-dates--import-problem--at-1440x900
+wrote  surfaces-photon-due-dates--large-same-day-group--at-1280x720
+wrote  surfaces-photon-due-dates--large-same-day-group--at-1440x900
+wrote  surfaces-photon-due-dates--no-upcoming-dates--at-1280x720
+wrote  surfaces-photon-due-dates--no-upcoming-dates--at-1440x900
+wrote  surfaces-photon-due-dates--loading--at-1280x720
+wrote  surfaces-photon-due-dates--loading--at-1440x900
+wrote  surfaces-photon-due-dates--error--at-1280x720
+wrote  surfaces-photon-due-dates--error--at-1440x900
+wrote  surfaces-photon-due-dates--photon-admin--at-1280x720
+wrote  surfaces-photon-due-dates--photon-admin--at-1440x900
+wrote  surfaces-photon-due-dates--photon-admin--at-1366x768
+wrote  surfaces-photon-due-dates--photon-admin--at-1920x1080
+wrote  surfaces-photon-due-dates--photon-admin--at-640x360@2
+wrote  surfaces-photon-due-dates--case-owner-scope--at-1280x720
+wrote  surfaces-photon-due-dates--case-owner-scope--at-1440x900
+wrote  surfaces-photon-due-dates--edit-date--at-1280x720
+wrote  surfaces-photon-due-dates--edit-date--at-1440x900
+wrote  surfaces-photon-due-dates--edit-date--at-640x360@2
+wrote  surfaces-photon-due-dates--save-error--at-1280x720
+   note surfaces-photon-due-dates--save-error--at-1440x900: 34 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-photon-due-dates--save-error--at-1440x900
+UNSTABLE surfaces-photon-due-dates--save-error--at-640x360@2: two clean renders differ by 2314 pixels in [40,494,247,581]
+wrote  surfaces-photon-due-dates--completion-confirmation--at-1280x720
+wrote  surfaces-photon-due-dates--completion-confirmation--at-1440x900
+wrote  surfaces-photon-due-dates--completion-confirmation--at-640x360@2
+wrote  surfaces-photon-due-dates--long-title--at-1280x720
+wrote  surfaces-photon-due-dates--long-title--at-1440x900
+wrote  surfaces-photon-due-dates--long-title--at-640x360@2
+   note surfaces-photon-due-dates--spreadsheet-import--at-1280x720: 6 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-photon-due-dates--spreadsheet-import--at-1280x720
+wrote  surfaces-photon-due-dates--spreadsheet-import--at-1440x900
+wrote  surfaces-photon-due-dates--spreadsheet-import--at-640x360@2
+wrote  surfaces-photon-due-dates--inventor-refused--at-1280x720
+wrote  surfaces-photon-due-dates--inventor-refused--at-1440x900
+   note surfaces-photon-due-dates--related-instruction--at-1280x720: 3 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-photon-due-dates--related-instruction--at-1280x720
+   note surfaces-photon-due-dates--related-instruction--at-1440x900: 3 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-photon-due-dates--related-instruction--at-1440x900
+shots: 1 failure(s)

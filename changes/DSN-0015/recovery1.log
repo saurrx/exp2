@@ -1,0 +1,2 @@
+PASS 1280 save-error message visible above controls; retry succeeds
+PASS 640 save-error message visible above controls; retry succeeds

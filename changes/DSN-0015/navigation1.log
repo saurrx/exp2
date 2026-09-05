@@ -1,0 +1,2 @@
+PASS related link opens renewal instruction, not the other event on the same patent
+PASS browser Back restores client, date filter, month and selected event

@@ -1,0 +1,5 @@
+
+> design@0.0.0 lint:roles
+> node tools/no-substring-roles.mjs
+
+ok    no substring role checks in src

@@ -32,10 +32,10 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Workspace, people and profile | Workspace Admin, Inventor, Case Owner, Photon Admin | `/workspace`, `/profile` | 6 | 12 | unwired |  |
 | Case Owner my work | Case Owner | `/` | 3 | 9 | unwired | DSN-0016 |
 | Clients and onboarding | Case Owner, Photon Admin | `/clients` | 4 | 12 | none |  |
-| Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
+| Photon Admin dashboard | Photon Admin | `/` | 9 | 12 | conceptual | DSN-0017 |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 223 intended stories, 81 V0 scenarios; backend impact conceptual on 9, unwired on 4, none on 4.
+17 surfaces, 226 intended stories, 90 V0 scenarios; backend impact conceptual on 10, unwired on 3, none on 4.
 
 ## Inventor home
 
@@ -279,18 +279,18 @@ Brief: `product-context/surfaces/clients-and-onboarding.md` · Storybook title: 
 
 ## Photon Admin dashboard
 
-Brief: `product-context/surfaces/photon-admin-dashboard.md` · Storybook title: `Surfaces/Photon Admin dashboard` · DSN: none yet
+Brief: `product-context/surfaces/photon-admin-dashboard.md` · Storybook title: `Surfaces/Photon Admin dashboard` · DSN: DSN-0017
 
 - **Personas:** Photon Admin
 - **User goal:** Ensure clients, ownership, incoming work and operational exceptions are under control across Photon Legal.
 - **Business goal:** Convert more approved ideas into well-managed patent work without losing client ownership or data quality.
 - **Routes:** `/` (Photon Admin)
-- **Required scenarios:** `v0/photon-admin/firm`, `v0/shape/slow`, `v0/shape/failure`
+- **Required scenarios:** `v0/photon-admin/healthy-operations`, `v0/photon-admin/unassigned-client`, `v0/photon-admin/aging-approved-ideas`, `v0/photon-admin/urgent-actions`, `v0/photon-admin/failed-import`, `v0/photon-admin/missing-client-configuration`, `v0/photon-admin/no-exceptions`, `v0/photon-admin/partial-data`, `v0/photon-admin/long-title`
 - **States:** loading — exceptions first; empty — no exceptions; success — unassigned clients, newly approved ideas, urgent Actions and dates, configuration exceptions, compact totals; error — partial data with the missing source named; permission — not applicable
 - **Surface-specific states:** healthy-operations, unassigned-client, aging-approved-ideas, urgent-actions, failed-import, missing-client-configuration, no-exceptions, partial-data
 - **Navigation badge:** none
-- **Backend impact:** unwired — Composed from lists that exist; firm totals and trends have no dedicated aggregate.
-- **Intended story ids:** `surfaces-photon-admin-dashboard--healthy-operations`, `surfaces-photon-admin-dashboard--unassigned-client`, `surfaces-photon-admin-dashboard--aging-approved-ideas`, `surfaces-photon-admin-dashboard--urgent-actions`, `surfaces-photon-admin-dashboard--failed-import`, `surfaces-photon-admin-dashboard--missing-client-configuration`, `surfaces-photon-admin-dashboard--no-exceptions`, `surfaces-photon-admin-dashboard--partial-data`, `surfaces-photon-admin-dashboard--loading`
+- **Backend impact:** conceptual — BF-15 declares the mock-only photon_admin_work aggregate on the existing dashboard response, derived from clients, assignments, approval transitions, events, imports and patents. No new route or permission; pending backend verification.
+- **Intended story ids:** `surfaces-photon-admin-dashboard--healthy-operations`, `surfaces-photon-admin-dashboard--unassigned-client`, `surfaces-photon-admin-dashboard--aging-approved-ideas`, `surfaces-photon-admin-dashboard--urgent-actions`, `surfaces-photon-admin-dashboard--failed-import`, `surfaces-photon-admin-dashboard--missing-client-configuration`, `surfaces-photon-admin-dashboard--no-exceptions`, `surfaces-photon-admin-dashboard--partial-data`, `surfaces-photon-admin-dashboard--loading`, `surfaces-photon-admin-dashboard--data-error`, `surfaces-photon-admin-dashboard--long-title`, `surfaces-photon-admin-dashboard--portfolio-context`
 - **Excluded here:** cost or revenue analytics, vanity totals before work
 
 ## Authentication and access

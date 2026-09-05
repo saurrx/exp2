@@ -1,0 +1,328 @@
+$ node qa/conformance/structure.qa.mjs --base http://localhost:3700
+exit 1 signal null
+
+
+### PHOTON_ADMIN
+  FAIL /
+       missing-signature: button:<data>
+       missing-signature: button:calendar
+       missing-signature: button:expand patent map
+       missing-signature: button:filed #
+       missing-signature: button:grant fee due <date> · # pm · globex materials #d
+       missing-signature: button:grant fee due <date> · # pm · helix biotech #d
+       missing-signature: button:granted #
+       missing-signature: button:list
+       missing-signature: button:mark done
+       missing-signature: button:my mu yang photon legal admin
+       ...and 26 more
+  FAIL /ideas
+       missing-signature: button:<data>
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page+disabled
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: button:status #
+       missing-signature: combobox:
+       missing-signature: link:ideas #
+       missing-signature: textbox:search by title, inventor, client, status...
+       extra-signature: button:clear filters
+       extra-signature: button:my mu yang
+       ...and 25 more
+  FAIL /patents
+       missing-signature: button:clients
+       missing-signature: button:date
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       missing-signature: button:status
+       missing-signature: button:tags
+       ...and 85 more
+  FAIL /due-dates
+       missing-signature: button:all due dates
+       missing-signature: button:calendar view
+       missing-signature: button:clients
+       missing-signature: button:columns
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:list view+pressed
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       ...and 57 more
+  FAIL /actions
+       missing-signature: button:all actions
+       missing-signature: button:all clients
+       missing-signature: button:columns
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: button:sort
+       missing-signature: cell:<data>
+       missing-signature: columnheader:action selected
+       missing-signature: columnheader:application no.
+       missing-signature: columnheader:client
+       missing-signature: columnheader:days
+       ...and 33 more
+  FAIL /clients
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: link:ideas #
+       extra-signature: button:my mu yang
+       extra-signature: link:ideas
+  FAIL /workspace
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: link:ideas #
+       extra-signature: button:my mu yang
+       extra-signature: link:ideas
+  FAIL /profile
+       missing-signature: button:my mu yang photon legal admin
+       missing-signature: link:ideas #
+       extra-signature: button:my mu yang
+       extra-signature: link:ideas
+
+### CASE_OWNER
+  FAIL /
+       missing-signature: button:<data>
+       missing-signature: button:calendar
+       missing-signature: button:expand patent map
+       missing-signature: button:filed #
+       missing-signature: button:grant fee due <date> · # pm · globex materials #d
+       missing-signature: button:granted #
+       missing-signature: button:list
+       missing-signature: button:mark done
+       missing-signature: button:national phase entry due (#m) <date> · # pm · acme robotics #d
+       missing-signature: button:next month
+       ...and 26 more
+  FAIL /ideas
+       missing-signature: button:<data>
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page+disabled
+       missing-signature: button:rm ravi menon case owner
+       missing-signature: button:status #
+       missing-signature: combobox:
+       missing-signature: link:ideas #
+       missing-signature: link:overview
+       missing-signature: textbox:search by title, inventor, client, status...
+       extra-signature: button:clear filters
+       ...and 27 more
+  FAIL /patents
+       missing-signature: button:clients
+       missing-signature: button:date
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:rm ravi menon case owner
+       missing-signature: button:sort
+       missing-signature: button:status
+       missing-signature: button:tags
+       ...and 86 more
+  FAIL /due-dates
+       missing-signature: button:all due dates
+       missing-signature: button:calendar view
+       missing-signature: button:clients
+       missing-signature: button:columns
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:list view+pressed
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:rm ravi menon case owner
+       ...and 59 more
+  FAIL /actions
+       missing-signature: button:all actions
+       missing-signature: button:all clients
+       missing-signature: button:columns
+       missing-signature: button:rm ravi menon case owner
+       missing-signature: button:sort
+       missing-signature: cell:<data>
+       missing-signature: columnheader:action selected
+       missing-signature: columnheader:application no.
+       missing-signature: columnheader:client
+       missing-signature: columnheader:days
+       ...and 35 more
+  FAIL /clients
+       missing-signature: button:rm ravi menon case owner
+       missing-signature: link:ideas #
+       missing-signature: link:overview
+       extra-signature: button:rm ravi menon
+       extra-signature: link:ideas
+       extra-signature: link:my work
+  FAIL /profile
+       missing-signature: button:rm ravi menon case owner
+       missing-signature: link:ideas #
+       missing-signature: link:overview
+       extra-signature: button:rm ravi menon
+       extra-signature: link:ideas
+       extra-signature: link:my work
+
+### LEGAL_COUNSEL
+  FAIL /
+       missing-signature: button:filed #
+       missing-signature: button:granted #
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: button:sent to photon legal #
+       missing-signature: columnheader:age
+       missing-signature: columnheader:score
+       missing-signature: group:
+       missing-signature: link:actions due · # days, not available, not available yet
+       missing-signature: link:awaiting review, # oldest # days
+       missing-signature: link:overview
+       ...and 69 more
+  FAIL /ideas
+       missing-signature: article:<data>
+       missing-signature: button:acme-# #d moisture-cured adhesive with delayed tack for panel assembly
+       missing-signature: button:ai evaluation report
+       missing-signature: button:all #
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: button:more decision actions
+       missing-signature: button:request update from inventor
+       missing-signature: button:review #
+       missing-signature: button:submission
+       missing-signature: button:summary
+       ...and 39 more
+  FAIL /patents
+       missing-signature: button:<data>
+       missing-signature: button:columns
+       missing-signature: button:date
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       missing-signature: button:status
+       ...and 76 more
+  FAIL /due-dates
+       missing-signature: button:all due dates
+       missing-signature: button:calendar view
+       missing-signature: button:columns
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:list view+pressed
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       ...and 54 more
+  FAIL /actions
+       missing-signature: button:active
+       missing-signature: button:all actions
+       missing-signature: button:columns
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       missing-signature: cell:<data>
+       ...and 50 more
+  FAIL /workspace
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: link:overview
+       missing-signature: link:review inventor ideas #
+       extra-signature: button:mo mara okafor
+       extra-signature: link:home
+       extra-signature: link:ideas #
+  FAIL /profile
+       missing-signature: button:mo mara okafor in-house counsel
+       missing-signature: link:overview
+       missing-signature: link:review inventor ideas #
+       extra-signature: button:mo mara okafor
+       extra-signature: link:home
+       extra-signature: link:ideas #
+
+### TECH_COMMITTEE
+  FAIL /
+       missing-signature: button:ti tomás ibarra tech committee
+       missing-signature: link:overview
+       missing-signature: link:review queue #
+       extra-signature: button:ti tomás ibarra
+       extra-signature: link:home
+       extra-signature: link:ideas #
+  FAIL /ideas
+       missing-signature: article:<data>
+       missing-signature: button:<data>
+       missing-signature: button:ai evaluation report
+       missing-signature: button:all #
+       missing-signature: button:more decision actions
+       missing-signature: button:request update from inventor
+       missing-signature: button:review #
+       missing-signature: button:send to legal counsel
+       missing-signature: button:submission
+       missing-signature: button:summary
+       ...and 39 more
+  FAIL /patents
+       missing-signature: button:<data>
+       missing-signature: button:columns
+       missing-signature: button:date
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       missing-signature: button:status
+       missing-signature: button:tags
+       ...and 76 more
+  FAIL /due-dates
+       missing-signature: button:all due dates
+       missing-signature: button:calendar view
+       missing-signature: button:columns
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:list view+pressed
+       missing-signature: button:next page
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       missing-signature: button:ti tomás ibarra tech committee
+       ...and 56 more
+  FAIL /profile
+       missing-signature: button:ti tomás ibarra tech committee
+       missing-signature: link:overview
+       missing-signature: link:review queue #
+       extra-signature: button:ti tomás ibarra
+       extra-signature: link:home
+       extra-signature: link:ideas #
+
+### INVENTOR
+  FAIL /
+       missing-signature: button:+ submit idea
+       missing-signature: button:battery swap dock with passive alignment cones
+       missing-signature: button:electrostatic dust shield for lidar windows
+       missing-signature: button:modular gripper fingers with swappable compliant pads
+       missing-signature: button:moisture-cured adhesive with delayed tack for panel assembly
+       missing-signature: button:pr priya raman inventor
+       missing-signature: button:self-tensioning cable harness for articulated robot joints
+       missing-signature: button:view all my ideas →
+       missing-signature: heading[1]:your invention workspace
+       missing-signature: heading[3]:patent world map
+       ...and 12 more
+  FAIL /ideas
+       missing-signature: button:+ add another idea
+       missing-signature: button:<data>
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page+disabled
+       missing-signature: button:pr priya raman inventor
+       missing-signature: button:status
+       missing-signature: combobox:
+       missing-signature: textbox:search your ideas by title or status...
+       extra-signature: button:pr priya raman
+       extra-signature: combobox:idea status
+       ...and 27 more
+  FAIL /patents
+       missing-signature: button:<data>
+       missing-signature: button:columns
+       missing-signature: button:date
+       missing-signature: button:first page+disabled
+       missing-signature: button:last page
+       missing-signature: button:next page
+       missing-signature: button:pr priya raman inventor
+       missing-signature: button:previous page+disabled
+       missing-signature: button:sort
+       missing-signature: button:status
+       ...and 72 more
+  FAIL /profile
+       missing-signature: button:pr priya raman inventor
+       extra-signature: button:pr priya raman
+
+31 surface(s) checked - 1289 deviation(s) - 20 suppressed
+

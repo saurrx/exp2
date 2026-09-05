@@ -98,6 +98,13 @@
       "type": "Scoped approved ideas, urgent events, setup/access context, assignment health, recent filing updates and active-patent jurisdiction aggregates; timestamp for existing access-request route",
       "finding": "BF-14",
       "reason": "DSN-0016: show the Case Owner the next assigned-client responsibility before portfolio context. Existing dashboard and request-access routes; no ranking, additional permission or new lifecycle state. Expired-access metadata only names a previously assigned client and grants no work access. Source transitions supply approval age; event instructions link to exact requests. Conceptual until backend verification."
+    },
+    {
+      "entity": "Dashboard",
+      "field": "photon_admin_work",
+      "type": "Firm-wide ownership gaps, approved ideas, urgent events, configuration and latest-import exceptions; explicit unavailable sources; scoped context links and active-patent geography",
+      "finding": "BF-15",
+      "reason": "DSN-0017: prioritize ownership and incoming work using existing client, assignment, idea-transition, event, import and patent records. Missing sources remain unknown rather than zero. No route, role, permission or workflow stage added. Conceptual until backend verification."
     }
   ],
   "collections": [

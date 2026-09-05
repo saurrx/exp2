@@ -463,6 +463,33 @@ const myWorkStates = ["no-assigned-clients", "newly-assigned-client", "new-appro
   return d;
 }));
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const photonDashboardStates = ["healthy-operations", "unassigned-client", "aging-approved-ideas", "urgent-actions", "failed-import", "missing-client-configuration", "no-exceptions", "partial-data", "long-title"].map(slug => v0(`v0/photon-admin/${slug}`, `Photon Admin dashboard: ${slug}`, "Synthetic firm-wide ownership, incoming work and operational exception state.", U.photonAdmin.email, [U.photonAdmin.email, U.caseOwner.email, U.caseOwner2.email], () => {
+  const specs: IdeaSpec[] = [
+    {invention:8,author:U.inventor,state:"SENT_TO_PHOTON",ageDays:2,reviewer:U.admin},
+    {invention:9,author:U.coinventor,state:"SENT_TO_PHOTON",ageDays:1,reviewer:U.admin},
+    {invention:10,author:U.inventor,state:"FILED",ageDays:35,reviewer:U.admin},
+  ];
+  if(slug==="aging-approved-ideas") specs.splice(0,2,...[0,1,2,3,8,9].map((invention,n)=>({invention,author:U.inventor,state:"SENT_TO_PHOTON" as const,ageDays:[75,38,20,12,3,1][n],reviewer:U.admin})));
+  const d=structuredClone(northwindBuild(`v0/photon-admin/${slug}`,{[NORTHWIND.id]:portfolio(18,"photon-northwind",NORTHWIND,0),[BEACON.id]:portfolio(6,"photon-beacon",BEACON,0),[ORBITAL.id]:portfolio(4,"photon-orbital",ORBITAL,0)},specs));
+  const rng=rngFor(`v0/photon-admin/${slug}`);
+  d.dueDates=[];d.actionRequests=[];
+  if(slug!=="failed-import")d.imports=[];
+  if(slug!=="unassigned-client") d.users.find(u=>u.id===U.caseOwner2.id)!.assigned_client_ids=[ORBITAL.id];
+  if(slug!=="missing-client-configuration")d.users.push({...structuredClone(U.admin2),id:uuid(rng),email:"admin@orbital.test",name:"Mina Vale",client_id:ORBITAL.id});
+  if(["urgent-actions","failed-import","missing-client-configuration","no-exceptions"].includes(slug)){d.ideas=d.ideas.filter(i=>i.state==="FILED");d.transitions=d.transitions.filter(t=>d.ideas.some(i=>i.id===t.idea_id));}
+  if(["healthy-operations","urgent-actions"].includes(slug)) {
+    for(const [n,client] of (slug==="urgent-actions"?[NORTHWIND,BEACON]:[NORTHWIND]).entries()) {
+      const patent=generatePortfolio(client,d.portfolios[client.id]).patents[0],id=uuid(rng);
+      d.patentOverrides[patent.id]={...d.patentOverrides[patent.id],application_number:`SYN-${client.idea_reference_prefix}-2025-0042`};
+      d.dueDates.push({id,patent_id:patent.id,client_id:client.id,title:n===0?"Response to examination report":"Patent renewal",event_type:n===0?"Office Action Response Due":"Renewal Fee Due",due_at:clock.daysAhead(n===0?3:-2),status:"PENDING",created_at:clock.daysAgo(30),updated_at:clock.daysAgo(1)});
+      if(n===0){const template=d.actionTemplates.find(t=>t.event_types.includes("Office Action Response Due"))!;d.actionRequests.push({id:uuid(rng),client_id:client.id,due_date_id:id,template_id:template.id,instruction:template.label,selected_countries:[],status:"NEW",submission_state:"SUBMITTED",version:1,note:null,requested_by_id:U.admin.id,requested_at:clock.daysAgo(1),updated_at:clock.daysAgo(1)});}
+    }
+  }
+  if(slug==="partial-data")d.flags.photonDashboardUnavailable=["imports"];
+  if(slug==="long-title"){d.ideas.find(i=>i.state==="SENT_TO_PHOTON")!.title=LONG_TITLE;d.clients.find(c=>c.id===NORTHWIND.id)!.name="Northwind Instruments and Advanced Measurement Research Laboratories";}
+  return d;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...photonDashboardStates, ...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

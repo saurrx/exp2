@@ -26,6 +26,8 @@ export type PortfolioSpec = { count: number; seed: string; dueDatesPerPatent: nu
 export type Flags = {
   /** A V0 scenario: four personas, one review stage; the mock models the proposed contracts in mock/proposed-fields.json. */
   v0?: boolean;
+  /** BF-15: unavailable sources in a partial Photon Admin dashboard read. */
+  photonDashboardUnavailable?: Array<"imports" | "portfolio">;
   /** Every mutation answers 400 with a message, for failure-state design. */
   mutationsFail?: boolean;
   /** The login endpoint refuses every account; /me and refresh answer 401. */

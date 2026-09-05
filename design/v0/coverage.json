@@ -1283,9 +1283,15 @@
         }
       ],
       "scenarios": [
-        "v0/photon-admin/firm",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/photon-admin/healthy-operations",
+        "v0/photon-admin/unassigned-client",
+        "v0/photon-admin/aging-approved-ideas",
+        "v0/photon-admin/urgent-actions",
+        "v0/photon-admin/failed-import",
+        "v0/photon-admin/missing-client-configuration",
+        "v0/photon-admin/no-exceptions",
+        "v0/photon-admin/partial-data",
+        "v0/photon-admin/long-title"
       ],
       "states": {
         "loading": "exceptions first",
@@ -1305,8 +1311,8 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "unwired",
-      "backendNotes": "Composed from lists that exist; firm totals and trends have no dedicated aggregate.",
+      "backendImpact": "conceptual",
+      "backendNotes": "BF-15 declares the mock-only photon_admin_work aggregate on the existing dashboard response, derived from clients, assignments, approval transitions, events, imports and patents. No new route or permission; pending backend verification.",
       "storyIds": [
         "surfaces-photon-admin-dashboard--healthy-operations",
         "surfaces-photon-admin-dashboard--unassigned-client",
@@ -1316,13 +1322,16 @@
         "surfaces-photon-admin-dashboard--missing-client-configuration",
         "surfaces-photon-admin-dashboard--no-exceptions",
         "surfaces-photon-admin-dashboard--partial-data",
-        "surfaces-photon-admin-dashboard--loading"
+        "surfaces-photon-admin-dashboard--loading",
+        "surfaces-photon-admin-dashboard--data-error",
+        "surfaces-photon-admin-dashboard--long-title",
+        "surfaces-photon-admin-dashboard--portfolio-context"
       ],
       "excludes": [
         "cost or revenue analytics",
         "vanity totals before work"
       ],
-      "dsn": null
+      "dsn": "DSN-0017"
     },
     {
       "brief": "surfaces/authentication.md",

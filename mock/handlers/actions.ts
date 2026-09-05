@@ -35,6 +35,7 @@ export const actionHandlers = [
     const scope = scopeFor(u);
     let rows = db.actionRequests.filter((a) => a.submission_state !== "DRAFT" && (scope === null || scope.includes(a.client_id)));
     const cid = q(url, "client_id"); if (cid) rows = rows.filter((a) => a.client_id === cid);
+    const requestId = q(url, "request_id"); if (requestId) rows = rows.filter(a => a.id === requestId);
     const rs = q(url, "request_status"); if (rs) rows = rows.filter((a) => a.status === rs);
     const search = (q(url, "search") ?? "").trim().toLowerCase();
     const hydrate = (a: ActionRequest) => { const dd = dueDateById(a.due_date_id); const p = dd && patentById(dd.patent_id); const t = a.template_id ? db.actionTemplates.find((x) => x.id === a.template_id) : null; const c = db.clients.find((x) => x.id === a.client_id); return { ...a, due_date: dd ? { id: dd.id, title: dd.title, event_type: dd.event_type, due_at: dd.due_at, status: dd.status, patent: p ? { id: p.id, title: p.title, application_number: p.application_number } : null } : null, template: t ? { id: t.id, label: t.label, category: t.category } : null, client: c ? { id: c.id, name: c.name } : null, requested_by: (() => { const r = db.users.find((x) => x.id === a.requested_by_id); return r ? { id: r.id, name: r.name } : null; })() }; };

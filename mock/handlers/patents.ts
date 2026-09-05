@@ -201,6 +201,7 @@ export const patentHandlers = [
       if (b.resolve_issue) patch.data_issue = null;
     }
     if (!Object.keys(patch).length) return { status: 400, body: { message: "No event changes supplied." } };
+    if (db.flags.v0) patch.updated_by = user?.name || null;
     return overrideDueDate(d.id, patch);
   }),
   route("post", "/v1/due-dates/:id/remind", ({ params }) => {

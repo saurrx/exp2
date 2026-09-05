@@ -87,10 +87,10 @@
     },
     {
       "entity": "DueDate / Due dates query",
-      "field": "nullable due_at, owner, data_issue, source, source_row, correction_note, updated_by; PATCH title/due_at/correction_note/resolve_issue; open/missing/issues/dueSoon filters",
+      "field": "nullable due_at, owner, data_issue, source, source_row, correction_note, updated_by; PATCH title/due_at/correction_note/resolve_issue; open/missing/issues/dueSoon filters; Actions queue request_id",
       "type": "Nullable ISO date, derived existing client owner, source and correction metadata; V0 operator-only correction fields and filters",
       "finding": "BF-13",
-      "reason": "DSN-0015: display missing or disputed imported dates truthfully and permit assigned Case Owners and Photon Admins to maintain the existing event. Existing route and states retained. Source provenance survives correction; completion remains separate from Actions. Conceptual until backend verification."
+      "reason": "DSN-0015: display missing or disputed imported dates truthfully and permit assigned Case Owners and Photon Admins to maintain the existing event. Existing route and states retained. Source provenance survives correction; completion remains separate from Actions. An exact request_id queue filter follows the related instruction even when several events share a patent. Conceptual until backend verification."
     }
   ],
   "collections": [

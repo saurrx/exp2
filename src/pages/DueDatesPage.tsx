@@ -11,6 +11,7 @@ export default function DueDatesPage() {
   useTrackOnce("due_dates_viewed");
   const location = useLocation();
   const {user} = useUserCookie();
-  if (user && !canReadDocket(user.role)) return <BlockedRedirect from="/due-dates" to="/"/>;
+  if (!user) return null;
+  if (!canReadDocket(user.role)) return <BlockedRedirect from="/due-dates" to="/"/>;
   return <><PageHeader title={user?.role === "LEGAL_COUNSEL" ? "Actions" : "Due dates"} actions={<ActionsNavigation/>}/><DueDatesContent initialView={location.state?.initialView || "list"}/></>;
 }

@@ -1,0 +1,5 @@
+wrote  surfaces-patent-detail--save-failure--at-1280x720
+   note surfaces-patent-detail--save-failure--at-1440x900: 8 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--save-failure--at-1440x900
+wrote  surfaces-patent-detail--save-failure--at-640x360@2
+shots: all stories rendered, stable within 40 pixels, no egress

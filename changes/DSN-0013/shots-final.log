@@ -1,0 +1,76 @@
+wrote  surfaces-patent-detail--inventor--at-1280x720
+wrote  surfaces-patent-detail--inventor--at-1440x900
+wrote  surfaces-patent-detail--inventor--at-1366x768
+wrote  surfaces-patent-detail--inventor--at-1920x1080
+wrote  surfaces-patent-detail--inventor--at-640x360@2
+wrote  surfaces-patent-detail--workspace-admin-upcoming-event--at-1280x720
+wrote  surfaces-patent-detail--workspace-admin-upcoming-event--at-1440x900
+wrote  surfaces-patent-detail--workspace-admin-upcoming-event--at-1366x768
+wrote  surfaces-patent-detail--workspace-admin-upcoming-event--at-1920x1080
+wrote  surfaces-patent-detail--workspace-admin-upcoming-event--at-640x360@2
+   note surfaces-patent-detail--case-owner-editor--at-1280x720: 19 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--case-owner-editor--at-1280x720
+wrote  surfaces-patent-detail--case-owner-editor--at-1440x900
+   note surfaces-patent-detail--case-owner-editor--at-1366x768: 19 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--case-owner-editor--at-1366x768
+wrote  surfaces-patent-detail--case-owner-editor--at-1920x1080
+wrote  surfaces-patent-detail--case-owner-editor--at-640x360@2
+   note surfaces-patent-detail--photon-admin-editor--at-1280x720: 19 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--photon-admin-editor--at-1280x720
+wrote  surfaces-patent-detail--photon-admin-editor--at-1440x900
+   note surfaces-patent-detail--photon-admin-editor--at-1366x768: 19 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--photon-admin-editor--at-1366x768
+wrote  surfaces-patent-detail--photon-admin-editor--at-1920x1080
+wrote  surfaces-patent-detail--photon-admin-editor--at-640x360@2
+wrote  surfaces-patent-detail--pending--at-1280x720
+wrote  surfaces-patent-detail--pending--at-1440x900
+wrote  surfaces-patent-detail--filed--at-1280x720
+wrote  surfaces-patent-detail--filed--at-1440x900
+wrote  surfaces-patent-detail--granted--at-1280x720
+wrote  surfaces-patent-detail--granted--at-1440x900
+wrote  surfaces-patent-detail--inactive--at-1280x720
+wrote  surfaces-patent-detail--inactive--at-1440x900
+wrote  surfaces-patent-detail--closed--at-1280x720
+wrote  surfaces-patent-detail--closed--at-1440x900
+wrote  surfaces-patent-detail--incomplete-imported-record--at-1280x720
+wrote  surfaces-patent-detail--incomplete-imported-record--at-1440x900
+wrote  surfaces-patent-detail--multiple-family-members--at-1280x720
+wrote  surfaces-patent-detail--multiple-family-members--at-1440x900
+wrote  surfaces-patent-detail--no-originating-idea--at-1280x720
+wrote  surfaces-patent-detail--no-originating-idea--at-1440x900
+wrote  surfaces-patent-detail--many-documents--at-1280x720
+wrote  surfaces-patent-detail--many-documents--at-1440x900
+   note surfaces-patent-detail--loading--at-1280x720: 1 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--loading--at-1280x720
+wrote  surfaces-patent-detail--loading--at-1440x900
+wrote  surfaces-patent-detail--error--at-1280x720
+wrote  surfaces-patent-detail--error--at-1440x900
+UNSTABLE surfaces-patent-detail--save-failure--at-1280x720: two clean renders differ by 50 pixels in [137,232,1221,705]
+wrote  surfaces-patent-detail--save-failure--at-1440x900
+wrote  surfaces-patent-detail--save-failure--at-640x360@2
+wrote  surfaces-patent-detail--saving--at-1280x720
+wrote  surfaces-patent-detail--saving--at-1440x900
+wrote  surfaces-patent-detail--case-owner-record--at-1280x720
+wrote  surfaces-patent-detail--case-owner-record--at-1440x900
+wrote  surfaces-patent-detail--case-owner-record--at-1366x768
+wrote  surfaces-patent-detail--case-owner-record--at-1920x1080
+wrote  surfaces-patent-detail--case-owner-record--at-640x360@2
+wrote  surfaces-patent-detail--photon-admin-record--at-1280x720
+wrote  surfaces-patent-detail--photon-admin-record--at-1440x900
+wrote  surfaces-patent-detail--photon-admin-record--at-1366x768
+wrote  surfaces-patent-detail--photon-admin-record--at-1920x1080
+wrote  surfaces-patent-detail--photon-admin-record--at-640x360@2
+wrote  surfaces-patent-detail--save-success--at-1280x720
+wrote  surfaces-patent-detail--save-success--at-1440x900
+wrote  surfaces-patent-detail--document-failure--at-1280x720
+   note surfaces-patent-detail--document-failure--at-1440x900: 4 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--document-failure--at-1440x900
+wrote  surfaces-patent-detail--document-failure--at-640x360@2
+wrote  surfaces-patent-detail--remove-document--at-1280x720
+wrote  surfaces-patent-detail--remove-document--at-1440x900
+wrote  surfaces-patent-detail--long-title--at-1280x720
+wrote  surfaces-patent-detail--long-title--at-1440x900
+wrote  surfaces-patent-detail--long-title--at-640x360@2
+wrote  legacy-reference-screens-due-dates--case-owner
+wrote  legacy-reference-screens-due-dates--photon-admin
+shots: 1 failure(s)

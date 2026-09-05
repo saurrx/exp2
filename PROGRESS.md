@@ -176,3 +176,6 @@ Round 2 PASS: all seven scorecard categories 4, no findings or missing states ac
 Patent detail is complete and merged to main with --no-ff (eb41ab3), pushed to origin. Progressive record, focused operational editor, truthful canonical metadata and document recovery serve all four personas. Twenty-three V0 stories replace two legacy detail stories; 72 captures inspected by the fresh evaluator, round 2 PASS with all seven scores 4. Final required gates 8/8, both builds, 25-context accessibility, four-persona stored-data/document/navigation checks and zoom recovery pass. Coverage is 10/17. Preserved the concurrent firing yield entry in the PROGRESS-only merge conflict. Broader unrelated accessibility findings remain recorded for the final run sweep. No founder decision required.
 
 Next surface: **DSN-0014 — Actions** (`product-context/surfaces/actions.md`). No surface remains in progress. The overall RUN COMPLETE condition remains unmet.
+
+## Concurrency yield — 2026-09-05T06:49:02.556421+00:00
+This scheduled firing yielded to another active run: 1f291cb (DSN-0014 Actions) committed within the last 25 minutes. Active Actions checkout preserved; no surface edits or validation performed. Next firing must recheck concurrency before resuming.

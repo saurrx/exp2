@@ -85,3 +85,23 @@ Second shared-navigation review: 16 additional portfolio/due-date captures have 
 Final shared-navigation review found two remaining legacy client captures with the same exact 490-pixel label-only change. Both full images were opened and accepted; sidebar-diffs-final.json records them. Total verified navigation-only baseline updates: 37.
 
 Two durable V0 API tests now guard BF-14 boundaries: foreign client filters cannot widen the work summary or its map, no-assignment summaries are empty, and requesting expired access stores its timestamp while client GET remains 403 and assignments remain unchanged. `npm run test:v0` passes 45/45 including both new tests (v0-boundaries.log). No auth code changed.
+
+## Final validation and blocked completion audit
+The revised build:design and Storybook builds pass. `shots2.log` records all 34 scoped captures stable across two clean contexts with no egress. All were copied into shots; the five final default viewports and all material revisions (long title, selected setup states and map captures) were opened. The seven other changed PNGs differ by only 2–8 pixels; revision-shot-diffs.json records the comparison to the prior fully inspected set. Revised axe/overflow checks pass all 28 contexts (`axe3.log`). Final condition gate passes 7/7 (`gates-required1.log`), lint:roles passes (`roles2.log`), and V0 passes 45/45 including the two new boundary tests.
+
+The full broad runner finished 18/23 before the reviewer UI corrections. Its recorded failures are older documentation-host allowlist entries, 99 visual differences and three unstable other-surface captures, 27 new accessibility fingerprints plus one reference Ideas age-label contrast block, 54 layout violations, and 1,257 historical conformance deviations. Of the visual differences, 22 are superseded by the final My work captures and 37 are the separately inspected navigation-label updates; 40 other/mixed differences remain unaccepted. No My work accessibility or unstable-capture finding occurred. See broad-gate-details for the full results. The runtime graph, reproducible lockfile, smoke, crawl, desktop and visible-identifier checks pass.
+
+| Completion condition | Evidence / status |
+| --- | --- |
+| 1 Persona frame and roleplay | Recorded before implementation in PROGRESS and this record. |
+| 2 Three directions | Written, rendered, opened and selected by cognitive load before UI work. |
+| 3 Built in place | Work summary implemented and validated; required client-view boundary remains blocked. |
+| 4 Intended V0 stories | Fourteen stories cover all nine intended IDs; all stories pass. |
+| 5 Legacy retirement | Case Owner home story, capture and two accessibility fingerprints retired. |
+| 6 Visual evidence | 34 scoped stable captures; required widths and 200% reviewed. |
+| 7 Required checks | 7/7 serial gate, roles, both builds, V0 45/45; 28 axe/overflow checks clean. |
+| 8 Independent PASS | Not achieved. Round 1 NEEDS_WORK; two UI findings fixed, exit defect unresolved. |
+| 9 Ledger and scorecard | Ledger deliberately null; fit/usability/trust remain 3 because of exit failure. |
+| 10 Merge and recap | Checkpoint committed on branch; no merge or completion recap. |
+
+The auth exception remains pending. Once authorized, fix original-persona restoration and show an explicit client-view/recovery boundary, verify entry and exit including failure, refresh affected evidence, and obtain independent PASS before updating coverage or merging. The overall run is not complete.

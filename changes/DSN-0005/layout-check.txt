@@ -1,0 +1,6 @@
+1280x720@1: no horizontal overflow, main fits viewport, primary action persists; egress=0
+1366x768@1: no horizontal overflow, main fits viewport, primary action persists; egress=0
+1440x900@1: no horizontal overflow, main fits viewport, primary action persists; egress=0
+1920x1080@1: no horizontal overflow, main fits viewport, primary action persists; egress=0
+640x360@2: no horizontal overflow, main fits viewport, primary action persists; egress=0
+Zoom navigation: Home, My ideas, Patents and Profile available.

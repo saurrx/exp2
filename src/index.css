@@ -91,6 +91,10 @@
     min-width: 0;
   }
 
+  body:has([data-inventor-home]) .h-dvh {
+    min-height: 0;
+  }
+
   /* A one-time entrance for dashboard numbers: transform only, no fade, so
      contrast is final from the first frame. Static under reduced motion. */
   @keyframes pulse-rise {

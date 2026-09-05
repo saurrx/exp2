@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { PageHeader } from "@/components/DashboardChrome";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ArrowDown, ArrowRight, ArrowUp, ChevronDown, RotateCcw, Users } from "lucide-react";
@@ -7,6 +9,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -1043,12 +1046,23 @@ const MyIdeas = ({ ideas, onSubmit, onOpenIdea, onViewAll, onOpenPatent, onSendI
   const recent = [...ideas].sort((a, b) => priority(a) - priority(b)).slice(0, 5);
   return (
     <section data-inventor-home aria-labelledby="inventor-ideas-heading" className="min-w-0">
+      <PageHeader title="Home" actions={<>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button size="sm" variant="outline" className="md:hidden">Navigation <ChevronDown aria-hidden="true" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild><Link to="/">Home</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link to="/ideas">My ideas</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link to="/patents">Patents</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link to="/profile">Profile</Link></DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button size="sm" onClick={onSubmit}>Submit an idea <ArrowRight aria-hidden="true" /></Button>
+      </>} />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 id="inventor-ideas-heading" className="text-2xl font-semibold tracking-tight text-[var(--pulse-ink)]">My ideas</h2>
           <p className="mt-2 max-w-prose text-sm text-[var(--pulse-ink-muted)]">Start a draft with your notes. You choose when to submit for review.</p>
         </div>
-        <Button size="sm" onClick={onSubmit}>Submit an idea <ArrowRight aria-hidden="true" /></Button>
       </div>
       <div className="mt-6 min-h-80">
         {hasError ? <div role="alert" className="flex min-h-64 flex-col items-start justify-center gap-3 border-y border-[var(--pulse-line)]">

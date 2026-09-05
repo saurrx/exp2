@@ -1,0 +1,11 @@
+VERDICT: NEEDS_WORK
+SURFACE: inventor-home  PERSONA: Inventor
+SCORECARD: product-fit 4 · hierarchy 4 · usability 3 · trust 4 · craft 4 · accessibility 3 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, my six answers agree with the record: task first, draft creation dominant, title and next step sufficient, no cross-panel memory, no irrelevant persona content, and clear review ownership.
+FINDINGS (most severe first, max 7):
+
+1. Navigation at 200% zoom — The sidebar disappears without a visible replacement control, leaving the Inventor to guess how to reach My ideas or Patents — Provide an accessible navigation trigger at this width and capture its rendered state.
+2. Persistent “Submit an idea” action — Both company-context screenshots lose the primary action after scrolling, requiring the Inventor to remember its location and return to the top; the brief explicitly requires persistence — Keep the single primary action accessible while scrolling and verify at both review widths.
+
+STATES MISSING: none of the brief’s named states.
+REFERENCE MATCH: yes — Typography, amber primary action, restrained secondary controls, small radii, and hairline separation follow the reference language.

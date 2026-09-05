@@ -1,0 +1,24 @@
+wrote  surfaces-inventor-home--first-run--at-1280x720
+wrote  surfaces-inventor-home--first-run--at-1440x900
+wrote  surfaces-inventor-home--invited-inactive--at-1280x720
+wrote  surfaces-inventor-home--invited-inactive--at-1440x900
+wrote  surfaces-inventor-home--no-ideas--at-1280x720
+wrote  surfaces-inventor-home--no-ideas--at-1440x900
+wrote  surfaces-inventor-home--active-draft--at-1280x720
+wrote  surfaces-inventor-home--active-draft--at-1440x900
+wrote  surfaces-inventor-home--several-statuses--at-1280x720
+wrote  surfaces-inventor-home--several-statuses--at-1440x900
+wrote  surfaces-inventor-home--several-statuses--at-1366x768
+wrote  surfaces-inventor-home--several-statuses--at-1920x1080
+wrote  surfaces-inventor-home--several-statuses--at-640x360@2
+wrote  surfaces-inventor-home--requested-changes--at-1280x720
+wrote  surfaces-inventor-home--requested-changes--at-1440x900
+wrote  surfaces-inventor-home--recent-submission--at-1280x720
+wrote  surfaces-inventor-home--recent-submission--at-1440x900
+wrote  surfaces-inventor-home--evaluation-available--at-1280x720
+wrote  surfaces-inventor-home--evaluation-available--at-1440x900
+wrote  surfaces-inventor-home--loading--at-1280x720
+wrote  surfaces-inventor-home--loading--at-1440x900
+wrote  surfaces-inventor-home--error--at-1280x720
+wrote  surfaces-inventor-home--error--at-1440x900
+shots: all stories rendered, stable within 40 pixels, no egress

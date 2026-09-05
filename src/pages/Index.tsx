@@ -445,7 +445,7 @@ const LegacyIndex = () => {
                         `/api/v1/idea/send-latest-draft-to-ihc/${id}`,
                         {},
                       );
-                      refetchIdeas();
+                      await Promise.all([refetchIdeas(), refetchDashboard()]);
                     } catch {
                       toast.error("Your idea wasn’t submitted. Your draft is still saved.");
                       throw new Error("Idea submission failed");

@@ -33,7 +33,9 @@ Restyled the existing `MyIdeas` component and its placement in `Index`. Full-wid
 
 Personal pipeline, collective company momentum, and the existing patent map follow the ideas. Removed the equal-weight personal dashboard cards, stale-activity nudge and isolated score. The main start flow, route, data hooks, adapter, auth, analytics and reference components are unchanged. Existing Button and Dialog primitives are reused. Colors use the existing tokens; no token additions or new primitive.
 
-The global 1024px body floor initially clipped the start action at 200% zoom. A `body:has([data-inventor-home])` rule lets only this surface reflow. The device access gate and other surfaces are unchanged. All five measured document/main widths fit their viewport with no horizontal scrolling.
+The global 1024px body floor initially clipped the start action at 200% zoom. A `body:has([data-inventor-home])` rule lets only this surface reflow and removes the layout's legacy minimum height so the bottom remains reachable. The device access gate and other surfaces are unchanged. All five measured document/main widths and main heights fit their viewport with no horizontal scrolling.
+
+The single primary action is in the existing sticky `PageHeader` slot, so it remains available after scrolling. At widths where the sidebar is hidden, a secondary Navigation menu exposes Home, My ideas, Patents and Profile. Successful home submission refreshes both the existing idea list and the new pipeline summary.
 
 ## Mock additions
 
@@ -89,6 +91,10 @@ Hard-rule check: one primary action; no repeated individual score/title/status; 
 - `npm run build:design`, `npm run storybook:build`: pass.
 - Screenshots: 23/23 written, no egress.
 - Browser layout measurements: document/main scroll widths fit at 1280, 1366, 1440, 1920 and 640 CSS pixels (200% device scale).
-- Selected gate runner and fresh evaluator: pending final output.
+- Selected gate runner: 7/7 passed (including 214/214 story tests); final coverage update will be checked again before merge.
+
+## Evaluator iteration
+
+Round 1 returned NEEDS_WORK: task hierarchy and cognitive load passed, but navigation was absent at 200% zoom and the start action scrolled away. The complete verdict is in `evaluator-round-1.txt`. Both were corrected through the existing page-header slot and dropdown primitive. All 23 baselines were regenerated. Supplemental screenshots now show the persistent action while scrolled and the open navigation menu at 200%. `layout-check.txt` records no horizontal overflow, a viewport-sized scroll area, a visible primary action at the bottom of the page, and no egress at all five widths. The second fresh-context verdict is pending.
 
 Known compromises: existing downstream start/disclosure/detail screens are scheduled separately. The home keeps their routes. Map expansion retains the existing dialog. The prototype's invited persona is represented by the existing mock session; real invitation acceptance remains the authentication surface. This is not a claim of measured business uplift or a user study.

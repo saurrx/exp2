@@ -15,7 +15,7 @@ const scenario = (name: string) => ({ pulse: { scenario: `v0/inventor/${name}`, 
 const check = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement);
   await expect(await canvas.findByRole("heading", { name: "My ideas" })).toBeVisible();
-  await expect(canvas.getByRole("button", { name: "Submit an idea" })).toBeEnabled();
+  await expect(await canvas.findByRole("button", { name: "Submit an idea" })).toBeEnabled();
   await expect(canvas.queryByRole("link", { name: /^Actions/ })).toBeNull();
   await expect(canvas.queryByRole("link", { name: /^Due Dates/ })).toBeNull();
   await expect(canvas.queryByRole("heading", { name: "Top inventors" })).toBeNull();

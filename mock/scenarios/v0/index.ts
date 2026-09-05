@@ -508,6 +508,14 @@ const clientStates = ["potential-client", "new-client", "no-owner", "no-admin", 
   const latest=d.imports.find(i=>i.client_id===client.id);
   if(latest && ["import-in-progress","import-errors"].includes(slug)) {latest.status=slug==="import-errors"?"PARTIAL":"RUNNING";latest.failed_count=slug==="import-errors"?2:0;latest.duplicate_in_file=slug==="import-errors"?1:0;latest.created_count=slug==="import-errors"?15:0;latest.updated_count=0;latest.unchanged_count=0;latest.completed_at=slug==="import-errors"?clock.iso():null;latest.created_at=clock.iso();latest.errors=slug==="import-errors"?[{row:2,message:"Jurisdiction column is empty."},{row:7,message:"Application number is missing."}]:[];}
   else if(["potential-client","new-client","no-portfolio"].includes(slug))d.imports=d.imports.filter(i=>i.client_id!==client.id);
+  if(["ready","confirm-ready","long-title"].includes(slug)) {
+    const rng=rngFor(`v0/clients/${slug}/dates`),patent=generatePortfolio(client,d.portfolios[client.id]).patents[0];
+    d.patentOverrides[patent.id]={...d.patentOverrides[patent.id],application_number:"SYN-NWI-2025-0042"};
+    const event={id:uuid(rng),patent_id:patent.id,client_id:client.id,title:"Response to examination report",event_type:"Office Action Response Due",due_at:clock.daysAhead(4),status:"PENDING" as const,created_at:clock.daysAgo(20),updated_at:clock.daysAgo(1)};
+    d.dueDates.push(event);
+    const template=d.actionTemplates.find(t=>t.event_types.includes(event.event_type))!;
+    d.actionRequests.push({id:uuid(rng),client_id:client.id,due_date_id:event.id,template_id:template.id,instruction:template.label,selected_countries:[],note:null,status:"NEW",submission_state:"SUBMITTED",version:1,requested_by_id:U.admin.id,requested_at:clock.daysAgo(1),updated_at:clock.daysAgo(1)});
+  }
   if(slug==="disabled")client.is_active=false;
   if(slug==="access-request"){d.users.find(u=>u.id===U.caseOwner.id)!.assigned_client_ids=[BEACON.id];d.access=d.access.filter(a=>!(a.user_id===U.caseOwner.id && a.client_id===client.id));}
   if(slug==="long-title"){client.name="Northwind Instruments and Advanced Measurement Research Laboratories";client.domain="advanced-measurement-research.northwind.test";client.about="Synthetic research workspace for distributed optical measurement, thermal calibration and process instrumentation. Client records are maintained by the assigned Case Owner.";}

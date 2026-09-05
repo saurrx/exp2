@@ -22,3 +22,24 @@ A preserves the route, existing component props, query state/cache contract, per
 
 ## Validation
 Pending. Coverage stays null until the required render review, checks and independent PASS.
+
+## What moved and stayed
+The existing list is now four aligned columns: application/title, status, jurisdiction and filed date. Operational readers get client attribution and a status editor; authorized readers get the next pending date. Optional fields unfold under records through Columns. Search leads, jurisdiction counts live in its filter, and empty/error states give a specific recovery. Import has client/file selection, a protected pending state, row-level results and retained-input retry. Export shares the exact list filter interpretation. Laptop content reflows into stacked records at desktop zoom with a navigation menu; the desktop access gate is unchanged.
+
+The `/patents` and `/patents/:patentId` routes, component props, URL state, cache invalidation, permission checks and existing status/upload/import endpoints remain. No adapter, auth, analytics, shared query-hook or reference-screen file changed. The detail screen's existing rendering is retained for DSN-0013. Transport fixes are recorded separately in `transport-defects.md`.
+
+## Mock and coverage
+No new endpoint, field, status or permission. Existing list/export handlers now share search, status, tag, jurisdiction, date and sorting semantics. Paging precedes row enrichment so large lists only enrich the requested page. Native CSV Response handling is opt-in to this export endpoint. V0 Inventor list rows omit due dates; operational import enforces stored-file/client scope. Added only two uncovered scenarios: `v0/portfolio/long-titles` and `v0/portfolio/import-result`. Other stories select existing V0 company, assigned-client, firm, large, empty and failure scenarios.
+
+All twelve intended `surfaces-patent-portfolio--` IDs exist, plus `import-failure` and `import-in-progress`. Five legacy portfolio stories and their ten baseline/actual PNGs and four a11y fingerprints are retired. The two legacy patent-detail stories stay for DSN-0013. No four-persona legacy portfolio UI journey remains; the independent legacy superadmin API scope journey is not replaced by this surface and remains regression-only.
+
+## Rendered scorecard and cognitive-load check
+Builder scores: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4. Search is the dominant action; import and export recede. The same row carries the identifying number and title, with no intermediate preview or repeated status. Client scope and jurisdiction counts are explicit. Whitespace and hairlines separate records. Default fields fit each review width, and optional fields wrap rather than adding horizontal scrolling. No invented metrics, guarantees or due dates for Inventors. These are design-review scores, not evidence of measured user/business improvement.
+
+Rendered roleplay confirms the six frame answers above: search and current scope lead for each persona, only identification/status/geography/date need scanning, and the existing detail link is the next step. Optional evidence costs one explicit Columns choice. Back retains the filter. Failure keeps the source file/client; import results separate added, updated, unchanged and failed rows. Initial zoom review exposed the inherited body minimum width, now corrected only for this surface. Independent fresh-context evaluation is pending.
+
+## Evidence
+`shots/` includes every story at 1280×720 and 1440×900; all four default personas also at 1366×768, 1920×1080 and 640×360@2. Supplemental zoom captures cover long titles, optional fields and import result/failure/pending. Default renders were opened and inspected. Eight focused axe contexts have zero findings; their zoom probes have no page or table overflow (`a11y2.log`). Four-persona actual CSV downloads equal the matching status/jurisdiction count, and clear/paging work (`functional.log`). Full-app navigation opens the existing detail route and browser Back preserves jurisdiction (`navigation.log`). Retained-input import retry completes, pending cannot close with Escape, and optional fields fit zoom (`ops.log`). Required gates and independent evaluation are recorded below when complete.
+
+## Known limits and follow-ups
+The existing mock import is a deterministic result simulation, not a spreadsheet parser; its supplied partial-error result lists representative row errors. Backend implementation still needs to honor the existing route's exact query semantics described in the transport record. Large lists use server-style paging; no real customer corpus was used. The existing parallel-story isolation probe remains informational and fails because shared cookie identity leaks between frames; the required story suite runs serially. No founder decision is needed.

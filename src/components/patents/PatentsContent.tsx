@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { track } from "@/lib/analytics";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,12 +43,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductChip } from "@/components/ui/product-chip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import API_CONFIG, { assetUrl } from "@/lib/apiConfig";
+import API_CONFIG, { assetUrl, rawApi } from "@/lib/apiConfig";
 import useUserCookie from "@/hooks/use-auth";
 import Cookies from "js-cookie";
 import Loader from "../Loader";
 import moment from "moment";
 import { useTheme } from "@/hooks/useTheme";
+import PortfolioImport from "./PortfolioImport";
 import PatentTagsCell from "./PatentTagsCell";
 import DateRangeFilter from "@/components/patents/DateRangeFilter";
 import { resolveDateRange, dateFilterLabel, type DatePreset } from "@/lib/dateRange";
@@ -144,7 +145,13 @@ type PatentsContentProps = {
   setExportTrigger?: (fn: (() => Promise<void> | void) | null) => void;
 };
 
-const COLUMN_VISIBILITY_KEY_PREFIX = "patents-portfolio-column-visibility-v5";
+const STATUS_KEYS: Record<string, string> = { ACTIVE_GRANTED: "GRANTED", ACTIVE_APPLIED: "APPLIED", ACTIVE_EXAMINATION: "EXAMINATION", INACTIVE_EXPIRED: "EXPIRED", INACTIVE_WITHDRAWN: "WITHDRAWN", INACTIVE_REJECTED: "REJECTED", INACTIVE_ABANDONED: "ABANDONED", INACTIVE_NONPAYMENT: "NONPAYMENT" };
+const backendStatus = (status: string) => STATUS_KEYS[status] || status;
+const legalStatus = (status: string): PatentLegalStatus => (Object.keys(STATUS_KEYS).find(key => STATUS_KEYS[key] === status) || status) as PatentLegalStatus;
+const dateText = (value?: string) => value && moment(value).isValid() ? moment(value).format("D MMM YYYY") : "Not recorded";
+const jurisdictionName = (code: string) => ({ EP: "Europe", WO: "International" }[code] || (() => { try { return new Intl.DisplayNames(["en"], { type: "region" }).of(code) || code; } catch { return code || "Not recorded"; } })());
+
+const COLUMN_VISIBILITY_KEY_PREFIX = "patents-portfolio-column-visibility-v6";
 
 const CORE_COLUMN_WIDTHS: Record<string, string> = {
   prn: "160px",
@@ -244,7 +251,7 @@ const defaultColumns: Column[] = [
     label: "Tags",
     width: "w-64",
     accessor: "tags" as keyof Patent,
-    visible: true,
+    visible: false,
   },
   {
     id: "abstract",
@@ -352,6 +359,10 @@ const PatentsContent = (props: PatentsContentProps) => {
   const getInitialCustomFrom = () => searchParams.get("date_from") || "";
   const getInitialCustomTo = () => searchParams.get("date_to") || "";
 
+  const jurisdiction = searchParams.get("jurisdiction") || "";
+  const [searchInput, setSearchInput] = useState(getInitialSearchQuery);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [viewMode, setViewMode] = useState<string>("list");
   const [rowHeight, setRowHeight] = useState<string>("large"); // Default to large for abstracts
   const [searchQuery, setSearchQuery] = useState<string>(getInitialSearchQuery);
@@ -466,23 +477,25 @@ const PatentsContent = (props: PatentsContentProps) => {
   // the same filter state the list query uses, then streams the response as
   // a blob and triggers a save. Backend returns text/csv with Content-
   // Disposition so the filename is set there.
-  const handleExportCsv = async () => {
+  const portfolioParams = (paged = true) => {
     const params = new URLSearchParams();
+    const cid = selectedClientId[0] || (!isOutsideCounselRole(user?.role) ? user?.client_id : "");
+    if (cid) params.set("client_id", cid);
     if (searchQuery) params.set("search", searchQuery);
-    if (filterOption.length > 0)
-      params.set("filter_status", filterOption.join(","));
-    if (selectedClientId.length > 0)
-      params.set("filter_client_id", selectedClientId.join(","));
-    if (selectedTags.length > 0)
-      params.set("filter_tags", selectedTags.join(","));
-    if (sortConfig?.sortBy) params.set("sortBy", sortConfig.sortBy);
-    if (sortConfig?.sortOrder) params.set("sortOrder", sortConfig.sortOrder);
+    if (filterOption[0]) params.set("status", backendStatus(filterOption[0]));
+    if (jurisdiction) params.set("jurisdiction", jurisdiction);
+    if (selectedTags.length) params.set("tags", selectedTags.join(","));
     if (dateRange.from) params.set("date_from", dateRange.from);
     if (dateRange.to) params.set("date_to", dateRange.to);
-
+    params.set("sort", sortConfig.sortBy === "application_date" ? "filing_date" : sortConfig.sortBy);
+    params.set("order", sortConfig.sortOrder);
+    if (paged) { params.set("page", String(currentPage)); params.set("limit", String(itemsPerPage)); }
+    return params;
+  };
+  const handleExportCsv = async () => {
     try {
-      const response = await API_CONFIG.get(
-        `/api/v1/patent/export/client/${user?.client_id}?${params.toString()}`,
+      const response = await rawApi.get(
+        `/v1/patents/export?${portfolioParams(false)}`,
         { responseType: "blob" },
       );
       const blob = new Blob([response.data], { type: "text/csv" });
@@ -510,7 +523,7 @@ const PatentsContent = (props: PatentsContentProps) => {
       props.setExportTrigger?.(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, filterOption, selectedClientId, selectedTags, sortConfig, dateRange, props.setExportTrigger]);
+  }, [searchQuery, filterOption, selectedClientId, selectedTags, sortConfig, dateRange, jurisdiction, props.setExportTrigger]);
 
   // Sync state from URL params when they change externally (e.g., browser back/forward)
   useEffect(() => {
@@ -530,6 +543,7 @@ const PatentsContent = (props: PatentsContentProps) => {
     const urlDateTo = searchParams.get("date_to") || "";
 
     if (urlSearch !== searchQuery) {
+      setSearchInput(urlSearch);
       setSearchQuery(urlSearch);
     }
     
@@ -671,6 +685,7 @@ const PatentsContent = (props: PatentsContentProps) => {
       selectedClientId,
       selectedTags,
       dateRange,
+      jurisdiction,
     ],
     [
       user?.client_id,
@@ -682,42 +697,27 @@ const PatentsContent = (props: PatentsContentProps) => {
       selectedClientId,
       selectedTags,
       dateRange,
+      jurisdiction,
     ],
   );
 
   const {
     data: patentData,
     isFetching: isFetchingPatents,
+    isPending: isPendingPatents,
+    isError: isErrorPatents,
     refetch,
   } = useQuery({
     queryKey: patentsQueryKey,
     queryFn: async () => {
-      const response = await API_CONFIG.get(
-        `/api/v1/patent/fetch-lastet/client/${
-          user?.client_id
-        }?source=dashboard&page=${currentPage}&limit=${itemsPerPage}&search=${searchQuery}&filter_status=${
-          filterOption.length > 0 ? filterOption.join(",") : ""
-        }&sortBy=${sortConfig.sortBy}&sortOrder=${sortConfig.sortOrder}${
-          selectedClientId.length > 0
-            ? `&filter_client_id=${selectedClientId.join("")}`
-            : ""
-        }${
-          selectedTags.length > 0
-            ? `&filter_tags=${selectedTags
-                .map(encodeURIComponent)
-                .join(",")}`
-            : ""
-        }${dateRange.from ? `&date_from=${dateRange.from}` : ""}${
-          dateRange.to ? `&date_to=${dateRange.to}` : ""
-        }`,
-      );
+      const response = await rawApi.get(`/v1/patents?${portfolioParams()}`);
 
       if (response.status === 200) {
         props?.setTotalPatents?.(response.data?.pagination?.total ?? 0);
         return response?.data;
       }
     },
-    enabled: !!user?.client_id,
+    enabled: !!user,
     refetchOnMount: true,
   });
 
@@ -736,7 +736,7 @@ const PatentsContent = (props: PatentsContentProps) => {
         const response = await API_CONFIG.get("/api/v1/clients?limit=500&sort=name&order=asc");
         return response?.data;
       } catch (error) {
-        console.error("Error getting clients", error);
+        throw error;
       }
     },
   });
@@ -932,1244 +932,57 @@ const PatentsContent = (props: PatentsContentProps) => {
     refetch();
   };
 
-  // Helper function to render cell content based on column ID
-  const renderCellContent = (columnId: string, client: any, index: number) => {
-    switch (columnId) {
-      case "assigneeOriginal":
-        return (
-          <td
-            className="px-4 py-2.5"
-            style={{ minWidth: "140px", maxWidth: "220px" }}
-          >
-            <span
-              className={`block truncate whitespace-nowrap text-sm font-sans ${
-                theme === "dark" ? "text-zinc-200" : "text-[var(--pulse-ink-secondary)]"
-              }`}
-              title={client?.assignee_original}
-            >
-              {client?.assignee_original}
-            </span>
-          </td>
-        );
-
-      case "abstract":
-        return (
-          <td className="px-4 py-3" style={{ minWidth: "540px" }}>
-            <span
-              className={`text-sm font-sans ${
-                theme === "dark" ? "text-zinc-200" : "text-gray-900"
-              }`}
-            >
-              {client?.abstract}
-            </span>
-          </td>
-        );
-      case "priority":
-        return (
-          <td className="px-4 py-3" style={{ minWidth: "240px" }}>
-            <span
-              className={`text-sm font-sans ${
-                theme === "dark" ? "text-zinc-200" : "text-gray-900"
-              }`}
-            >
-              {client?.priority_details || "-"}
-            </span>
-          </td>
-        );
-      case "prn":
-        return (
-          <td className="px-4 py-2.5" style={{ minWidth: "140px" }}>
-            <span
-              className={`whitespace-nowrap text-[13px] tabular-nums ${
-                theme === "dark" ? "text-neutral-300" : "text-[var(--pulse-ink)]"
-              }`}
-            >
-              {client?.prn || <span className="text-neutral-400">—</span>}
-            </span>
-          </td>
-        );
-      case "title":
-        return (
-          <td
-            className="px-4 py-2.5"
-            style={{ minWidth: "320px", maxWidth: "480px" }}
-          >
-            <span
-              className={`block truncate whitespace-nowrap font-sans text-sm font-medium ${
-                theme === "dark" ? "text-zinc-200" : "text-[var(--pulse-ink)]"
-              }`}
-              title={client.title}
-            >
-              {client.title}
-            </span>
-          </td>
-        );
-      case "currentAssignee":
-        return (
-          <td className="px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-xs font-sans uppercase ${
-                  theme === "dark" ? "text-neutral-400" : "text-neutral-600"
-                }`}
-              >
-                {client?.current_assignee || 0}
-              </span>
-            </div>
-          </td>
-        );
-      case "dateOfFiling":
-        return (
-          <td className="px-4 py-2.5" style={{ minWidth: "120px" }}>
-            <div className="flex items-center justify-end gap-2">
-              <span
-                className={`whitespace-nowrap text-[13px] tabular-nums ${
-                  theme === "dark" ? "text-neutral-400" : "text-[var(--pulse-ink-secondary)]"
-                }`}
-              >
-                {moment(client?.application_date).format("YYYY-MM-DD")}
-              </span>
-            </div>
-          </td>
-        );
-      case "publication_date":
-        return (
-          <td className="px-4 py-3" style={{ minWidth: "150px" }}>
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-[13px] tabular-nums ${
-                  theme === "dark" ? "text-neutral-400" : "text-[var(--pulse-ink-secondary)]"
-                }`}
-              >
-                {(client?.issue_date &&
-                  moment(client?.issue_date).format("YYYY-MM-DD")) ||
-                  "-"}
-              </span>
-            </div>
-          </td>
-        );
-      case "legal_current_status": {
-        const isEditing = editingPatentId === client.id;
-        const currentValue = client.legal_current_status as
-          | PatentLegalStatus
-          | null
-          | undefined;
-        const meta = currentValue
-          ? PATENT_LEGAL_STATUS_META[currentValue]
-          : null;
-
-        if (isEditing) {
-          return (
-            <td
-              key={columnId}
-              className="text-left px-4 py-2.5 font-sans"
-              style={{ width: "250px" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-2">
-                <Select
-                  defaultValue={currentValue ?? undefined}
-                  disabled={isUpdatingStatus}
-                  onValueChange={(value) =>
-                    updatePatentStatus({
-                      id: client.id,
-                      status: value as PatentLegalStatus,
-                    })
-                  }
-                >
-                  <SelectTrigger className="h-8 text-xs w-[180px]">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PATENT_LEGAL_STATUS_VALUES.map((v) => (
-                      <SelectItem key={v} value={v}>
-                        {PATENT_LEGAL_STATUS_META[v].label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isUpdatingStatus ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setEditingPatentId(null)}
-                    className="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
-                    aria-label="Cancel edit"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </td>
-          );
-        }
-
-        return (
-          <td
-            key={columnId}
-            className="text-left px-4 py-2.5 font-sans"
-            style={{ width: "170px" }}
-          >
-            <div className="inline-flex items-center gap-2">
-              {meta ? (
-                <ProductChip
-                  kind="status"
-                  marker
-                  markerColor={meta.marker}
-                  textColor={meta.text}
-                >
-                  {meta.label.replace(/^(Active|Inactive) – /, "")}
-                </ProductChip>
-              ) : (
-                <span className="text-xs text-neutral-400">—</span>
-              )}
-              {canEditStatus && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingPatentId(client.id);
-                  }}
-                  className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-                  aria-label="Edit status"
-                  title="Edit status"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          </td>
-        );
-      }
-      case "inventors":
-        return (
-          <td
-            key={columnId}
-            className={`px-4 py-2.5 text-sm min-w-[150px] ${
-              theme === "dark" ? "text-neutral-400" : "text-neutral-800"
-            }`}
-          >
-            {client?.inventors
-              ?.slice(0, 4)
-              .map((inventor: any, idx: number) => (
-                <div key={idx}>
-                  <span className="whitespace-nowrap font-sans">
-                    {inventor || "N/A"}
-                  </span>
-                </div>
-              ))}
-
-            {client?.inventors?.length > 4 && (
-              <div className="mt-1 text-xs font-sans text-neutral-700">
-                +{client.inventors.length - 4} more
-              </div>
-            )}
-          </td>
-        );
-      case "tags":
-        return (
-          <td
-            key={columnId}
-            className="px-2 py-1.5 align-middle"
-            style={{ minWidth: "220px", maxWidth: "280px" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <PatentTagsCell
-              patentId={client.id}
-              tags={Array.isArray(client?.tags) ? client.tags : []}
-              patentsQueryKey={patentsQueryKey}
-            />
-          </td>
-        );
-      case "publicationCountry": {
-        const cc = (client?.publication_country || "").toUpperCase();
-        // ISO2 → regional-indicator emoji flag; skip placeholders like "??".
-        const flag = /^[A-Z]{2}$/.test(cc)
-          ? String.fromCodePoint(
-              ...[...cc].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65),
-            )
-          : null;
-        return (
-          <td key={columnId} className="px-4 py-2.5">
-            {cc ? (
-              <span className="inline-flex items-center gap-2 whitespace-nowrap">
-                {flag && <span className="text-[13px] leading-none">{flag}</span>}
-                <span
-                  className={`text-[13px] tabular-nums ${
-                    theme === "dark" ? "text-neutral-300" : "text-[var(--pulse-ink-secondary)]"
-                  }`}
-                >
-                  {cc}
-                </span>
-              </span>
-            ) : (
-              <span className="text-xs text-neutral-400">—</span>
-            )}
-          </td>
-        );
-      }
-      default:
-        return null;
-    }
+  const scopeClient = selectedClientId[0] || (!canEditStatus ? user?.client_id : "");
+  const stats = useQuery({ queryKey: ["portfolio-stats", user?.id, scopeClient], enabled: !!user, queryFn: async () => (await rawApi.get(`/v1/patents/stats${scopeClient ? `?client_id=${encodeURIComponent(scopeClient)}` : ""}`)).data as { total: number; granted: number; applied: number; examination: number; inactive: number; byJurisdiction: Array<{ jurisdiction: string; count: number }> } });
+  const clients: Array<{ id: string; name: string }> = clientsData?.data || [];
+  const rows: any[] = patentData?.data || [];
+  const optionalIds = ["assigneeOriginal", "currentAssignee", "inventors", "tags", "abstract", "priority", "publication_date"];
+  const extraColumns = canEditStatus ? columns.filter(column => optionalIds.includes(column.id) && column.visible) : [];
+  const emptyPortfolio = !isPendingPatents && !isErrorPatents && stats.data?.total === 0;
+  const hasFilters = !!(searchQuery || filterOption.length || jurisdiction || selectedTags.length || dateFilterActive);
+  const setJurisdiction = (value: string) => { const next = new URLSearchParams(searchParams); if (value) next.set("jurisdiction", value); else next.delete("jurisdiction"); next.delete("page"); setCurrentPage(1); setSearchParams(next, { replace: true }); };
+  const clearFilters = () => { setSearchQuery(""); setSearchInput(""); setFilterOption([]); setSelectedTags([]); clearDateFilter(); setJurisdiction(""); };
+  const fieldValue = (column: string, patent: any) => {
+    if (column === "tags") return <PatentTagsCell patentId={patent.id} tags={patent.tags || []} patentsQueryKey={patentsQueryKey} />;
+    const value = column === "assigneeOriginal" ? patent.assignee_original : column === "currentAssignee" ? patent.current_assignee : column === "inventors" ? patent.inventors?.join(", ") : column === "abstract" ? patent.abstract : column === "priority" ? patent.priority_details : dateText(patent.publication_date || patent.issue_date);
+    return typeof value === "string" && value.trim() ? value : "Not recorded";
   };
-
-  const renderPagination = () => {
-    if (!patentData?.pagination) return null;
-
-    const totalPages = Number(patentData.pagination.totalPages) || 1;
-    const total = Number(patentData.pagination.total) || 0;
-    if (total === 0) return null;
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    // Only disable if we're actually on the first/last page
-    const isFirstPage = currentPage <= 1;
-    const isLastPage = currentPage >= totalPages;
-
-    return (
-      <div
-        className={`pulse-pagination-bar relative z-20 !mx-0 !mb-0 !mt-0 rounded-md border ${
-          theme === "dark"
-            ? "bg-neutral-950 border-[#cccccc20]"
-            : "bg-white border-photon-gray-300"
-        }`}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span
-              className={`text-sm whitespace-nowrap ${
-                theme === "dark" ? "text-neutral-500" : "text-gray-500"
-              }`}
-            >
-              Showing {startIndex + 1} to{" "}
-              {Math.min(startIndex + patentData?.data?.length, totalItems)} of{" "}
-              {totalItems} entries
-            </span>
-            <div className="relative">
-              <select
-                value={itemsPerPage.toString()}
-                onChange={(e) => handleItemsPerPageChange(e.target.value)}
-                className={`border rounded-sm pl-3 pr-8 py-1.5 text-sm appearance-none focus:outline-none focus:border-[#F9B418] transition-colors ${
-                  theme === "dark"
-                    ? "bg-neutral-900 border-neutral-800 text-neutral-300"
-                    : "bg-white border-neutral-200 text-neutral-700"
-                }`}
-              >
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="30">30</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-              <ChevronDown
-                className={`absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${
-                  theme === "dark" ? "text-neutral-500" : "text-neutral-400"
-                }`}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {totalPages > 5 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 hover:bg-transparent"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPageFromApi === 1}
-                title="First page"
-              >
-                <ChevronsLeft
-                  className={`w-4 h-4 ${theme === "dark" && "text-zinc-200"}`}
-                />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 hover:bg-transparent"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPageFromApi === 1}
-              title="Previous page"
-            >
-              <ChevronLeft
-                className={`w-4 h-4 ${theme === "dark" && "text-zinc-200"}`}
-              />
-            </Button>
-            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 3) {
-                pageNum = i + 1;
-              } else if (currentPageFromApi <= 2) {
-                pageNum = i + 1;
-              } else if (currentPageFromApi >= totalPages - 1) {
-                pageNum = totalPages - 2 + i;
-              } else {
-                pageNum = currentPageFromApi - 1 + i;
-              }
-              return (
-                <Button
-                  key={pageNum}
-                  variant={
-                    currentPageFromApi === pageNum ? "default" : "outline"
-                  }
-                  size="sm"
-                  className={`px-3 py-1.5 w-8 text-sm font-sans ${
-                    currentPageFromApi === pageNum
-                      ? "bg-[#F9B418] text-zinc-900 hover:bg-[#F9B418]"
-                      : `text-neutral-300 ${
-                          theme === "dark"
-                            ? "bg-neutral-900 text-neutral-300"
-                            : "bg-neutral-100 text-neutral-900"
-                        } border border-[#cccccc20] hover:bg-neutral-800 hover:text-neutral-300`
-                  }`}
-                  onClick={() => setCurrentPage(pageNum)}
-                >
-                  {pageNum}
-                </Button>
-              );
-            })}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 hover:bg-transparent"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-              disabled={currentPageFromApi === totalPages}
-              title="Next page"
-            >
-              <ChevronRight
-                className={`w-4 h-4 ${theme === "dark" && "text-zinc-200"}`}
-              />
-            </Button>
-            {totalPages > 5 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 hover:bg-transparent"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPageFromApi === totalPages}
-                title="Last page"
-              >
-                <ChevronsRight
-                  className={`w-4 h-4 ${theme === "dark" && "text-zinc-200"}`}
-                />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="relative flex min-h-0 w-full min-w-0 flex-1 flex-col">
-      <div className="flex min-h-0 w-full flex-1 flex-col bg-transparent">
-        <div className="pulse-toolbar !mx-0 !mb-5 !mt-0 items-center">
-          <div className="pulse-toolbar-tight flex w-full flex-wrap items-center gap-2">
-            {/* The search box gives up width before any labelled control does:
-                it stays usable at 200px, and a filter whose word is cut off
-                does not. */}
-            <div className="min-w-[160px] flex-[1_1_200px]">
-              <div className="relative w-full">
-                <Search
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10 pointer-events-none ${
-                    theme === "dark" ? "text-neutral-500" : "text-neutral-400"
-                  }`}
-                />
-                <Input
-                  name="search"
-                  className={`pl-10 h-[42px] pb-2.5 rounded-sm ${
-                    theme === "dark"
-                      ? "bg-neutral-900 border border-[#cccccc11] text-zinc-200 placeholder:text-neutral-600"
-                      : "text-zinc-900 placeholder:text-neutral-400 bg-neutral-50"
-                  }`}
-                  placeholder="Search by application no., title, inventor..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Plus
-                  onClick={() => setSearchQuery("")}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 rotate-45 w-4 h-4 z-10 cursor-pointer ${
-                    theme === "dark" ? "text-neutral-500" : "text-neutral-400"
-                  }`}
-                />
-              </div>
-            </div>
-
-            {isOutsideCounselRole(user?.role) && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FilterButton icon={<Building2 />}>Clients</FilterButton>
-                </PopoverTrigger>
-                <PopoverContent
-                  className={`w-[280px]  rounded-lg border p-0 ${
-                    theme === "dark"
-                      ? "bg-zinc-900 border-[#cccccc20]"
-                      : "bg-white border-photon-border-light"
-                  }`}
-                >
-                  <div
-                    className={`font-bold font-sans px-3 pt-3 text-sm ${
-                      theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                    }`}
-                  >
-                    Filter by Client
-                  </div>
-
-                  <div className="px-3 pt-2 pb-1">
-                    <Input
-                      type="text"
-                      placeholder="Search clients..."
-                      value={clientSearchQuery}
-                      onChange={(e) => setClientSearchQuery(e.target.value)}
-                      className={`h-8 text-xs ${
-                        theme === "dark"
-                          ? "bg-neutral-950 border-[#cccccc20] text-zinc-200 placeholder:text-neutral-500"
-                          : "bg-white border-neutral-200 text-neutral-700 placeholder:text-neutral-400"
-                      }`}
-                    />
-                  </div>
-
-                  <ScrollArea type="always" className="max-h-[300px]">
-                    <div className="p-4 space-y-3">
-                      {clientsData?.data
-                        ?.filter((client: any) =>
-                          client?.name
-                            ?.toLowerCase()
-                            .includes(clientSearchQuery.toLowerCase()),
-                        )
-                        ?.map((client: any) => {
-                        const checked = selectedClientId.includes(client.id);
-                        return (
-                          <div
-                            key={client.id}
-                            className="cursor-pointer flex items-center space-x-2 py-0.5"
-                          >
-                            <Checkbox
-                              id={`column-${client.id}`}
-                              checked={checked}
-                              onCheckedChange={(value) =>
-                                setSelectedClientId((prev) =>
-                                  value
-                                    ? [...prev, client.id]
-                                    : prev.filter((id) => id !== client.id),
-                                )
-                              }
-                              className={`${
-                                theme === "dark"
-                                  ? "border-[#cccccc20]"
-                                  : "border-zinc-900"
-                              }`}
-                            />
-                            <div className="flex items-center gap-2 w-5 h-5">
-                              {client?.logo_file?.file_path ? (
-                                <img
-                                  src={assetUrl(client?.logo_file?.file_path)}
-                                  alt={client.name}
-                                  crossOrigin="use-credentials"
-                                  className="h-5 w-5 object-contain"
-                                  loading="lazy"
-                                  decoding="async"
-                                  onError={(e) => {
-                                    (
-                                      e.target as HTMLImageElement
-                                    ).style.display = "none";
-                                    (
-                                      e.currentTarget.parentNode as HTMLElement
-                                    ).innerHTML =
-                                      `<div className="w-5 h-5 flex items-center justify-center bg-primary/5 text-[#F9B418] font-semibold text-xs">
-                                        ${client.name
-                                          .substring(0, 2)
-                                          .toUpperCase()}
-                                      </div>`;
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-5 h-5 flex items-center justify-center bg-primary/5 text-[#F9B418] font-semibold text-xs">
-                                  {client.name.substring(0, 2).toUpperCase()}
-                                </div>
-                              )}
-                            </div>
-                            <label
-                              htmlFor={`column-${client.id}`}
-                              className={`text-sm font-sans cursor-pointer ${
-                                theme === "dark"
-                                  ? "text-neutral-300"
-                                  : "!text-neutral-700"
-                              }`}
-                            >
-                              {client?.name}
-                            </label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </ScrollArea>
-                </PopoverContent>
-              </Popover>
-            )}
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <FilterButton icon={<Filter />}>Status
-                  {filterOption.length ? (
-                    <span className="h-5 w-5 font-sans rounded-full bg-[#F9B418] text-black">
-                      {filterOption.length}
-                    </span>
-                  ) : (
-                    ""
-                  )}</FilterButton>
-              </PopoverTrigger>
-
-              <PopoverContent
-                sideOffset={8}
-                className={`w-[240px] p-0 ${
-                  theme === "dark"
-                    ? "bg-neutral-900 border border-[#cccccc20]"
-                    : ""
-                }`}
-              >
-                {/* Client list */}
-                <ScrollArea type="always" className="max-h-[320px]">
-                  <div
-                    className={`font-bold font-sans px-4 pt-3 text-sm ${
-                      theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                    }`}
-                  >
-                    Filter by Status
-                  </div>
-                  <div className="font-sans p-3">
-                    {PATENT_LEGAL_STATUS_VALUES.map((value) => {
-                      const status = {
-                        value,
-                        label: PATENT_LEGAL_STATUS_META[value].label,
-                      };
-                      const checked = filterOption.includes(status.value);
-
-                      return (
-                        <div
-                          key={status.value}
-                          className={`flex items-center font-sans gap-2 cursor-pointer  p-1.5 ${
-                            theme === "dark"
-                              ? "hover:bg-neutral-900"
-                              : "hover:bg-white"
-                          }`}
-                        >
-                          <Checkbox
-                            id={`status-${status.value}`}
-                            checked={checked}
-                            onCheckedChange={(value) => {
-                              setFilterOption((prev) =>
-                                value
-                                  ? [...prev, status.value]
-                                  : prev.filter((id) => id !== status.value),
-                              );
-                            }}
-                            className={
-                              theme === "dark"
-                                ? "bg-transparent border-white/10"
-                                : "border-zinc-900"
-                            }
-                          />
-
-                          <label
-                            htmlFor={`status-${status.value}`}
-                            className={`text-sm cursor-pointer ${
-                              theme === "dark"
-                                ? "text-zinc-200"
-                                : "text-neutral-700"
-                            }`}
-                          >
-                            {status.label}
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <FilterButton icon={<TagsIcon />}>Tags
-                  {selectedTags.length ? (
-                    <span className="h-5 w-5 font-sans rounded-full bg-[#F9B418] text-black">
-                      {selectedTags.length}
-                    </span>
-                  ) : (
-                    ""
-                  )}</FilterButton>
-              </PopoverTrigger>
-
-              <PopoverContent
-                sideOffset={8}
-                className={`w-[240px] p-0 ${
-                  theme === "dark"
-                    ? "bg-neutral-900 border border-[#cccccc20]"
-                    : ""
-                }`}
-              >
-                <div
-                  className={`font-bold font-sans px-4 pt-3 text-sm ${
-                    theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                  }`}
-                >
-                  Filter by Tags
-                </div>
-                <div className="px-3 pt-2 pb-1">
-                  <Input
-                    type="text"
-                    placeholder="Search tags..."
-                    value={tagSearchQuery}
-                    onChange={(e) => setTagSearchQuery(e.target.value)}
-                    className={`h-8 text-xs ${
-                      theme === "dark"
-                        ? "bg-neutral-950 border-[#cccccc20] text-zinc-200 placeholder:text-neutral-500"
-                        : "bg-white border-neutral-200 text-neutral-700 placeholder:text-neutral-400"
-                    }`}
-                  />
-                </div>
-                <ScrollArea type="always" className="max-h-[300px]">
-                  <div className="font-sans p-3 pt-1">
-                    {(() => {
-                      const filtered = tagOptions.filter((t) =>
-                        t
-                          .toLowerCase()
-                          .includes(tagSearchQuery.toLowerCase()),
-                      );
-                      if (filtered.length === 0) {
-                        return (
-                          <div
-                            className={`px-1.5 py-2 text-sm ${
-                              theme === "dark"
-                                ? "text-neutral-500"
-                                : "text-neutral-400"
-                            }`}
-                          >
-                            {tagOptions.length === 0
-                              ? "No tags yet"
-                              : "No matching tags"}
-                          </div>
-                        );
-                      }
-                      return filtered.map((tag) => {
-                        const checked = selectedTags.includes(tag);
-                        return (
-                          <div
-                            key={tag}
-                            className={`flex items-center font-sans gap-2 cursor-pointer p-1.5 ${
-                              theme === "dark"
-                                ? "hover:bg-neutral-900"
-                                : "hover:bg-white"
-                            }`}
-                          >
-                            <Checkbox
-                              id={`tag-${tag}`}
-                              checked={checked}
-                              onCheckedChange={(value) => {
-                                setSelectedTags((prev) =>
-                                  value
-                                    ? [...prev, tag]
-                                    : prev.filter((t) => t !== tag),
-                                );
-                              }}
-                              className={
-                                theme === "dark"
-                                  ? "bg-transparent border-white/10"
-                                  : "border-zinc-900"
-                              }
-                            />
-                            <label
-                              htmlFor={`tag-${tag}`}
-                              className={`text-sm cursor-pointer truncate ${
-                                theme === "dark"
-                                  ? "text-zinc-200"
-                                  : "text-neutral-700"
-                              }`}
-                              title={tag}
-                            >
-                              {tag}
-                            </label>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                </ScrollArea>
-              </PopoverContent>
-            </Popover>
-
-            <DateRangeFilter
-              preset={datePreset}
-              from={customFrom}
-              to={customTo}
-              onPresetChange={handleDatePresetChange}
-              onFromChange={(v) => { setCustomFrom(v); setCurrentPage(1); }}
-              onToChange={(v) => { setCustomTo(v); setCurrentPage(1); }}
-              onClear={clearDateFilter}
-            />
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <FilterButton icon={<Columns3 />}>Columns</FilterButton>
-              </PopoverTrigger>
-              <PopoverContent
-                className={`w-[240px] p-0 ${
-                  theme === "dark"
-                    ? "bg-zinc-900 border-[#cccccc20]"
-                    : "bg-white border-photon-border-light"
-                }`}
-              >
-                <div
-                  className={`p-4 pb-0 ${
-                    theme === "dark" && "border-[#cccccc20]"
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-sans font-semibold ${
-                      theme === "dark" ? "text-zinc-200" : "text-foreground"
-                    }`}
-                  >
-                    Toggle Columns
-                  </p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      theme === "dark" ? "text-zinc-200" : "text-neutral-600"
-                    }`}
-                  >
-                    Select which columns to display
-                  </p>
-                </div>
-                <ScrollArea className="max-h-[440px] overflow-y-visible">
-                  <div className="p-4 space-y-3">
-                    {columns.map((column) => (
-                      <div
-                        key={column.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`column-${column.id}`}
-                          checked={column.visible || column.sticky}
-                          onCheckedChange={() =>
-                            toggleColumnVisibility(column.id)
-                          }
-                          disabled={column.sticky}
-                          className={`${
-                            theme === "dark"
-                              ? "bg-[#cccccc20] border-none"
-                              : "border-zinc-900"
-                          }`}
-                        />
-                        <label
-                          htmlFor={`column-${column.id}`}
-                          className={`text-sm ${
-                            column.sticky
-                              ? `${
-                                  theme === "dark"
-                                    ? "text-white/50"
-                                    : "text-neutral-700/50"
-                                }`
-                              : `${
-                                  theme === "dark"
-                                    ? "text-zinc-200"
-                                    : "text-neutral-700"
-                                }`
-                          }`}
-                        >
-                          {column.label}
-                          {column.sticky && (
-                            <span className="text-xs text-muted-foreground ml-1">
-                              (fixed)
-                            </span>
-                          )}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </PopoverContent>
-            </Popover>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <FilterButton icon={<ArrowUpDown />}>Sort</FilterButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className={`w-[180px] p-2 ${
-                  theme === "dark"
-                    ? "bg-zinc-900 border-[#cccccc20]"
-                    : "bg-white border-photon-border-light"
-                }`}
-              >
-                <DropdownMenuLabel
-                  className={`font-sans ${
-                    theme === "dark" ? "text-zinc-200" : "text-foreground"
-                  }`}
-                >
-                  Sort Patents
-                </DropdownMenuLabel>
-
-                <DropdownMenuRadioGroup
-                  value={activeSortPreset}
-                  onValueChange={(value: string) =>
-                    handleSortChange(value as SortOption)
-                  }
-                  className="w-[180px]"
-                >
-                  <MenuRadioItem
-                    value="newest">
-                    Newest First
-                  </MenuRadioItem>
-                  <MenuRadioItem
-                    value="oldest">
-                    Oldest First
-                  </MenuRadioItem>
-                  <MenuRadioItem
-                    value="titleAZ">
-                    Title (A-Z)
-                  </MenuRadioItem>
-                  <MenuRadioItem
-                    value="titleZA">
-                    Title (Z-A)
-                  </MenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {(filterOption.length > 0 ||
-            selectedTags.length > 0 ||
-            dateFilterActive) && (
-            <div className="mt-4 flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-neutral-500">Active Filters:</span>
-              {dateFilterActive && (
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-xs border bg-neutral-100 border-neutral-300 text-neutral-700 dark:text-neutral-300 dark:bg-neutral-900 dark:border-[#27272a]">
-                  <span>Filed: {getDateFilterLabel()}</span>
-                  <button
-                    className="hover:text-[#F9B418]"
-                    onClick={clearDateFilter}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
-              {filterOption.map((option) => (
-                <div key={option} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-xs border bg-neutral-100 border-neutral-300 text-neutral-700 dark:text-neutral-300 dark:bg-neutral-900 dark:border-[#27272a]">
-                  <span>
-                    Status:{" "}
-                    {PATENT_LEGAL_STATUS_META[option as PatentLegalStatus]
-                      ?.label ?? option}
-                  </span>
-                  <button
-                    className="hover:text-[#F9B418]"
-                    onClick={() => {
-                      setFilterOption((prev) =>
-                        prev.filter((id) => id !== option),
-                      );
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-x w-3 h-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M18 6 6 18"></path>
-                      <path d="m6 6 12 12"></path>
-                    </svg>
-                  </button>
-                </div>
-              ))}
-              {selectedTags.map((tag) => (
-                <div
-                  key={`tag-chip-${tag}`}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-xs border bg-neutral-100 border-neutral-300 text-neutral-700 dark:text-neutral-300 dark:bg-neutral-900 dark:border-[#27272a]"
-                >
-                  <span className="max-w-[160px] truncate" title={tag}>
-                    Tag: {tag}
-                  </span>
-                  <button
-                    className="hover:text-[#F9B418]"
-                    onClick={() =>
-                      setSelectedTags((prev) => prev.filter((t) => t !== tag))
-                    }
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => {
-                  setFilterOption([]);
-                  setSelectedTags([]);
-                  clearDateFilter();
-                }}
-                className="text-xs px-2.5 py-1 rounded-sm hover:bg-[#F9B418]/10 transition-colors text-neutral-400 hover:text-[#F9B418]"
-              >
-                Clear All
-              </button>
-            </div>
-          )}
-        </div>
-
-        {isFetchingPatents ? (
-          <Loader />
-        ) : (
-          <div
-            className={`pulse-table-frame !mx-0 !mb-3 flex min-h-0 w-auto min-w-0 flex-1 flex-col overflow-auto ${
-              theme === "dark" ? "border-[#cccccc20]" : ""
-            }`}
-          >
-            {patentData?.data?.length === 0 ? (
-              <div
-                className={`flex flex-col items-center justify-center ${
-                  theme === "dark"
-                    ? "border-[#cccccc20]"
-                    : "bg-white border-gray-200"
-                } p-8 text-center shadow-sm h-full`}
-              >
-                <div
-                  className={`flex h-20 w-20 items-center justify-center rounded-full ${
-                    theme === "dark" ? "bg-gray-500/20" : "bg-gray-100"
-                  }`}
-                >
-                  <FileSearch
-                    className={`h-10 w-10 ${
-                      theme === "dark" ? "text-zinc-200" : "text-zinc-900"
-                    }`}
-                  />
-                </div>
-
-                <h3
-                  className={`mt-6 text-xl font-semibold ${
-                    theme === "dark" ? "text-zinc-200" : "text-zinc-900"
-                  }`}
-                >
-                  No patents found
-                </h3>
-
-                <p className="mt-3 max-w-md text-gray-600 text-center">
-                  We couldn't find any patents matching your search criteria.
-                </p>
-              </div>
-            ) : (
-              <div
-                className={`overflow-hidden rounded-md ${
-                  theme === "dark"
-                    ? "bg-transparent"
-                    : "bg-white border-photon-gray-200 border"
-                } flex flex-col`}
-              >
-                <div
-                  className="overflow-x-auto"
-                >
-                  <table className="pulse-data-table min-w-[1384px] w-full table-fixed">
-                    <colgroup>
-                      <col style={{ width: "64px" }} />
-                      <col style={{ width: "140px" }} />
-                      {visibleColumns.map((column) => (
-                        <col
-                          key={column.id}
-                          className={
-                            CORE_COLUMN_WIDTHS[column.id]
-                              ? undefined
-                              : column.width
-                          }
-                          style={
-                            CORE_COLUMN_WIDTHS[column.id]
-                              ? { width: CORE_COLUMN_WIDTHS[column.id] }
-                              : undefined
-                          }
-                        />
-                      ))}
-                    </colgroup>
-                    <thead
-                      className={`sticky top-0 z-10 border-b ${
-                        theme === "dark"
-                          ? "bg-neutral-950 border-[#cccccc20]"
-                          : "bg-[#FAFAFA] border-[#E8E8E8]"
-                      }`}
-                    >
-                      <tr className="relative">
-                        <th
-                          className="px-4 py-3 text-left text-xs font-semibold text-[#727272] dark:text-neutral-500"
-                        >
-                          S.No
-                        </th>
-                        <th
-                          className={`px-4 py-3 text-left text-xs font-semibold ${
-                            sortConfig.sortBy === "application_number"
-                              ? "text-[#444444] dark:text-neutral-200"
-                              : "text-[#727272] dark:text-neutral-500"
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => handleHeaderSort("application_number")}
-                            className="flex items-center gap-1 transition-colors hover:text-[#0C0C0C] dark:hover:text-neutral-200"
-                          >
-                            Application No.
-                            {renderSortIndicator("application_number")}
-                          </button>
-                        </th>
-
-                        {visibleColumns.map((column) => {
-                          const active =
-                            !!column.sortField &&
-                            sortConfig.sortBy === column.sortField;
-                          return (
-                            <th
-                              key={column.id}
-                              className={`${
-                                column.id === "Sr"
-                                  ? "text-center"
-                                  : column.id === "dateOfFiling"
-                                    ? "text-right"
-                                    : "text-left"
-                              } px-4 py-3 text-xs font-semibold whitespace-nowrap ${
-                                active
-                                  ? "text-[#444444] dark:text-neutral-200"
-                                  : "dark:text-neutral-500 text-[#727272]"
-                              }`}
-                              style={column.id === "Sr" ? { width: "70px" } : {}}
-                              aria-sort={
-                                active
-                                  ? sortConfig.sortOrder === "asc"
-                                    ? "ascending"
-                                    : "descending"
-                                  : undefined
-                              }
-                            >
-                              {column.sortField ? (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleHeaderSort(column.sortField!)
-                                  }
-                                  className={`flex items-center gap-1 transition-colors hover:text-[#444444] dark:hover:text-neutral-200 ${
-                                    column.id === "dateOfFiling"
-                                      ? "ml-auto flex-row-reverse"
-                                      : ""
-                                  }`}
-                                >
-                                  {column.label}
-                                  {renderSortIndicator(column.sortField)}
-                                </button>
-                              ) : (
-                                column.label
-                              )}
-                            </th>
-                          );
-                        })}
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {patentData?.data?.map((client: any, index: number) => (
-                        <tr
-                          key={index}
-                          className={`border-b group ${
-                            theme === "dark"
-                              ? "border-[#cccccc20] hover:bg-neutral-900/30"
-                              : "border-[#E8E8E8] bg-white hover:bg-[#FAFAFA]"
-                          } cursor-pointer transition-colors`}
-                          onClick={() => handleRowClick(client.id)}
-                        >
-                          <td
-                            className={`px-4 py-2.5 text-left text-sm font-sans
-                            ${
-                              theme === "dark"
-                                ? "bg-[#0a0a0a] text-neutral-400 group-hover:bg-neutral-900"
-                                : "bg-white text-gray-500 group-hover:bg-neutral-100"
-                            }`}
-                          >
-                            {startIndex + index + 1}
-                          </td>
-                          <td
-                            className={`px-4 py-2.5
-                            ${
-                              theme === "dark"
-                                ? "bg-[#0a0a0a] group-hover:bg-neutral-900"
-                                : "bg-white group-hover:bg-[#FAFAFA]"
-                            }`}
-                            style={{ minWidth: "140px" }}
-                          >
-                            <div className="flex flex-col gap-0.5">
-                              <span
-                                className={`${
-                                  theme === "dark"
-                                    ? "text-neutral-300"
-                                    : "text-[#0C0C0C]"
-                                } text-[13px] tabular-nums whitespace-nowrap flex items-center gap-1.5`}
-                              >
-                                {client.application_number}
-                                {/* This filing came from a disclosure on the
-                                    platform — a small population and worth
-                                    saying, since most of the portfolio was
-                                    imported.
-
-                                    A circular ICON beside the number, not a
-                                    "Linked idea" chip on its own row. The chip
-                                    cost a second line in a sticky column that is
-                                    already narrow, and it repeated a word the
-                                    tooltip says better; the mark belongs ON the
-                                    number it qualifies. The tooltip still names
-                                    the idea, because a bare icon tells a reader
-                                    a link exists without telling them to what. */}
-                                {client?.IdeaPatentLink?.[0]?.idea?.id && (
-                                  <LinkedIdeaBadge
-                                    ideaId={client.IdeaPatentLink[0].idea.id}
-                                    ideaTitle={client.IdeaPatentLink[0].idea.title}
-                                    onOpen={(id) => navigate(`/ideas/${id}`)}
-                                  />
-                                )}
-                              </span>
-                            </div>
-                          </td>
-
-                          {visibleColumns.map((column) => (
-                            <React.Fragment key={column.id}>
-                              {renderCellContent(column.id, client, index)}
-                            </React.Fragment>
-                          ))}
-                        </tr>
-                      ))}
-                      {patentData?.data?.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan={7}
-                            className="text-center p-4 text-gray-500"
-                          >
-                            No clients found
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      {patentData?.pagination && renderPagination()}
+  const controlClass = "h-9 min-w-0 rounded-sm border border-pl-border bg-pl-bg px-3 text-sm text-pl-text-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pulse-focus)]";
+  return <div data-patent-portfolio className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-pl-bg p-4 font-sans text-pl-ink md:p-6">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-pl-border pb-4">
+      <p className="text-sm text-pl-text-2">{canEditStatus ? scopeClient ? clients.find(client => client.id === scopeClient)?.name || "Selected client" : user?.role === "CASE_OWNER" ? "Assigned-client portfolio" : "All client portfolios" : "Company portfolio"}{stats.data && <span className="ml-2 text-pl-text-3">· {stats.data.total.toLocaleString()} patents</span>}</p>
+      {canEditStatus && !emptyPortfolio && <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>Import patents</Button>}
     </div>
-  );
+    {(!emptyPortfolio || canEditStatus) && <>
+      <form onSubmit={event => { event.preventDefault(); handleSearchChange(searchInput.trim()); }} className="mt-4 flex items-center gap-2 [&>div]:min-w-0 [&>div]:flex-1" role="search">
+        <label htmlFor="patent-search" className="sr-only">Title or application number</label><Input id="patent-search" value={searchInput} onChange={event => setSearchInput(event.target.value)} placeholder="Title or application number" className="h-9 min-w-0 flex-1" />
+        <Button type="submit" size="sm" className="bg-pl-brand text-pl-ink hover:bg-pl-brand-deep">Search patents</Button>
+        <Button type="button" size="sm" variant="outline" className="md:hidden" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(open => !open)}>Filters</Button>
+      </form>
+      <div className={`${filtersOpen ? "flex" : "hidden"} mt-3 flex-wrap items-center gap-2 md:flex`}>
+        {canEditStatus && <select aria-label="Portfolio client" value={selectedClientId[0] || ""} onChange={event => { setSelectedClientId(event.target.value ? [event.target.value] : []); setCurrentPage(1); }} className={controlClass}><option value="">{user?.role === "CASE_OWNER" ? "All assigned clients" : "All clients"}</option>{clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}</select>}
+        <select aria-label="Patent status" value={filterOption[0] || ""} onChange={event => { setFilterOption(event.target.value ? [event.target.value as FilterOption] : []); setCurrentPage(1); }} className={controlClass}><option value="">All statuses</option>{PATENT_LEGAL_STATUS_VALUES.map(status => <option key={status} value={status}>{PATENT_LEGAL_STATUS_META[status].label}</option>)}</select>
+        <select aria-label="Jurisdiction" value={jurisdiction} onChange={event => setJurisdiction(event.target.value)} className={controlClass}><option value="">All jurisdictions{stats.data ? ` · ${stats.data.byJurisdiction.length}` : ""}</option>{stats.data?.byJurisdiction.map(item => <option key={item.jurisdiction} value={item.jurisdiction}>{jurisdictionName(item.jurisdiction)} · {item.count.toLocaleString()}</option>)}</select>
+        <select aria-label="Sort patents" value={activeSortPreset || "newest"} onChange={event => handleSortChange(event.target.value as SortOption)} className={controlClass}><option value="newest">Newest filing first</option><option value="oldest">Oldest filing first</option><option value="titleAZ">Title A–Z</option><option value="titleZA">Title Z–A</option></select>
+        <DateRangeFilter preset={datePreset} from={customFrom} to={customTo} onPresetChange={handleDatePresetChange} onFromChange={setCustomFrom} onToChange={setCustomTo} onClear={clearDateFilter} title="Filing date" label="Filed" />
+        {tagOptions.length > 0 && <select aria-label="Patent tag" value={selectedTags[0] || ""} onChange={event => { setSelectedTags(event.target.value ? [event.target.value] : []); setCurrentPage(1); }} className={controlClass}><option value="">All tags</option>{tagOptions.map(tag => <option key={tag} value={tag}>{tag}</option>)}</select>}
+        {canEditStatus && <Popover><PopoverTrigger asChild><Button size="sm" variant="outline"><Columns3 aria-hidden="true" />Columns</Button></PopoverTrigger><PopoverContent align="end" className="bg-pl-bg text-pl-ink"><p className="mb-3 text-sm font-semibold">Optional record fields</p><div className="space-y-3">{columns.filter(column => optionalIds.includes(column.id)).map(column => <label key={column.id} className="flex items-center gap-2 text-sm"><Checkbox checked={column.visible} onCheckedChange={() => toggleColumnVisibility(column.id)} />{column.label}</label>)}</div></PopoverContent></Popover>}
+        {hasFilters && <Button size="sm" variant="ghost" onClick={clearFilters}>Clear filters</Button>}
+      </div>
+      {stats.isError && <p className="mt-3 text-sm text-pl-text-2">Jurisdiction totals could not be loaded. <button type="button" onClick={() => stats.refetch()} className="underline">Retry totals</button></p>}
+      {isErrorClients && canEditStatus && <p role="alert" className="mt-3 text-sm">Client scopes could not be loaded.</p>}
+    </>}
+    {isPendingPatents ? <div role="status" className="space-y-4 py-8"><p className="text-sm text-pl-text-2">Loading patents…</p>{[1,2,3].map(row => <div key={row} aria-hidden="true" className="h-16 rounded-sm bg-pl-bg-muted" />)}</div>
+      : isErrorPatents ? <div role="alert" className="py-12 text-center"><h2 className="text-lg font-semibold">Patents could not be loaded</h2><p className="mt-2 text-sm text-pl-text-2">Your filters are retained.</p><Button size="sm" variant="outline" className="mt-4" onClick={() => refetch()}>Reload patents</Button></div>
+      : emptyPortfolio ? <div className="py-12 text-center"><h2 className="text-lg font-semibold">No patents have been added</h2><p className="mx-auto mt-2 max-w-xl text-sm text-pl-text-2">{canEditStatus ? "Import a portfolio file for this client to make its patent records available." : "Photon Legal will add the company’s patent records here."}</p>{canEditStatus && <Button size="sm" className="mt-4 bg-pl-brand text-pl-ink hover:bg-pl-brand-deep" onClick={() => setImportOpen(true)}>Import patents</Button>}</div>
+      : rows.length === 0 ? <div className="py-12 text-center"><h2 className="text-lg font-semibold">No patents match these filters</h2><p className="mt-2 text-sm text-pl-text-2">Try another title, application number or jurisdiction.</p><Button size="sm" variant="outline" className="mt-4" onClick={clearFilters}>Clear filters</Button></div>
+      : <>
+        <div className="mt-4 flex items-center justify-between gap-2 text-sm text-pl-text-2"><p aria-live="polite">{hasFilters ? `${totalItems.toLocaleString()} matching patents` : "Patent records"}{isFetchingPatents ? " · Refreshing…" : ""}</p><label className="flex items-center gap-2">Rows <select aria-label="Rows per page" value={itemsPerPage} onChange={event => handleItemsPerPageChange(event.target.value)} className={controlClass}>{[10,20,50].map(count => <option key={count} value={count}>{count}</option>)}</select></label></div>
+        <table className="mt-3 w-full table-fixed border-collapse text-left text-sm"><caption className="sr-only">Patent records in the selected portfolio</caption><colgroup className="hidden md:table-column-group"><col className="w-1/2"/><col className="w-1/6"/><col className="w-1/6"/><col className="w-1/6"/></colgroup><thead className="hidden border-y border-pl-border text-pl-text-3 md:table-header-group"><tr><th scope="col" className="py-2 pr-4 font-medium">Application / title</th><th scope="col" className="py-2 pr-3 font-medium">Status</th><th scope="col" className="py-2 pr-3 font-medium">Jurisdiction</th><th scope="col" className="py-2 font-medium">Filed</th></tr></thead><tbody>{rows.map(patent => { const status = legalStatus(patent.status || patent.legal_current_status), label = PATENT_LEGAL_STATUS_META[status]?.label?.replace(/^(Active|Inactive) – /, "") || "Not recorded"; const due = patent.due_dates?.[0]; return <React.Fragment key={patent.id}><tr className="block border-b border-pl-border py-4 md:table-row md:py-0"><td className="block break-words py-2 pr-4 align-top md:table-cell md:py-4"><p className="mb-1 font-mono text-xs text-pl-text-3">{patent.application_number || patent.prn || "Application number not recorded"}</p><Link to={`/patents/${patent.id}`} className="font-semibold text-pl-navy hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pulse-focus)]">{patent.title || "Untitled patent"}</Link>{canEditStatus && <p className="mt-1 text-xs text-pl-text-2">{patent.client?.name || "Client not recorded"}</p>}</td><td className="inline-block py-2 pr-3 align-top md:table-cell md:py-4">{editingPatentId === patent.id ? <select autoFocus aria-label={`Status for ${patent.application_number}`} value={status} disabled={isUpdatingStatus} onChange={event => updatePatentStatus({ id: patent.id, status: event.target.value as PatentLegalStatus })} className={`${controlClass} w-full`}>{PATENT_LEGAL_STATUS_VALUES.map(key => <option key={key} value={key}>{PATENT_LEGAL_STATUS_META[key].label}</option>)}</select> : <div className="flex flex-wrap items-center gap-1"><ProductChip tone={status === "ACTIVE_GRANTED" ? "success" : status === "ACTIVE_EXAMINATION" ? "info" : "neutral"}>{label}</ProductChip>{canEditStatus && <button type="button" aria-label={`Edit status for ${patent.application_number || "patent"}`} onClick={() => setEditingPatentId(patent.id)} className="rounded-sm p-1 text-pl-text-3 hover:text-pl-ink"><Pencil aria-hidden="true" className="h-3 w-3"/></button>}</div>}</td><td className="inline-block py-2 pr-3 align-top text-pl-text-2 md:table-cell md:py-4">{jurisdictionName(patent.jurisdiction || patent.publication_country)}</td><td className="block py-2 align-top text-pl-text-2 md:table-cell md:py-4"><span className="mr-1 md:hidden">Filed</span>{dateText(patent.filing_date || patent.application_date)}{user?.role !== "INVENTOR" && due && <p className="mt-1 text-xs text-pl-text-2">Next date · {dateText(due.due_at)}</p>}</td></tr>{extraColumns.length > 0 && <tr className="block border-b border-pl-border md:table-row"><td colSpan={4} className="block py-3 md:table-cell"><dl className="grid gap-4 md:grid-cols-2">{extraColumns.map(column => <div key={column.id} className="min-w-0 text-sm"><dt className="text-xs font-medium text-pl-text-3">{column.label}</dt><dd className="mt-1 break-words text-pl-text-2">{column.id === "abstract" || column.id === "priority" ? <details><summary className="cursor-pointer">Show {column.label.toLowerCase()}</summary><p className="mt-2">{fieldValue(column.id,patent)}</p></details> : fieldValue(column.id,patent)}</dd></div>)}</dl></td></tr>}</React.Fragment>; })}</tbody></table>
+        <nav aria-label="Patent pages" className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-pl-border py-3"><p className="text-sm text-pl-text-2">{startIndex + 1}–{Math.min(startIndex + rows.length,totalItems)} of {totalItems.toLocaleString()}</p><div className="flex items-center gap-2"><Button size="sm" variant="outline" disabled={currentPage <= 1 || isFetchingPatents} onClick={() => setCurrentPage(page => page-1)}>Previous</Button><span className="text-sm">Page {currentPage} of {paginationMeta.totalPages || 1}</span><Button size="sm" variant="outline" disabled={currentPage >= (paginationMeta.totalPages || 1) || isFetchingPatents} onClick={() => setCurrentPage(page => page+1)}>Next</Button></div></nav>
+      </>}
+    {canEditStatus && <PortfolioImport open={importOpen} onOpenChange={setImportOpen} clients={clients} selectedClientId={selectedClientId[0]} onImported={() => { queryClient.invalidateQueries({ queryKey: ["patents"] }); queryClient.invalidateQueries({ queryKey: ["portfolio-stats"] }); }} />}
+  </div>;
 };
 
 export default PatentsContent;

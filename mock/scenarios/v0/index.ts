@@ -368,6 +368,15 @@ const reviewMissingDetail = v0("v0/review/missing-detail", "Review: missing deta
   return data;
 });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const portfolioLongTitles = v0("v0/portfolio/long-titles", "Portfolio with long titles", "Synthetic long titles preserve complete record identification at laptop and zoom widths.", U.admin.email, [U.admin.email, U.inventor.email, U.caseOwner.email, U.photonAdmin.email], () => {
+  const data = northwindBuild("v0/portfolio/long-titles");
+  for (const patent of generatePortfolio(NORTHWIND, SMALL[NORTHWIND.id]).patents.slice(0, 12)) data.patentOverrides[patent.id] = { ...data.patentOverrides[patent.id], title: "Self-tensioning cable harness with a load-responsive adjustment loop and independent reference setting for assemblies exposed to repeated mechanical movement across distributed mounting points" };
+  return data;
+});
+const portfolioImportResult = v0("v0/portfolio/import-result", "Portfolio import with rows to correct", "An operational import returns created, updated, unchanged and failed rows with correction guidance.", U.caseOwner.email, [U.caseOwner.email, U.photonAdmin.email], () => {
+  const data = northwindBuild("v0/portfolio/import-result"); data.flags.importTrouble = true; return data;
+});
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

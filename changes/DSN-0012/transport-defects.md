@@ -1,0 +1,5 @@
+# Portfolio transport defects exposed by the required surface
+
+The existing component sends sort/date filters that its inherited adapter mapping drops; jurisdiction cannot pass through that mapping either. Its export call also loses Axios response options, and the mock registry serializes the export handler's native Response as JSON. These prevent truthful filtering and export, independently of styling.
+
+The surface keeps its route, props, filter/URL state, query cache keys and upload/status-update flows. Its list query and export use the already available raw API client against the same existing `/v1/patents` and `/v1/patents/export` routes so the requested query vocabulary reaches the mock. Shared query-hook files, adapter, authentication and analytics code are unchanged. The mock applies the same filters to list and export; native Response support is opt-in for the export route so unrelated file routes do not change. Import retains the existing same-origin upload and import endpoints and checks the existing Photon-role/client scope in the V0 mock. No new permission or endpoint is introduced.

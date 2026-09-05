@@ -30,7 +30,7 @@ export type Result = DefaultBodyType | { status: number; body?: DefaultBodyType 
 const isStatusResult = (r: unknown): r is { status: number; body?: DefaultBodyType } =>
   typeof r === "object" && r !== null && "status" in r && typeof (r as { status: unknown }).status === "number" && Object.keys(r as object).every((k) => k === "status" || k === "body");
 
-export function route(method: Method, path: string, resolve: (ctx: Ctx) => Result | Promise<Result>): HttpHandler {
+export function route(method: Method, path: string, resolve: (ctx: Ctx) => Result | Promise<Result>, options: { rawResponse?: boolean } = {}): HttpHandler {
   const key = routeKey(method, path);
   if (!KNOWN.has(key) && !PROPOSED.has(key)) {
     throw new Error(`[pulse-design] handler for a route the backend does not have: ${key}. Declare it in mock/proposed-routes.json if the design needs it.`);
@@ -50,6 +50,7 @@ export function route(method: Method, path: string, resolve: (ctx: Ctx) => Resul
       body: async () => { try { return (await request.clone().json()) as DefaultBodyType; } catch { return {}; } },
     };
     const r = await resolve(ctx);
+    if (options.rawResponse && r instanceof Response) return r;
     if (isStatusResult(r)) return r.body === undefined ? new HttpResponse(null, { status: r.status }) : HttpResponse.json(r.body, { status: r.status });
     return HttpResponse.json(r);
   });

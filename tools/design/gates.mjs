@@ -1,5 +1,5 @@
 /**
- * The design fork's gate runner. Runs every check the spike exit criteria name,
+ * The V0 gate runner. Runs the active repository checks,
  * in order, and prints a checklist. Exit 1 if any required gate fails; the
  * isolation probe is informational and reports whether parallel story tests
  * would be safe.
@@ -38,7 +38,6 @@ run("lint:roles", "npm", ["run", "lint:roles"]);
 run("routes: every handler is real, every reachable route served", "node", ["tools/design/routes.mjs"]);
 run("credentials and inert hosts", "node", ["tools/design/credentials.mjs"]);
 run("manifest and graph parity", "node", ["tools/design/manifest.mjs"]);
-run("fingerprint self-test (bites)", "node", ["tools/design/fingerprint.mjs", "--self-test"]);
 run("tokens: generated outputs match src/styles/tokens.json", "node", ["tools/tokens.mjs", "--check"]);
 run("fidelity: adapter boundary, OpenAPI bodies, state machine", "npm", ["run", "test:fidelity"]);
 run("v0 semantic gate (four personas, one stage, coverage, exclusions, optional evaluation, badges, declared contracts)", "npm", ["run", "test:v0"]);
@@ -78,10 +77,7 @@ const vitePaths = [["root", rootVite], ["react-vite", viteFrom("@storybook/react
 results.push({ name: "runtime graph", ok: single.every(([, n]) => n === "1") && vitePaths.every(([, v]) => v === rootVite), secs: "0", tail: [...single.map(([p, n]) => `${p}=${n}`), ...vitePaths.map(([p, v]) => `${p}=${v}`)].join(" ") });
 console.log(`${results.at(-1).ok ? "ok  " : "FAIL"} runtime graph ${results.at(-1).tail}`);
 
-// Path classes: the exporter's rule table classifies the paths it must.
-const cls = spawnSync("node", ["-e", `import("./tools/design/paths.mjs").then(m=>{const t={"src/components/x.tsx":"portable","src/lib/realAdapter.ts":"offLimits","mock/runtime/db.ts":"protected","mock/handlers/a.ts":"reviewSupport","design/stories/a.stories.tsx":"reviewSupport","qa/visual/baselines/a.png":"reviewSupport","index.html":"buildImpact","src/lib/roles.ts":"behaviourImpact","package.json":"protected"};const bad=Object.entries(t).filter(([f,c])=>m.classify(f)!==c);if(bad.length){console.error(bad);process.exit(1)}})`], { encoding: "utf8" });
-results.push({ name: "path classes", ok: cls.status === 0, secs: "0", tail: cls.stderr.slice(0, 120) });
-console.log(`${cls.status === 0 ? "ok  " : "FAIL"} path classes`);
+// Export path classes and behaviour fingerprints are retired (CLAUDE.md).
 
 const failed = results.filter((r) => !r.ok && !r.informational);
 console.log(`\ngates: ${results.length - failed.length}/${results.length} passed${failed.length ? ", failed: " + failed.map((f) => f.name).join(", ") : ""}`);

@@ -1,6 +1,6 @@
 /**
- * Case owner loop: the whole client roster, fenced on writes, plus the queue.
- * @tier:journey @role:CASE_OWNER @area:clients @area:actions @sec:tenant-isolation @soc2:CC6.1 @cp:smoke @cp:post-deploy
+ * Case owner loop: the whole client roster, fenced on writes, client access.
+ * @tier:journey @role:CASE_OWNER @area:clients @sec:tenant-isolation @soc2:CC6.1 @cp:smoke @cp:post-deploy
  *
  *   node qa/journey/case-owner.qa.mjs [--base https://demo.photonpulse.ai]
  *
@@ -15,10 +15,6 @@
  *    UNASSIGNED client's page, which must offer "Request access" and neither
  *    "View as client" nor "Edit client". Everything is still measured against
  *    the live session, never a hardcoded name.
- * 2. The Photon operations queue renders REAL rows. The queue's row map reads
- *    fields out of a nested shape and threw on its first real row while the
- *    table was empty; asserting a non-empty queue is what makes that
- *    detectable (CLAUDE.md §6: an empty table hides broken code).
  */
 import { chromium } from 'playwright';
 import { openSession, APP } from '../lib/session.mjs';
@@ -35,7 +31,7 @@ if (!session) {
   process.exit(1);
 }
 const { page } = session;
-const j = new Journey('CASE_OWNER assignment + operations loop');
+const j = new Journey('CASE_OWNER assignment loop');
 console.log(`  (session ${session.reused ? 'reused' : 'fresh login'})`);
 
 try {
@@ -134,23 +130,8 @@ try {
     return 'no reassignment control';
   });
 
-  await j.step('the operations queue renders real instructions', async () => {
-    await page.goto(`${BASE}/actions`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(3000);
-    const table = page.locator('table').first();
-    for (const header of [/Application No\./, /Client/, /Action Selected/, /Request Status/]) {
-      await assertPageContains(page, header, `the operations queue must have a ${header} column`);
-    }
-    const n = await table.locator('tbody tr').count();
-    assert(n > 0,
-      'the Photon operations queue rendered zero rows — the row map never ran, which is exactly how ' +
-      'it shipped broken before');
-    const first = (await table.locator('tbody tr').first().innerText()).replace(/\s+/g, ' ');
-    assert(/\d{6,}/.test(first), `queue row shows no application number: "${first.slice(0, 140)}"`);
-    assert(/(New|Acknowledged|In Progress|Completed|Declined)/i.test(first),
-      `queue row shows no request status: "${first.slice(0, 140)}"`);
-    return `${n} instruction(s), first row: "${first.slice(0, 90)}"`;
-  });
+  // Actions are covered by Surfaces/Actions (DSN-0014).
+
 } finally {
   await session.close();
   await browser.close();

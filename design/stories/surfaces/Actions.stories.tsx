@@ -1,4 +1,6 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
+import Index from "@/pages/Index";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
 import DueDatesPage from "@/pages/DueDatesPage";
@@ -6,7 +8,7 @@ import ActionsPage from "@/pages/ActionsPage";
 import { route } from "../../../mock/runtime/registry";
 import { getDb } from "../../../mock/runtime/db";
 
-const meta = { title: "Surfaces/Actions", component: DueDatesPage, tags:["viewport:1280x720","viewport:1440x900"], parameters:{pulse:{route:"/due-dates",scenario:"v0/actions/action-required",persona:"LEGAL_COUNSEL"}} } satisfies Meta<typeof DueDatesPage>;
+const meta = { title: "Surfaces/Actions", component: DueDatesPage, tags:["redesign","viewport:1280x720","viewport:1440x900"], parameters:{pulse:{route:"/due-dates",scenario:"v0/actions/action-required",persona:"LEGAL_COUNSEL"}} } satisfies Meta<typeof DueDatesPage>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 const full=["viewport:1366x768","viewport:1920x1080","viewport:640x360@2"];
@@ -25,7 +27,8 @@ export const PhotonOverdue: Story = { ...ops("overdue") };
 export const MissingTemplate: Story = { parameters:{pulse:{scenario:"v0/actions/missing-template"}},play:async({canvasElement})=>{const c=await ready(canvasElement);await expect(await c.findByRole("heading",{name:"Instruction options are not configured"})).toBeVisible();} };
 export const SubmissionError: Story = { tags:["viewport:640x360@2"],play:async({canvasElement})=>{const c=await ready(canvasElement);await userEvent.click(await c.findByLabelText(/Respond to the office action/));await userEvent.click(c.getByRole("button",{name:"Review instruction to send"}));getDb().flags.mutationsFail=true;await userEvent.click(c.getByRole("button",{name:"Send instruction",exact:true}));await expect(await c.findByRole("alert")).toHaveTextContent("Your choices are retained");getDb().flags.mutationsFail=false;} };
 export const Loading: Story = { parameters:{msw:{handlers:[route("get","/v1/due-dates",async()=>{await new Promise(r=>setTimeout(r,60000));return {data:[]};})]}},play:async({canvasElement})=>{await expect(await within(canvasElement).findByRole("status")).toHaveTextContent("Loading events");} };
-export const InventorRefused: Story = { render:()=> <ActionsPage/>,parameters:{pulse:{route:"/actions",scenario:"v0/inventor/portfolio",persona:"INVENTOR"}} };
+function RefusedActions() { const location = useLocation(); return location.pathname === "/actions" ? <ActionsPage/> : <Index/>; }
+export const InventorRefused: Story = { render:()=> <RefusedActions/>,parameters:{pulse:{path:"*",route:"/actions",scenario:"v0/inventor/portfolio",persona:"INVENTOR"}},play:async({canvasElement})=>{const c=within(canvasElement);await expect(await c.findByRole("heading",{name:"My ideas"},{timeout:15000})).toBeVisible();await expect(c.queryByRole("heading",{name:"Patent event instructions"})).toBeNull();} };
 export const CaseOwnerIncoming: Story = { ...ops("submitted","CASE_OWNER"),tags:full };
 export const PhotonEmpty: Story = { ...ops("empty-queue") };
 export const ManyRequests: Story = { ...ops("many","CASE_OWNER") };

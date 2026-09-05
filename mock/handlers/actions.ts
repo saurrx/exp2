@@ -39,7 +39,7 @@ export const actionHandlers = [
     const search = (q(url, "search") ?? "").trim().toLowerCase();
     const hydrate = (a: ActionRequest) => { const dd = dueDateById(a.due_date_id); const p = dd && patentById(dd.patent_id); const t = a.template_id ? db.actionTemplates.find((x) => x.id === a.template_id) : null; const c = db.clients.find((x) => x.id === a.client_id); return { ...a, due_date: dd ? { id: dd.id, title: dd.title, event_type: dd.event_type, due_at: dd.due_at, status: dd.status, patent: p ? { id: p.id, title: p.title, application_number: p.application_number } : null } : null, template: t ? { id: t.id, label: t.label, category: t.category } : null, client: c ? { id: c.id, name: c.name } : null, requested_by: (() => { const r = db.users.find((x) => x.id === a.requested_by_id); return r ? { id: r.id, name: r.name } : null; })() }; };
     let out = rows.map(hydrate);
-    if (search) out = out.filter((r) => `${r.due_date?.patent?.title ?? ""} ${r.due_date?.patent?.application_number ?? ""} ${r.instruction ?? ""} ${r.client?.name ?? ""}`.toLowerCase().includes(search));
+    if (search) out = out.filter((r) => `${r.due_date?.title ?? ""} ${r.due_date?.patent?.title ?? ""} ${r.due_date?.patent?.application_number ?? ""} ${r.instruction ?? ""} ${r.client?.name ?? ""}`.toLowerCase().includes(search));
     const filter = q(url, "filter"); const now = clock.iso();
     if (filter === "overdue") out = out.filter((r) => r.due_date?.status === "PENDING" && r.due_date.due_at.slice(0,10) < now.slice(0,10));
     else if (filter === "upcoming") out = out.filter((r) => r.due_date?.status === "PENDING" && r.due_date.due_at.slice(0,10) > now.slice(0,10));

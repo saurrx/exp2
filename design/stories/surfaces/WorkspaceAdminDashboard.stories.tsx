@@ -42,10 +42,10 @@ export const Typical: Story = {
     await expect(canvas.queryByRole("group", { name: "Your workspace" })).toBeNull();
     await expect(canvas.queryByRole("group", { name: "Company portfolio" })).toBeNull();
     await expect(canvas.getByRole("heading", { name: "Review Inventor Ideas" })).toBeVisible();
-    const scoreHeader = canvas.getByRole("columnheader", { name: /Score sorted highest first/ });
+    const scoreHeader = await canvas.findByRole("columnheader", { name: /Score sorted highest first/ });
     await expect(scoreHeader).toHaveAttribute("aria-sort", "descending");
     await expect(canvas.queryByRole("img", { name: "Not evaluated" })).toBeNull();
-    await userEvent.click(canvas.getByRole("button", { name: /Submitted/ }));
+    await userEvent.click(within(canvas.getByRole("columnheader", { name: /Submitted/ })).getByRole("button"));
     await expect(canvas.getByRole("columnheader", { name: /Submitted sorted oldest first/ })).toHaveAttribute("aria-sort", "ascending");
     await userEvent.click(canvas.getByRole("button", { name: /Score/ }));
     await expect(scoreHeader).toHaveAttribute("aria-sort", "descending");
@@ -61,9 +61,9 @@ export const Typical: Story = {
     const inventorPeriod = canvas.getByRole("combobox", { name: "Period" });
     await expect(within(inventorPeriod).getAllByRole("option")).toHaveLength(5);
     await expect(await canvas.findAllByRole("button", { name: /^\d+\. .+, \d+ ideas?$/ }, { timeout: 10_000 })).toHaveLength(5);
-    await canvas.getByRole("button", { name: "Patents" }).click();
+    await userEvent.click(canvas.getByRole("button", { name: /^patents$/i }));
     await expect(await canvas.findAllByRole("button", { name: /^\d+\. .+, \d+ patents?$/ })).toHaveLength(5);
-    await canvas.getByRole("button", { name: "Ideas" }).click();
+    await userEvent.click(canvas.getByRole("button", { name: /^ideas$/i }));
     await expect(canvas.getByRole("heading", { name: "Idea pipeline" })).toBeVisible();
     const pipelinePeriod = canvas.getByRole("combobox", { name: "Pipeline period" });
     await expect(canvas.getByText("usually 1–2 months")).toBeVisible();

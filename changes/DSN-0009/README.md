@@ -84,7 +84,7 @@ Success signal: retrieval-to-record and return-to-draft completion should improv
 - Existing dashboard date-window forwarding is retained; date-window contract reconciliation is outside this list visual change.
 
 ## Independent evaluator
-Pending fresh-context review. Coverage dsn remains null until PASS.
+Fresh-context evaluator PASS in round 3; verdicts and corrections are recorded below.
 
 Final visual inspection: all four persona defaults opened at all five sizes. The empty, drafts-only, long-title, loading, error, filtered-empty and large-queue renders were also opened. At zoom, the first Inventor idea now exposes its status and score immediately; Case Owner/client attribution remains in the row. There are 34 story baselines plus 11 supplemental screenshots (45 PNGs total). Reload ideas is secondary to the persistent start action, avoiding two primary controls on the error state.
 
@@ -112,7 +112,7 @@ REFERENCE MATCH: no — desktop typography, restrained color, hairlines, and rev
 - The selected queue row shows its reference/selection cue instead of repeating the detail title and score. Other rows retain their scan columns; the compact queue shows the selected title when the brief is hidden. This is the evaluator-exposed repetition defect in the approved reference, not a new queue direction.
 - Genuinely empty Inventor first-run state omits retrieval controls. Search/filter-empty recovery still exposes them.
 
-Final verification and evaluator round 2 pending.
+Round 2 completed; the remaining advisory-label finding is recorded below.
 
 Round 2 validation: full stories 263/263, V0 38/38, selected gates 7/7, both builds and refreshed stable screenshots pass. All twenty primary-action/overflow probes pass, zoom filters open and close, and eight focused axe contexts have no findings. Settled navigation captures were reopened and show opaque legible menus. Required Storybook build twice failed with a public-assets mkdir race; `.storybook/main.ts` now disables Vite’s duplicate public-directory copy while retaining Storybook staticDirs. The next build passed. The initial unchanged-desktop comparison log predates the evaluator’s repetition/content corrections; remaining legacy review baselines are refreshed for those documented defects.
 
@@ -132,3 +132,19 @@ REFERENCE MATCH: yes — restrained typography, hairline separation, compact con
 
 ## Round 3 correction
 The Workspace Admin assessment now says “AI-assisted and advisory” once beside the assessment and full-evaluation link. This corrects the evaluator-exposed trust defect without changing review behavior.
+
+## Evaluator round 3 — PASS
+```text
+VERDICT: PASS
+SURFACE: ideas.md  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — Independent six-question roleplays at 1280×720 and 1440×900 agree with the record: tasks lead, relevant context stays adjacent, unnecessary evidence recedes, and next steps and advisory status are explicit.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none — all ten required states are represented across the 45 inspected screenshots.
+REFERENCE MATCH: yes — restrained typography, compact controls, hairline separation, and the review panes preserve the reference language; zoom navigation remains legible.
+```
+
+Final verification: the advisory-copy change passes typecheck, both builds, stable affected-story screenshots and all twenty geometry/interaction probes. Reopened all five Workspace Admin defaults plus the large queue and zoom selection. Prior full stories (263/263), V0 (38/38), role/token checks, focused axe and selected gates remain the broader validation evidence.
+
+After setting coverage: final gates 6/6 pass (typecheck, roles, tokens, V0, coverage and runtime graph).

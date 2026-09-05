@@ -21,7 +21,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Start an idea | Inventor, Workspace Admin | `/ideas`, `/ideas/:id/draft` | 5 | 11 | conceptual | DSN-0006 |
 | Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired | DSN-0006 |
 | Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none | DSN-0007 |
-| Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | none |  |
+| Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | conceptual | DSN-0009 |
 | Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 16 | 17 | conceptual | DSN-0008 |
 | Review decision | Workspace Admin | `/ideas/:id` | 3 | 12 | none |  |
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 209 intended stories, 49 V0 scenarios; backend impact conceptual on 4, unwired on 5, none on 8.
+17 surfaces, 209 intended stories, 52 V0 scenarios; backend impact conceptual on 5, unwired on 5, none on 7.
 
 ## Inventor home
 
@@ -103,17 +103,17 @@ Brief: `product-context/surfaces/evaluation.md` · Storybook title: `Surfaces/Ev
 
 ## Ideas list
 
-Brief: `product-context/surfaces/ideas.md` · Storybook title: `Surfaces/Ideas list` · DSN: none yet
+Brief: `product-context/surfaces/ideas.md` · Storybook title: `Surfaces/Ideas list` · DSN: DSN-0009
 
 - **Personas:** Inventor, Workspace Admin, Case Owner, Photon Admin
 - **User goal:** Inventor: find own drafts and submissions and their next step. Workspace Admin: clear pending reviews. Case Owner: find approved ideas from assigned clients. Photon Admin: oversee ideas sent to Photon across clients.
 - **Business goal:** Faster review and a clear next step for every idea.
 - **Routes:** `/ideas` (Inventor, Workspace Admin, Case Owner, Photon Admin)
-- **Required scenarios:** `v0/inventor/portfolio`, `v0/workspace-admin/queue`, `v0/workspace-admin/empty`, `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/large`, `v0/shape/slow`, `v0/shape/failure`
+- **Required scenarios:** `v0/inventor/first-run`, `v0/ideas/drafts-only`, `v0/ideas/mixed`, `v0/ideas/long-titles`, `v0/workspace-admin/queue`, `v0/workspace-admin/large-aging-queue`, `v0/case-owner/my-work`, `v0/photon-admin/firm`
 - **States:** loading — table skeleton with the persona's columns; empty — no ideas, drafts only, or a filter that matches nothing; success — mixed statuses sorted by the persona's job; pending review oldest first with days waiting; error — list unavailable with retry; permission — inventors see own and credited ideas only; case owners assigned clients only
 - **Surface-specific states:** empty, drafts-only, mixed-statuses, long-titles, large-queue, filtered-empty, requested-changes, evaluation-running
 - **Navigation badge:** pending-review for Workspace Admin
-- **Backend impact:** none — GET /v1/ideas with state filters and paging exists.
+- **Backend impact:** conceptual — Existing GET /v1/ideas paging and filters retained. BF-10 declares derived Case Owner names on the hydrated idea for received-work attribution; no new endpoint.
 - **Intended story ids:** `surfaces-ideas-list--inventor-empty`, `surfaces-ideas-list--inventor-drafts-only`, `surfaces-ideas-list--inventor-mixed`, `surfaces-ideas-list--workspace-admin-pending`, `surfaces-ideas-list--workspace-admin-large-queue`, `surfaces-ideas-list--workspace-admin-filtered-empty`, `surfaces-ideas-list--case-owner`, `surfaces-ideas-list--photon-admin`, `surfaces-ideas-list--long-titles`, `surfaces-ideas-list--loading`, `surfaces-ideas-list--error`
 - **Excluded here:** preview step before opening a record, badges for any persona but Workspace Admin
 

@@ -411,14 +411,14 @@
         }
       ],
       "scenarios": [
-        "v0/inventor/portfolio",
+        "v0/inventor/first-run",
+        "v0/ideas/drafts-only",
+        "v0/ideas/mixed",
+        "v0/ideas/long-titles",
         "v0/workspace-admin/queue",
-        "v0/workspace-admin/empty",
+        "v0/workspace-admin/large-aging-queue",
         "v0/case-owner/my-work",
-        "v0/photon-admin/firm",
-        "v0/shape/large",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/photon-admin/firm"
       ],
       "states": {
         "loading": "table skeleton with the persona's columns",
@@ -441,8 +441,8 @@
       "badgePersonas": [
         "WORKSPACE_ADMIN"
       ],
-      "backendImpact": "none",
-      "backendNotes": "GET /v1/ideas with state filters and paging exists.",
+      "backendImpact": "conceptual",
+      "backendNotes": "Existing GET /v1/ideas paging and filters retained. BF-10 declares derived Case Owner names on the hydrated idea for received-work attribution; no new endpoint.",
       "storyIds": [
         "surfaces-ideas-list--inventor-empty",
         "surfaces-ideas-list--inventor-drafts-only",
@@ -460,7 +460,7 @@
         "preview step before opening a record",
         "badges for any persona but Workspace Admin"
       ],
-      "dsn": null
+      "dsn": "DSN-0009"
     },
     {
       "brief": "surfaces/idea-detail.md",

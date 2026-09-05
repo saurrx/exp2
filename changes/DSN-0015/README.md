@@ -24,17 +24,17 @@ The choice is pre-authorized by the run's cognitive-load contract. All three low
 Keep /due-dates and the scoped all_due_dates query, existing adapter and shared hooks. Workspace Admin continues into the completed Actions design on the same technical route. Inventor receives the existing blocked-redirect behavior instead of any due-date content. Photon manual maintenance and spreadsheet import follow the brief; any missing fields or routes are declared in the mock. References, product context, auth, analytics and dependencies remain unchanged.
 
 ## Validation
-In progress. Coverage remains null until the required evidence and independent PASS.
+Final review in progress. Coverage remains null until the required gates and independent PASS. All 19 states pass focused interaction checks; V0 passes 43/43. Forty-nine captures pass two-clean-render stability checks with no egress (shots3.log plus the targeted save-error rerun in shots-save-final.log); the first refresh had one intermittent save-error zoom difference. All 38 accessibility/zoom contexts are clean (axe3.log). Full-app correction, recovery, import, scope and exact Action/Back navigation checks pass (functional2.log, extra1.log, recovery1.log, navigation1.log). Final required serial gate will be recorded below.
 
 ## Implementation checkpoint
 The 1,800-line legacy table wrapper is replaced in place by the same scoped query feeding a token-based urgency list and focused event record. Source and latest correction recede; missing dates and disputed records remain honest. Date edits require a correction note and retain source/row provenance. Completion has its own confirmation and preserves the related Action. Existing spreadsheet import is reused with a due-date count and return label. A month filter acts on the server's full result set, replacing the misleading page-only calendar. The old calendar and unused reminder component, two legacy stories/captures and their accessibility fingerprints are retired.
 
-BF-13 declares nullable dates, owner derived from existing Case Owner assignments, source and correction metadata, operator-only existing PATCH corrections and additional date filters. Missing dates are excluded from overdue checks in dependent mock readers. No adapter, shared hook, auth, analytics, product-context, reference screen or dependency changes. The /actions component now honors a supplied application search so the related Action link is useful. At 200%, client/reference/date stay in the compact record and secondary owner/status/patent title can be expanded. This surface joins the existing desktop-zoom CSS exceptions; the device gate is unchanged.
+BF-13 declares nullable dates, owner derived from existing Case Owner assignments, source and correction metadata, operator-only existing PATCH corrections and additional date filters. Missing dates are excluded from overdue checks in dependent mock readers. No adapter, shared hook, auth, analytics, product-context, reference screen or dependency changes. The /actions component now honors the exact related request as well as its application search. Browser Back restores client, month, deadline filter and selected event, including a patent with two instructions. At 200%, client/reference/date stay in the compact record and secondary owner/status/patent title can be expanded. This surface joins the existing desktop-zoom CSS exceptions; the device gate is unchanged.
 
 Eighteen new stories and all 332 story tests passed in the first full run; V0 38/38. API/UI probes pass for saved corrections with source row and named updater, event completion independent of Action status, reopening, scoped writes for all four roles, invalid-date refusal, missing-date filtering, retained edits across selection, spreadsheet import and 200% editing/navigation. A later serial gate exposed a focus timing race; synchronous layout focus now fixes it. Final validation remains in progress.
 
 ## Rendered review and cognitive-load check
-All 47 current captures were opened: every story at 1280×720 and 1440×900; Case Owner and Photon Admin defaults also at 1366×768, 1920×1080 and 640×360@2; editing, failure, confirmation, long content and import also at 200%. The first pass exposed the legacy body width floor and a save-error message below sticky controls. The surface now reflows at 200%; error recovery scrolls its message above the save controls and was functionally checked at 1280 and 640. The final capture refresh follows this correction.
+All 49 final captures have been reviewed (the original 47 were opened in full, followed by the refreshed recovery and navigation captures and defaults): every story at 1280×720 and 1440×900; Case Owner and Photon Admin defaults also at 1366×768, 1920×1080 and 640×360@2; editing, failure, confirmation, long content and import also at 200%. The first pass exposed the legacy body width floor and a save-error message below sticky controls. The surface now reflows at 200%; error recovery scrolls its message above the save controls and was functionally checked at 1280 and 640. Final captures show the recovery message and retry controls together.
 
 | Scorecard | Score | Rendered evidence |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ All 47 current captures were opened: every story at 1280×720 and 1440×900; Cas
 | Usability | 4 | Retained edits, retry, cancel and reopening; scoped search/month/pagination; matching Action link. |
 | Trust | 4 | Recorded dates are never inferred; source row survives correction; named updater and distinct completion consequences. |
 | Craft | 4 | Reference token/type/button language, hairline separation, bounded reading width and no ornamental data cards. |
-| Accessibility | 4 | All 36 accessibility/zoom contexts have zero violations and zero horizontal overflow; keyboard and zoom recovery checked. |
+| Accessibility | 4 | All 38 accessibility/zoom contexts have zero violations and zero horizontal overflow; keyboard and zoom recovery checked. |
 | Business | 4 | Makes unresolved events easier to find and correct; completion and source checks guard against merely clearing a queue. |
 
 Case Owner post-render roleplay: (1) I first see the next recorded event and urgency in my assigned scope. (2) Edit event leads, then Save event commits the correction. (3) I read the event, reference, client, date and owner; I skip source details unless checking a discrepancy. (4) Client/reference stay with the editor and confirmation; retained edits avoid remembering changes when selecting another event. (5) I do not need a full month grid, patent lifecycle columns, client-instruction controls or decoration. (6) The correction note, visible retry and explicit independent event completion tell me what is saved and what changes.
@@ -51,3 +51,28 @@ Case Owner post-render roleplay: (1) I first see the next recorded event and urg
 Photon Admin post-render roleplay: (1) The missing-date event leads, with Orbital Foods and Unassigned ownership visible at ordinary laptop widths. (2) I correct the recorded event. (3) I read urgency, event, client/owner and date; I open the Action or provenance only when required. (4) The same focused record prevents a cross-row comparison while editing. (5) There are no firm vanity totals, leading calendar or navigation badge. (6) The source remains traceable and completing an event cannot silently complete a client's Action. At 200%, client/reference/date and the primary action stay together; owner/status and full patent title use one compact disclosure.
 
 Known compromises: the optional calendar is a server month filter with the actionable list preserved; it makes no day-grid capacity-count claim. The mock import models deterministic outcomes rather than parsing a real docketing system. Only the latest correction is exposed, labelled honestly; BF-13 is conceptual until backend verification. The existing Case Owner sidebar Overview label belongs to the upcoming My work surface and is not changed here. No founder decision is required.
+
+## Story and capture inventory
+Every ID below is prefixed `surfaces-photon-due-dates--`. Every state has 1280×720 and 1440×900 captures. Upcoming and photon-admin additionally have 1366×768, 1920×1080 and 640×360@2; edit-date, save-error, completion-confirmation, long-title and spreadsheet-import additionally have 640×360@2.
+
+| Story suffix | Persona | Scenario |
+| --- | --- | --- |
+| `upcoming` | Case Owner | `v0/due-dates/upcoming` |
+| `due-soon` | Case Owner | `v0/due-dates/due-soon` |
+| `overdue` | Case Owner | `v0/due-dates/overdue` |
+| `completed` | Case Owner | `v0/due-dates/completed` |
+| `missing-date` | Case Owner | `v0/due-dates/missing-date` |
+| `import-problem` | Case Owner | `v0/due-dates/import-problem` |
+| `large-same-day-group` | Case Owner | `v0/due-dates/large-same-day-group` |
+| `no-upcoming-dates` | Case Owner | `v0/due-dates/no-upcoming-dates` |
+| `loading` | Case Owner | `v0/due-dates/upcoming` |
+| `error` | Case Owner | `v0/due-dates/upcoming` |
+| `photon-admin` | Photon Admin | `v0/due-dates/firm-scope` |
+| `case-owner-scope` | Case Owner | `v0/due-dates/firm-scope` |
+| `edit-date` | Case Owner | `v0/due-dates/missing-date` |
+| `save-error` | Case Owner | `v0/due-dates/upcoming` |
+| `completion-confirmation` | Case Owner | `v0/due-dates/upcoming` |
+| `long-title` | Case Owner | `v0/due-dates/long-title` |
+| `spreadsheet-import` | Case Owner | `v0/due-dates/upcoming` |
+| `inventor-refused` | Inventor | `v0/inventor/portfolio` |
+| `related-instruction` | Case Owner | `v0/due-dates/same-patent-events` |

@@ -245,3 +245,31 @@ describe("conceptual contracts are declared, modelled in V0 and refused in the l
     expect(db.emails).toBeUndefined();
   });
 });
+
+
+describe("Idea detail disclosure boundaries", () => {
+  it("refuses another inventor's detail, drafts, history, source file and resubmission", async () => {
+    const db = seed("v0/idea-detail/rejected"), idea = db.ideas[0], draft = db.drafts[0], file = db.files.find((f) => f.idea_id === idea.id)!;
+    // Select an existing non-credited inventor from the scenario roster.
+    const other = db.users.find((u) => u.role === "INVENTOR" && u.id !== idea.author_id && !db.inventors.some((i) => i.idea_id === idea.id && i.inventor_id === u.id))!;
+    setFramePersona(other.email);
+    for (const url of [`/v1/ideas/${idea.id}`, `/v1/ideas/${idea.id}/drafts`, `/v1/drafts/${draft.id}`, `/v1/ideas/${idea.id}/transitions`, `/v1/files/${file.id}/raw`]) expect((await req("GET", url)).status, url).toBe(403);
+    expect((await req("POST", `/v1/ideas/${idea.id}/submit`, { comment: "A different inventor must not submit this." })).status).toBe(403);
+  });
+  it("preserves the rejected decision while the author revises and resubmits with a reason", async () => {
+    const db = seed("v0/idea-detail/rejected"), idea = db.ideas[0], draft = db.drafts[0]; setFramePersona("inventor@northwind.test");
+    const oldDecision = db.transitions.find((t) => t.decision === "REJECTED")!;
+    expect((await req("PATCH", `/v1/drafts/${draft.id}`, { answers: { ...draft.answers, novelty: "The loop corrects tension without an external reference." }, version: draft.version ?? 0 })).status).toBe(201);
+    expect((await req("POST", `/v1/ideas/${idea.id}/submit`, {})).status).toBe(400);
+    expect((await req("POST", `/v1/ideas/${idea.id}/submit`, { comment: "Added the load-response distinction." })).status).toBe(200);
+    expect(idea.state).toBe("LEGAL_REVIEW"); expect(idea.revision).toBe(2); expect(db.transitions).toContainEqual(oldDecision);
+    expect(db.transitions.find((t) => t.is_appeal)?.comment).toBe("Added the load-response distinction.");
+  });
+  it("associates only stored, same-workspace uploads with the author's editable disclosure", async () => {
+    const db = seed("v0/idea-detail/rejected"), idea = db.ideas[0], ownFile = db.files.find((f) => f.idea_id === idea.id)!; setFramePersona("inventor@northwind.test");
+    const foreignFile = db.files.find((f) => f.client_id !== idea.client_id)!;
+    expect((await req("POST", `/v1/ideas/${idea.id}/files`, { file_ids: [foreignFile.id] })).status).toBe(400);
+    expect((await req("POST", `/v1/ideas/${idea.id}/files`, { file_ids: [ownFile.id] })).status).toBe(200);
+    expect((await req("GET", `/v1/files/${ownFile.id}/raw`)).status).toBe(200);
+  });
+});

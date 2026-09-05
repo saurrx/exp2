@@ -171,6 +171,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   const [sourceError, setSourceError] = useState<string | null>(null);
   const [conflictDraft, setConflictDraft] = useState<any>(null);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [reconsiderationNote, setReconsiderationNote] = useState("");
   const [online, setOnline] = useState(navigator.onLine);
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -658,9 +659,10 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
 
   const { mutate: uploadAttachment } = useMutation({
     mutationFn: async (files: File[]) => {
-      await API_CONFIG.post(`/api/v1/idea/upload-idea-file/${ideaId}`, {
-        files: files.map((f) => ({ originalName: f.name, key: f.name })),
-      });
+      const { s3Upload } = await import("@/lib/api-service/s3Upload");
+      const stored: Awaited<ReturnType<typeof s3Upload>>[] = [];
+      for (const file of files) stored.push(await s3Upload(file, "idea", idea?.client_id ?? user?.client_id));
+      await rawApi.post(`/v1/ideas/${ideaId}/files`, { file_ids: stored.map((file) => file.id) });
     },
     onSuccess: (_data, files) => {
       // Metadata only: content-type + a coarse size band, never the filename or
@@ -698,7 +700,7 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
       await saveNow(sections, provenance, completion);
       await API_CONFIG.post(
         `/api/v1/idea/send-to-ihc/${draftId}/${user?.client_id}`,
-        { stale: dirtySinceScore },
+        { stale: dirtySinceScore, ...(idea?.state === "REJECTED" || idea?.status === "REJECT_BY_IHC" ? { comment: reconsiderationNote.trim() } : {}) },
       );
     },
     onSuccess: () => {
@@ -761,12 +763,13 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
   }, [requiredComplete, scored]);
 
   /* ---------------------------------- render ---------------------------------- */
+  const reconsidering = idea?.state === "REJECTED" || idea?.status === "REJECT_BY_IHC";
   const requestedChanges = idea?.status === "CHANGES_REQUESTED" || idea?.state === "CHANGES_REQUESTED";
   const saveMessage = !online ? "Offline · your answers remain here" : saveState === "saving" ? "Saving…" : saveState === "conflict" ? "Another revision was saved. Your answers remain here." : saveState === "error" ? "Could not save. Your answers remain here." : savedLabel(savedAt) || "Autosaves as you type";
   const fieldCls = "w-full resize-y rounded-sm border border-pl-border bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   const liveSignal = !answers.prob1?.trim() ? "Describe the problem your idea addresses." : !answers.sol1?.trim() ? "Your problem is described. Explain how your idea solves it." : !answers.adv1?.trim() ? "Your problem and approach are described. Add what makes your idea different, in your own words." : "Your problem, approach and distinguishing idea are described. Evaluation can compare them with prior art.";
-  const editable = !idea || ((idea.author_id ?? idea.created_by_id) === user?.id || (user?.role === "LEGAL_COUNSEL" && idea.submitted_by_id === user.id)) && ["DRAFT", "CHANGES_REQUESTED"].includes(idea.state ?? (idea.status === "IN_DRAFT" ? "DRAFT" : idea.status === "UPDATE_REQUEST" ? "CHANGES_REQUESTED" : ""));
+  const editable = !idea || ((idea.author_id ?? idea.created_by_id) === user?.id || (user?.role === "LEGAL_COUNSEL" && idea.submitted_by_id === user.id)) && ["DRAFT", "CHANGES_REQUESTED", "REJECTED"].includes(idea.state ?? (idea.status === "IN_DRAFT" ? "DRAFT" : idea.status === "UPDATE_REQUEST" ? "CHANGES_REQUESTED" : idea.status === "REJECT_BY_IHC" ? "REJECTED" : ""));
   if (idea && !editable) return <div data-disclosure-workspace className="min-h-0 flex-1 overflow-y-auto p-6"><PageHeader title="Invention disclosure" /><h1 className="text-xl font-semibold">{idea.title}</h1><p className="mt-2 text-sm text-pl-text-3">This disclosure is read-only. Review its status on the idea page.</p><Button size="sm" variant="outline" className="mt-3" onClick={() => navigate(`/ideas/${ideaId}`)}>View idea</Button><div className="mt-5 divide-y divide-pl-border">{sections.map((section) => <details key={section.id} className="py-3"><summary className="cursor-pointer font-medium">{section.title}</summary>{section.questions.filter((q: any) => q.answer).map((q: any) => <p key={q.id} className="mt-3 text-sm">{q.answer}</p>)}</details>)}</div></div>;
 
   return (
@@ -782,13 +785,14 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
         </div>
         <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h1 title={idea?.title} className="min-w-0 truncate text-base font-semibold lg:text-xl">{idea?.title || "Invention disclosure"}</h1>
-          <span className="text-xs text-pl-text-3">{idea?.reference_number} · {requestedChanges ? "Changes requested" : "In draft"}</span>
+          <span className="text-xs text-pl-text-3">{idea?.reference_number} · {reconsidering ? "Rejected · revising" : requestedChanges ? "Changes requested" : "In draft"}</span>
         </div>
         {idea?.submitted_by && <p className="mt-2 text-xs text-pl-text-3">Inventor: {idea.author?.name} · Submitted by: {idea.submitted_by.name}</p>}
       </header>
 
       <div className="min-h-0 px-6 py-5 lg:flex-1 lg:overflow-y-auto">
         {!draftData ? draftLoadError ? <div role="alert"><p>Could not load this disclosure.</p><Button size="sm" variant="outline" onClick={() => reloadDraft()}>Try again</Button></div> : <p role="status">Loading disclosure…</p> : <>
+          {reconsidering && <div className="mb-5 border-l-2 border-pl-blue pl-4"><h2 className="text-sm font-semibold">Revise your disclosure</h2><p className="mt-1 text-sm text-pl-text-2">Address the decision in your answers. Include a reconsideration note when you resubmit; the previous decision remains in history.</p></div>}
           {requestedChanges && <div className="mb-5 border-l-2 border-pl-blue pl-4"><h2 className="text-sm font-semibold">Update your disclosure</h2><p className="mt-1 text-sm text-pl-text-2">Address the review feedback, then submit this revision for review.</p>{reviewFeedback && <blockquote className="mt-2 text-sm">{reviewFeedback}</blockquote>}</div>}
           {(saveState === "error" || saveState === "conflict") && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-sm bg-pl-red-tint p-3 text-sm text-pl-red-text"><p>{saveMessage}</p>{saveState === "conflict" ? <Button variant="outline" size="sm" onClick={async () => { try { setConflictDraft((await API_CONFIG.get(`/api/v1/idea/single-draft/${draftId}`)).data.data); } catch { setFinishNote("Could not load the latest revision. Your answers remain here."); } }}>Compare latest revision</Button> : <Button variant="outline" size="sm" onClick={() => saveNow(sections, provenance, completion).catch(() => undefined)}>Retry save</Button>}</div>}
           <div className="grid min-w-0 gap-8 lg:grid-cols-3">
@@ -848,10 +852,10 @@ const DraftWorkspace = ({ ideaId }: { ideaId?: string }) => {
         </>}
       </div>
       </div>
-      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-pl-border bg-background px-6 py-3"><p className="min-w-0 text-xs text-pl-text-3">{finishNote || (requiredComplete ? "Submit this disclosure to your Workspace Admin." : "Your draft stays editable until you submit it for review.")}</p><Button size="sm" onClick={handleSend} disabled={isSending || !online || !draftData}>{isSending ? "Submitting…" : requestedChanges ? "Resubmit for review" : "Submit for review"}</Button></footer>
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-pl-border bg-background px-6 py-3"><p className="min-w-0 text-xs text-pl-text-3">{finishNote || (requiredComplete ? "Submit this disclosure to your Workspace Admin." : "Your draft stays editable until you submit it for review.")}</p><Button size="sm" onClick={handleSend} disabled={isSending || !online || !draftData}>{isSending ? "Submitting…" : requestedChanges || reconsidering ? "Resubmit for review" : "Submit for review"}</Button></footer>
       <Dialog open={evaluationOpen} onOpenChange={setEvaluationOpen}><DialogContent className="max-h-full max-w-4xl overflow-y-auto" onOpenAutoFocus={(event) => { event.preventDefault(); evaluationTitleRef.current?.focus({ preventScroll: true }); }}><DialogHeader><DialogTitle ref={evaluationTitleRef} tabIndex={-1} className="outline-none">Evaluation result</DialogTitle><DialogDescription>{idea?.reference_number} · {idea?.title}</DialogDescription></DialogHeader>{dirtySinceScore && <p className="text-sm text-pl-amber-text">Evaluated before your latest edits.</p>}{scoreMeta?.scoringResult && <PatentNoveltyReport embedded title={idea?.title} reference={idea?.reference_number} api_evaluation_id={scoreMeta.id} scoringResult={scoreMeta.scoringResult} priorArt={scoreMeta.priorArt ?? []} report={scoreMeta} />}<Button size="sm" className="justify-self-start" onClick={() => setEvaluationOpen(false)}>Return to disclosure</Button></DialogContent></Dialog>
       <Dialog open={!!conflictDraft} onOpenChange={(open) => { if (!open) setConflictDraft(null); }}><DialogContent className="max-h-full overflow-y-auto"><DialogHeader><DialogTitle>Compare the saved revision</DialogTitle><DialogDescription>Your answers remain in the disclosure. Review the latest saved answers before choosing which version to keep.</DialogDescription></DialogHeader><div className="space-y-3">{disclosureSections(conflictDraft?.meta_data).map((section) => <details key={section.id}><summary className="cursor-pointer text-sm font-medium">{section.title}</summary>{section.questions.map((q) => <div key={q.id} className="mt-3 text-sm"><h3 className="font-medium">{FIELD_META[q.id]?.label || q.text}</h3><div className="mt-2 grid gap-3 sm:grid-cols-2"><div><p className="text-xs text-pl-text-3">Your answer</p><p className="mt-1">{answers[q.id] || "No answer"}</p></div><div><p className="text-xs text-pl-text-3">Saved answer</p><p className="mt-1">{q.answer || "No answer"}</p></div></div></div>)}</details>)}</div><div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => { setSections(disclosureSections(conflictDraft.meta_data)); setProvenance(Object.fromEntries(disclosureSections(conflictDraft.meta_data).flatMap((section) => section.questions).filter((question) => question.answer?.trim()).map((question) => [question.id, question.provenance || "you"]))); versionRef.current = conflictDraft.version ?? 0; sessionStorage.removeItem(recoveryKey); setSaveState("saved"); setConflictDraft(null); }}>Use saved revision</Button><Button size="sm" onClick={async () => { versionRef.current = conflictDraft.version ?? 0; try { await saveNow(sections, provenance, completion); setConflictDraft(null); } catch { /* Keep the comparison open on failure. */ } }}>Save my answers instead</Button></div></DialogContent></Dialog>
-      <Dialog open={confirmSubmit} onOpenChange={setConfirmSubmit}><DialogContent><DialogHeader><DialogTitle>{requestedChanges ? "Resubmit this disclosure?" : "Submit this disclosure for review?"}</DialogTitle><DialogDescription>{idea?.submitted_by ? `Inventor: ${idea.author?.name}. Submitted by: ${idea.submitted_by.name}. ` : ""}Your Workspace Admin will review this version. You can edit it again if changes are requested.</DialogDescription></DialogHeader><div className="flex flex-wrap justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setConfirmSubmit(false)}>Keep editing</Button><Button size="sm" disabled={isSending} onClick={() => sendToCommittee()}>{isSending ? "Submitting…" : "Submit for review"}</Button></div></DialogContent></Dialog>
+      <Dialog open={confirmSubmit} onOpenChange={setConfirmSubmit}><DialogContent><DialogHeader><DialogTitle>{requestedChanges || reconsidering ? "Resubmit this disclosure?" : "Submit this disclosure for review?"}</DialogTitle><DialogDescription>{idea?.submitted_by ? `Inventor: ${idea.author?.name}. Submitted by: ${idea.submitted_by.name}. ` : ""}Your Workspace Admin will review this version. You can edit it again if changes are requested.</DialogDescription></DialogHeader>{reconsidering && <div><label htmlFor="reconsideration-note" className="text-sm font-medium">What changed since the decision?</label><textarea id="reconsideration-note" rows={3} value={reconsiderationNote} onChange={(event) => setReconsiderationNote(event.target.value)} className={`mt-2 ${fieldCls}`} /><p className="mt-1 text-xs text-pl-text-3">Required for reconsideration. Your Workspace Admin receives this note with the revision.</p></div>}<div className="flex flex-wrap justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setConfirmSubmit(false)}>Keep editing</Button><Button size="sm" disabled={isSending || (reconsidering && !reconsiderationNote.trim())} onClick={() => sendToCommittee()}>{isSending ? "Submitting…" : "Submit for review"}</Button></div></DialogContent></Dialog>
     </div>
   );
 };

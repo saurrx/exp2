@@ -4,5 +4,11 @@
     "path": "/v1/emails/outbox",
     "finding": "BF-3",
     "reason": "V0 activation and reminder email outbox (product-context/WORKFLOWS.md section 9); the backend has no mailer. Served only for V0 scenarios; nothing is sent."
+  },
+  {
+    "method": "POST",
+    "path": "/v1/ideas/:id/files",
+    "finding": "BF-8",
+    "reason": "DSN-0008: associate same-origin stored uploads with an editable idea owned by the inventor or its on-behalf submitter. Existing file routes store bytes but the old upload-idea-file route is unmapped. The association is read as Idea.files; no cross-client association is allowed."
   }
 ]

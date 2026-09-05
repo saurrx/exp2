@@ -22,7 +22,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired | DSN-0006 |
 | Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none | DSN-0007 |
 | Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | none |  |
-| Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 6 | 17 | conceptual |  |
+| Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 16 | 17 | conceptual |  |
 | Review decision | Workspace Admin | `/ideas/:id` | 3 | 12 | none |  |
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
 | Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 7 | 12 | none |  |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 209 intended stories, 34 V0 scenarios; backend impact conceptual on 4, unwired on 5, none on 8.
+17 surfaces, 209 intended stories, 49 V0 scenarios; backend impact conceptual on 4, unwired on 5, none on 8.
 
 ## Inventor home
 
@@ -125,11 +125,11 @@ Brief: `product-context/surfaces/idea-detail.md` · Storybook title: `Surfaces/I
 - **User goal:** Understand the invention disclosure, its evidence, history, ownership and current next step.
 - **Business goal:** Confidence after submission and review; a usable filing brief for Photon.
 - **Routes:** `/ideas/:id` (Inventor, Workspace Admin, Case Owner, Photon Admin)
-- **Required scenarios:** `v0/inventor/portfolio`, `v0/workspace-admin/queue`, `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/slow`, `v0/shape/failure`
+- **Required scenarios:** `v0/idea-detail/draft`, `v0/idea-detail/evaluated`, `v0/idea-detail/submitted`, `v0/idea-detail/under-review`, `v0/idea-detail/changes-requested`, `v0/idea-detail/rejected`, `v0/idea-detail/resubmitted`, `v0/idea-detail/sent-to-photon`, `v0/idea-detail/filed`, `v0/idea-detail/granted`, `v0/idea-detail/closed`, `v0/idea-detail/missing-evaluation`, `v0/idea-detail/partial-evaluation`, `v0/idea-detail/on-behalf-attribution`, `v0/idea-detail/long-content`, `v0/inventor/portfolio`
 - **States:** loading — reference and title first, sections follow; empty — no evaluation yet; no attachments; success — every state of the V0 lifecycle with the next step named; error — record unavailable; attachment download failed; permission — an idea outside the caller's scope is refused; role-specific actions hidden
 - **Surface-specific states:** draft, evaluated, submitted, under-review, changes-requested, rejected, resubmitted, sent-to-photon, filed, granted, closed, missing-evaluation, partial-evaluation, on-behalf-attribution
 - **Navigation badge:** none
-- **Backend impact:** conceptual — Separate Inventor and Submitted by attribution needs a submitter identity on the idea (BF-1, modelled as submitted_by_id in mock/proposed-fields.json). Granted and Closed render from the linked patent (POST /v1/patents/:id/link-idea exists).
+- **Backend impact:** conceptual — Separate Inventor and Submitted by attribution needs a submitter identity on the idea (BF-1, modelled as submitted_by_id in mock/proposed-fields.json). Granted and Closed render from the linked patent (POST /v1/patents/:id/link-idea exists). DSN-0008 hydrates existing patent links and transition history. BF-8 declares Idea.files, StoredFile.idea_id and POST /v1/ideas/:id/files for stored same-origin uploads. V0 detail, drafts, history and linked files enforce the existing idea scope; rejected revisions retain the decision and require a reconsideration note.
 - **Intended story ids:** `surfaces-idea-detail-and-status--draft`, `surfaces-idea-detail-and-status--evaluated`, `surfaces-idea-detail-and-status--submitted`, `surfaces-idea-detail-and-status--under-review`, `surfaces-idea-detail-and-status--changes-requested`, `surfaces-idea-detail-and-status--rejected`, `surfaces-idea-detail-and-status--resubmitted`, `surfaces-idea-detail-and-status--sent-to-photon`, `surfaces-idea-detail-and-status--filed`, `surfaces-idea-detail-and-status--granted`, `surfaces-idea-detail-and-status--closed`, `surfaces-idea-detail-and-status--missing-evaluation`, `surfaces-idea-detail-and-status--partial-evaluation`, `surfaces-idea-detail-and-status--on-behalf-attribution`, `surfaces-idea-detail-and-status--loading`, `surfaces-idea-detail-and-status--error`, `surfaces-idea-detail-and-status--permission-denied`
 - **Excluded here:** questionnaire as one wall, repeated score, internal ids, actions unavailable to the role
 

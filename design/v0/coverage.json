@@ -487,12 +487,22 @@
         }
       ],
       "scenarios": [
-        "v0/inventor/portfolio",
-        "v0/workspace-admin/queue",
-        "v0/case-owner/my-work",
-        "v0/photon-admin/firm",
-        "v0/shape/slow",
-        "v0/shape/failure"
+        "v0/idea-detail/draft",
+        "v0/idea-detail/evaluated",
+        "v0/idea-detail/submitted",
+        "v0/idea-detail/under-review",
+        "v0/idea-detail/changes-requested",
+        "v0/idea-detail/rejected",
+        "v0/idea-detail/resubmitted",
+        "v0/idea-detail/sent-to-photon",
+        "v0/idea-detail/filed",
+        "v0/idea-detail/granted",
+        "v0/idea-detail/closed",
+        "v0/idea-detail/missing-evaluation",
+        "v0/idea-detail/partial-evaluation",
+        "v0/idea-detail/on-behalf-attribution",
+        "v0/idea-detail/long-content",
+        "v0/inventor/portfolio"
       ],
       "states": {
         "loading": "reference and title first, sections follow",
@@ -519,7 +529,7 @@
       },
       "badge": "none",
       "backendImpact": "conceptual",
-      "backendNotes": "Separate Inventor and Submitted by attribution needs a submitter identity on the idea (BF-1, modelled as submitted_by_id in mock/proposed-fields.json). Granted and Closed render from the linked patent (POST /v1/patents/:id/link-idea exists).",
+      "backendNotes": "Separate Inventor and Submitted by attribution needs a submitter identity on the idea (BF-1, modelled as submitted_by_id in mock/proposed-fields.json). Granted and Closed render from the linked patent (POST /v1/patents/:id/link-idea exists). DSN-0008 hydrates existing patent links and transition history. BF-8 declares Idea.files, StoredFile.idea_id and POST /v1/ideas/:id/files for stored same-origin uploads. V0 detail, drafts, history and linked files enforce the existing idea scope; rejected revisions retain the decision and require a reconsideration note.",
       "storyIds": [
         "surfaces-idea-detail-and-status--draft",
         "surfaces-idea-detail-and-status--evaluated",

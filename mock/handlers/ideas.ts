@@ -67,6 +67,7 @@ function submit(idea: Idea, actor: User, comment: string | undefined) {
   const from = idea.state;
   if (!["DRAFT", "CHANGES_REQUESTED", "REJECTED"].includes(from)) return { status: 409, body: { message: `An idea in state ${from} cannot be submitted.` } };
   const onBehalf = !!db.flags.v0 && actor.role === "LEGAL_COUNSEL" && idea.submitted_by_id === actor.id;
+  if (db.flags.v0 && actor.id !== idea.author_id && !onBehalf) return { status: 403, body: { message: "Only the inventor or recorded submitter can resubmit this disclosure." } };
   if (actor.role !== "INVENTOR" && !onBehalf) return { status: 403, body: { message: "Only an inventor can submit a disclosure." } };
   if (from === "REJECTED" && !comment?.trim()) return { status: 400, body: { message: "An appeal needs a comment explaining what changed." } };
   const draft = db.drafts.filter((d) => d.idea_id === idea.id).sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0];
@@ -142,6 +143,7 @@ export const ideaHandlers = [
   route("get", "/v1/ideas/:id", ({ params }) => {
     const db = getDb();
     const i = db.ideas.find((x) => x.id === params.id);
+    if (i && db.flags.v0 && !visibleIdeas(db, currentUser()).some((idea) => idea.id === i.id)) return { status: 403, body: { message: "This idea is outside your workspace." } };
     return i ? hydrateIdea(db, i, clock.now()) : { status: 404, body: { message: "Idea not found." } };
   }),
   route("patch", "/v1/ideas/:id", async ({ params, body }) => {
@@ -162,7 +164,7 @@ export const ideaHandlers = [
     db.ideas = db.ideas.filter((x) => x.id !== i.id); db.drafts = db.drafts.filter((d) => d.idea_id !== i.id); db.inventors = db.inventors.filter((x) => x.idea_id !== i.id);
     touched(); return { ok: true };
   }),
-  route("get", "/v1/ideas/:id/drafts", ({ params }) => getDb().drafts.filter((d) => d.idea_id === params.id).map(hydrateDraft)),
+  route("get", "/v1/ideas/:id/drafts", ({ params }) => { const db = getDb(); if (db.flags.v0 && !visibleIdeas(db, currentUser()).some((idea) => idea.id === params.id)) return { status: 403, body: { message: "This idea is outside your workspace." } }; return db.drafts.filter((draft) => draft.idea_id === params.id).map(hydrateDraft); }),
   route("post", "/v1/ideas/:id/drafts", async ({ params, body }) => {
     const b = (await body()) as { answers?: Record<string, unknown> };
     const db = getDb();
@@ -202,8 +204,19 @@ export const ideaHandlers = [
     touched();
     return hydrateIdea(db, idea, clock.now());
   }),
+  route("post", "/v1/ideas/:id/files", async ({ params, body }) => {
+    const db = getDb(); const actor = currentUser(); const idea = db.ideas.find((idea) => idea.id === params.id);
+    if (!db.flags.v0) return { status: 501, body: { message: "Idea file association is a proposed V0 contract." } };
+    if (!actor || !idea || !(idea.author_id === actor.id || (actor.role === "LEGAL_COUNSEL" && idea.submitted_by_id === actor.id)) || !["DRAFT", "CHANGES_REQUESTED", "REJECTED"].includes(idea.state)) return { status: 403, body: { message: "This disclosure is not editable by you." } };
+    const payload = await body() as { file_ids?: string[] };
+    const files = (payload.file_ids ?? []).map((id) => db.files.find((file) => file.id === id));
+    if (!files.length || files.some((file) => !file || file.client_id !== idea.client_id || file.uploaded_by_id !== actor.id || file.status !== "STORED")) return { status: 400, body: { message: "Upload these files in this workspace before attaching them." } };
+    files.forEach((file) => { file!.idea_id = idea.id; }); touched();
+    return { files };
+  }),
   route("get", "/v1/ideas/:id/transitions", ({ params }) => {
     const db = getDb();
+    if (db.flags.v0 && !visibleIdeas(db, currentUser()).some((idea) => idea.id === params.id)) return { status: 403, body: { message: "This idea is outside your workspace." } };
     return db.transitions.filter((t) => t.idea_id === params.id).sort((a, b) => b.created_at.localeCompare(a.created_at)).map((t) => ({ ...t, actor: (() => { const a = db.users.find((x) => x.id === t.actor_id); return a ? { id: a.id, name: a.name, email: a.email } : null; })() }));
   }),
   route("post", "/v1/ideas/:id/file", async ({ params, body }) => {
@@ -235,7 +248,9 @@ export const ideaHandlers = [
     return { ...credit, inventor: { id: who.id, name: who.name, email: who.email } };
   }),
   route("get", "/v1/drafts/:id", ({ params }) => {
-    const d = getDb().drafts.find((x) => x.id === params.id);
+    const db = getDb();
+    const d = db.drafts.find((x) => x.id === params.id);
+    if (d && db.flags.v0 && !visibleIdeas(db, currentUser()).some((idea) => idea.id === d.idea_id)) return { status: 403, body: { message: "This disclosure is outside your workspace." } };
     return d ? hydrateDraft(d) : { status: 404, body: { message: "Draft not found." } };
   }),
   route("patch", "/v1/drafts/:id", async ({ params, body }) => {
@@ -247,7 +262,7 @@ export const ideaHandlers = [
       const idea = db.ideas.find((i) => i.id === d.idea_id);
       const actor = currentUser();
       const canWrite = actor && idea && (idea.author_id === actor.id || (actor.role === "LEGAL_COUNSEL" && idea.submitted_by_id === actor.id));
-      if (!canWrite || !idea || !["DRAFT", "CHANGES_REQUESTED"].includes(idea.state)) return { status: 403, body: { message: "This disclosure is not editable by you in its current state." } };
+      if (!canWrite || !idea || !["DRAFT", "CHANGES_REQUESTED", "REJECTED"].includes(idea.state)) return { status: 403, body: { message: "This disclosure is not editable by you in its current state." } };
       const expected = b.answers?.__expected_version;
       if (expected !== undefined && expected !== (d.version ?? 0)) return { status: 409, body: { message: "Another revision was saved. Compare it before replacing your answers." } };
       d.version = (d.version ?? 0) + 1;

@@ -104,6 +104,7 @@ interface PatentNoveltyReportProps {
     scoringResult: ScoringResult;
   };
   embedded?: boolean;
+  hideAssessment?: boolean;
   expandFirstReference?: boolean;
   /** The idea's human reference, e.g. DEMO07 — shown instead of an id. */
   reference?: string;
@@ -116,6 +117,7 @@ export default function PatentNoveltyReport({
   report,
   api_evaluation_id,
   embedded = false,
+  hideAssessment = false,
   expandFirstReference = false,
   reference,
 }: PatentNoveltyReportProps) {
@@ -199,7 +201,7 @@ export default function PatentNoveltyReport({
 
   const rawScore = scoringResult?.score;
   const score = typeof rawScore === "number" ? rawScore / 10 : null;
-  const band = score === null ? "Not evaluated" : score >= 7 ? "Highly novel" : score >= 4 ? "Moderately novel" : score >= 2 ? "Marginally novel" : "Closely matched";
+  const band = score === null ? "Not evaluated" : score >= 8 ? "Highly novel" : score >= 6 ? "Moderately novel" : score >= 4 ? "Marginally novel" : "Closely matched";
   const partial = (report as any)?.raw?.state === "PARTIAL" || report?.status === "PARTIAL";
   const differences = scoringResult?.distinctDifferences ?? [];
   const recommendations = scoringResult?.recommendations ?? [];
@@ -258,13 +260,13 @@ export default function PatentNoveltyReport({
       )}
 
     {!embedded && <header><p className="text-xs text-pl-text-3">{reference ? `${reference} · ` : ""}Evaluation result</p><h1 className="mt-2 text-xl font-semibold">{title}</h1></header>}
-    <section aria-label="Assessment">
+    {!hideAssessment && <section aria-label="Assessment">
       <h2 className="text-sm font-semibold">Assessment</h2>
       {partial && <p role="status" className="mt-2 text-sm text-pl-amber-text">Partial result · the score is provisional</p>}
       <div className="mt-2 flex flex-wrap items-baseline gap-3"><p className="text-3xl font-semibold tabular-nums">{score?.toFixed(1) ?? "—"}<span className="text-sm font-normal text-pl-text-3"> /10</span></p><p className="text-sm font-medium">{band}</p></div>
       <p className="mt-2 text-sm text-pl-text-2">{score === null ? "An assessment is not available yet." : references.length === 0 ? "No close prior art was returned by this search. This does not establish that the idea is unique." : score < 4 ? "The search found close overlap. Review the differences and strengthen your explanation." : "The search found potentially distinct features. Review the comparison before drawing conclusions."}</p>
       <p className="mt-2 text-xs text-pl-text-3">AI-assisted and advisory. No score is required to submit for review.</p>
-    </section>
+    </section>}
     <section className="border-t border-pl-border pt-4"><h2 className="text-sm font-semibold">What appears different</h2>{list(differences.slice(0, 3), "The report does not identify distinct features. Explain what your approach changes compared with existing solutions.")}</section>
     <section className="border-t border-pl-border pt-4"><h2 className="text-sm font-semibold">How to strengthen</h2>{recommendations.length ? <ul className="mt-2 list-disc space-y-3 pl-4 text-sm text-pl-text-2">{recommendations.map((tip: any, i) => <li key={i}>{suggestion(tip)}{tip.rationale && <p className="mt-1 text-xs text-pl-text-3">{tip.rationale}</p>}</li>)}</ul> : <p className="mt-2 text-sm text-pl-text-3">No specific prompts were returned. Review whether the mechanism and its technical advantage are explained clearly.</p>}</section>
     <details className="border-t border-pl-border pt-4">

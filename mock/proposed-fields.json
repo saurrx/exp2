@@ -49,6 +49,13 @@
       "type": "version number; frozen submitted revisions with answers; retained source text and filenames; ai/edited/you provenance",
       "finding": "BF-7",
       "reason": "DSN-0006: one canonical disclosure with optimistic concurrency through answers.__expected_version, retained source material, visible human/AI provenance and frozen reviewed revisions. V0 only; existing draft routes and adapter remain intact."
+    },
+    {
+      "entity": "Idea / StoredFile",
+      "field": "Idea.files / StoredFile.idea_id",
+      "type": "Array of stored file metadata / string",
+      "finding": "BF-8",
+      "reason": "DSN-0008: retain and retrieve supporting attachments with the invention disclosure. The V0 mock associates uploads through POST /v1/ideas/:id/files and exposes only the linked stored files on the idea."
     }
   ],
   "collections": [

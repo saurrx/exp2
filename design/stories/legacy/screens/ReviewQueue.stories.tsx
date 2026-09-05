@@ -19,7 +19,7 @@ export const Committee: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText(/Self-tensioning cable harness/, {}, { timeout: 10_000 });
-    await expect(canvas.getByRole("link", { name: /Review queue/ })).toBeVisible();
+    await expect(canvas.getByRole("link", { name: /^Ideas/ })).toHaveAttribute("href", "/ideas");
   },
 };
 

@@ -42,6 +42,8 @@ const northwind = (): IdeaSpec[] => [
   { invention: 14, author: U.inventor, state: "DRAFT", ageDays: 1, completion: 100, evaluation: { state: "RUNNING" } },
   // The oldest wait in the queue, past the 30-day aging threshold (DSN-0002).
   { invention: 15, author: U.coinventor, state: "LEGAL_REVIEW", ageDays: 56, evaluation: { state: "SUCCEEDED", score: 81 } },
+  // Complete without evaluation: submission must remain available (DSN-0000).
+  { invention: 16, author: U.inventor, state: "DRAFT", ageDays: 1, completion: 100 },
 ];
 
 /* ---- Workspace Admin dashboard states (product-context/surfaces/workspace-admin-dashboard.md, DSN-0002) ---- */

@@ -35,6 +35,12 @@ passes, evaluator PASS recorded in the DSN README.
 
 (Bugs and improvements noticed outside a surface's scope. Not fixed by the run.)
 
+- Preflight inspection: the current reference dashboard stat grid clips at 200% zoom. Preserve reference UI during unrelated surfaces; address under the dashboard state run if authorised. Legacy screenshots retain old vocabulary and the already recorded draft stepper defect.
+
 ## Entries
 
 <!-- DSN-NNNN · <surface> · <date> · gates: … · evaluator: PASS/NEEDS_WORK ×n · next: … -->
+
+- DSN-0000 · preflight · 2026-09-05 · In progress on `codex/dsn-0000-preflight`. Main reproduced the missing complete unevaluated Inventor draft (32/33 V0 tests pass); operational Ideas navigation also carries the forbidden badge. Restore that scenario state and restrict the badge to the existing review navigation. No reference screen changes. Dependencies installed; Chromium is available. Recent commits are lane setup, not another surface run.
+
+- DSN-0000 · preflight · 2026-09-05 · Verified for merge: V0 33/33; stories 206/206; typecheck, role lint, tokens and Storybook build pass; selected gate runner 7/7 passed. Restored the missing unevaluated draft and removed operational Ideas badges. Repaired stale story selectors and removed retired gate invocations. Full two-render pass found 82 stale baselines, no unstable renders; baseline refresh passed, badge dashboards rechecked (Workspace Admin passed isolated retry). Both reference components unchanged. Next: DSN-0005 Inventor home.

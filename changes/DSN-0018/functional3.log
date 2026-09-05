@@ -1,0 +1,96 @@
+HTTP 200 /v1/ideas/counts
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients/d7060259-e140-48ad-8136-3086a7e950c6
+HTTP 200 /v1/case-owners
+HTTP 200 /v1/patents/import-history
+HTTP 200 /v1/patents/stats
+HTTP 200 /v1/invites/share-link
+HTTP 200 /v1/clients
+HTTP 200 /v1/patents
+HTTP 200 /v1/clients
+HTTP 200 /v1/patents/stats
+HTTP 200 /v1/patents/export
+HTTP 201 /v1/clients
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/patents/import-history
+HTTP 200 /v1/patents/stats
+HTTP 200 /v1/invites/share-link
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/case-owners/736c5583-07c0-45c5-9aef-64c92db4f49e/assignments
+HTTP 200 /v1/case-owners
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+AFTER INVITE http://127.0.0.1:3740/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520?tab=overview PHOTON LEGAL
+
+Client workspace
+Refresh client
+Back to clients
+
+Potential client
+
+Cedar Calibration Research
+Case Owner: Jonas Weber
+Enter client view
+Setup and support
+Portfolio
+Invite the first Workspace Admin
+
+Invite the person who will review ideas and help inventors participate.
+
+Invite Workspace Admin
+Setup evidence · 3 of 6 in place
+People and invitations · 0 Workspace Admins · 0 inventors
+Ideas, portfolio and upcoming work
+Portfolio imports
+Client information and settings
+HTTP 201 /v1/invites
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/invites/share-link/regenerate
+HTTP 200 /v1/invites/share-link
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/files/presign-upload
+HTTP 200 /v1/files/8694cb71-8f75-4bf8-9d57-f259ab045979/content
+HTTP 200 /v1/patents/import
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/patents/stats
+HTTP 200 /v1/patents/import-history
+IMPORT RESULT Portfolio import results
+
+The spreadsheet is kept with this client — see Import history to download it.
+
+Added
+12
+Updated
+0
+Deadlines
+6
+Errors
+0
+Every row was new — nothing already on file was changed.
+Close
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+HTTP 200 /v1/clients/d1ab7d51-aba9-44f1-b93b-164c3e61e520
+PASS complete create → domain → assignment → admin invitation → inventor method → spreadsheet import → readiness
+PASS ready PHOTON_ADMIN
+HTTP 200 /v1/ideas/counts
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients/d7060259-e140-48ad-8136-3086a7e950c6
+HTTP 200 /v1/patents/import-history
+HTTP 200 /v1/patents/stats
+HTTP 200 /v1/invites/share-link
+HTTP 200 /v1/auth/view-as/d7060259-e140-48ad-8136-3086a7e950c6
+HTTP 200 /v1/ideas/counts
+HTTP 200 /v1/dashboard
+HTTP 200 /v1/ideas/pipeline
+HTTP 200 /v1/ideas
+HTTP 200 /v1/due-dates
+HTTP 200 /v1/auth/view-as/exit
+HTTP 200 /v1/ideas/counts
+HTTP 200 /v1/clients
+HTTP 200 /v1/clients
+PASS ready CASE_OWNER

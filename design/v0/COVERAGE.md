@@ -31,11 +31,11 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon due dates | Case Owner, Photon Admin | `/due-dates` | 13 | 20 | conceptual | DSN-0015 |
 | Workspace, people and profile | Workspace Admin, Inventor, Case Owner, Photon Admin | `/workspace`, `/profile` | 6 | 12 | unwired |  |
 | Case Owner my work | Case Owner | `/` | 3 | 9 | unwired | DSN-0016 |
-| Clients and onboarding | Case Owner, Photon Admin | `/clients` | 4 | 12 | none |  |
+| Clients and onboarding | Case Owner, Photon Admin | `/clients`, `/clients/:clientId` | 13 | 28 | conceptual | DSN-0018 |
 | Photon Admin dashboard | Photon Admin | `/` | 9 | 12 | conceptual | DSN-0017 |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 226 intended stories, 90 V0 scenarios; backend impact conceptual on 10, unwired on 3, none on 4.
+17 surfaces, 242 intended stories, 103 V0 scenarios; backend impact conceptual on 11, unwired on 3, none on 3.
 
 ## Inventor home
 
@@ -263,18 +263,18 @@ Brief: `product-context/surfaces/case-owner-my-work.md` · Storybook title: `Sur
 
 ## Clients and onboarding
 
-Brief: `product-context/surfaces/clients-and-onboarding.md` · Storybook title: `Surfaces/Clients and onboarding` · DSN: none yet
+Brief: `product-context/surfaces/clients-and-onboarding.md` · Storybook title: `Surfaces/Clients and onboarding` · DSN: DSN-0018
 
 - **Personas:** Case Owner, Photon Admin
 - **User goal:** Find an assigned or any client, understand its setup, and complete onboarding.
 - **Business goal:** Clients become ready faster: admin invited, inventors invited, portfolio imported.
-- **Routes:** `/clients` (Case Owner, Photon Admin) — client detail and onboarding open from the list in production
-- **Required scenarios:** `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/failure`, `v0/shape/slow`
-- **States:** loading — compact client list skeleton; empty — no clients assigned; potential client without a workspace; success — ready client workspace with admins, participation, portfolio summary, import history, assignments; error — import duplicates or errors; save failed; permission — Case Owner assigned clients only; enter client view when authorized
+- **Routes:** `/clients` (Case Owner, Photon Admin) — client selection and onboarding; search/page preserved in the explicit return link; `/clients/:clientId` (Case Owner, Photon Admin) — setup/support, scoped portfolio and existing client-view entry
+- **Required scenarios:** `v0/clients/potential-client`, `v0/clients/no-owner`, `v0/clients/no-admin`, `v0/clients/no-inventors`, `v0/clients/no-portfolio`, `v0/clients/import-in-progress`, `v0/clients/import-errors`, `v0/clients/ready`, `v0/clients/confirm-ready`, `v0/clients/disabled`, `v0/clients/access-request`, `v0/clients/long-title`, `v0/clients/empty`
+- **States:** loading — named loading state in the compact client list; empty — no clients assigned; potential client without a workspace; success — ready client workspace with admins, participation, portfolio summary, import history, assignments; error — import duplicates or errors; save failed; permission — Case Owner assigned clients only; enter client view when authorized
 - **Surface-specific states:** potential-client, new-client, no-admin, no-inventors, no-portfolio, import-in-progress, import-errors, ready, disabled, access-request
 - **Navigation badge:** none
-- **Backend impact:** none — Clients, case-owner assignments, users, invites and import exist. The plan field is never surfaced.
-- **Intended story ids:** `surfaces-clients-and-onboarding--potential-client`, `surfaces-clients-and-onboarding--new-client`, `surfaces-clients-and-onboarding--no-admin`, `surfaces-clients-and-onboarding--no-inventors`, `surfaces-clients-and-onboarding--no-portfolio`, `surfaces-clients-and-onboarding--import-in-progress`, `surfaces-clients-and-onboarding--import-errors`, `surfaces-clients-and-onboarding--ready`, `surfaces-clients-and-onboarding--disabled`, `surfaces-clients-and-onboarding--access-request`, `surfaces-clients-and-onboarding--loading`, `surfaces-clients-and-onboarding--error`
+- **Backend impact:** conceptual — BF-16 derives client onboarding evidence and attributed readiness on existing client routes from saved domain, owners, people, invitation methods, portfolio/import results and scoped work. No new route or permission; pending backend verification. The plan field is never surfaced.
+- **Intended story ids:** `surfaces-clients-and-onboarding--photon-admin`, `surfaces-clients-and-onboarding--case-owner`, `surfaces-clients-and-onboarding--potential-client`, `surfaces-clients-and-onboarding--new-client`, `surfaces-clients-and-onboarding--no-owner`, `surfaces-clients-and-onboarding--no-admin`, `surfaces-clients-and-onboarding--no-inventors`, `surfaces-clients-and-onboarding--no-portfolio`, `surfaces-clients-and-onboarding--import-in-progress`, `surfaces-clients-and-onboarding--import-errors`, `surfaces-clients-and-onboarding--ready`, `surfaces-clients-and-onboarding--ready-case-owner`, `surfaces-clients-and-onboarding--disabled`, `surfaces-clients-and-onboarding--access-request`, `surfaces-clients-and-onboarding--loading`, `surfaces-clients-and-onboarding--error`, `surfaces-clients-and-onboarding--empty`, `surfaces-clients-and-onboarding--long-title`, `surfaces-clients-and-onboarding--invite-admin`, `surfaces-clients-and-onboarding--invite-link`, `surfaces-clients-and-onboarding--import-result`, `surfaces-clients-and-onboarding--confirm-readiness`, `surfaces-clients-and-onboarding--edit-domain`, `surfaces-clients-and-onboarding--save-failed`, `surfaces-clients-and-onboarding--client-support`, `surfaces-clients-and-onboarding--client-settings`, `surfaces-clients-and-onboarding--shared-invitation`, `surfaces-clients-and-onboarding--owner-assignment`
 - **Excluded here:** decorative client cards, plan or price selection
 
 ## Photon Admin dashboard

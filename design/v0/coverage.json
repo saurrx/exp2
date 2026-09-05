@@ -1213,17 +1213,35 @@
             "PHOTON_ADMIN"
           ],
           "exists": true,
-          "note": "client detail and onboarding open from the list in production"
+          "note": "client selection and onboarding; search/page preserved in the explicit return link"
+        },
+        {
+          "path": "/clients/:clientId",
+          "personas": [
+            "CASE_OWNER",
+            "PHOTON_ADMIN"
+          ],
+          "exists": true,
+          "note": "setup/support, scoped portfolio and existing client-view entry"
         }
       ],
       "scenarios": [
-        "v0/case-owner/my-work",
-        "v0/photon-admin/firm",
-        "v0/shape/failure",
-        "v0/shape/slow"
+        "v0/clients/potential-client",
+        "v0/clients/no-owner",
+        "v0/clients/no-admin",
+        "v0/clients/no-inventors",
+        "v0/clients/no-portfolio",
+        "v0/clients/import-in-progress",
+        "v0/clients/import-errors",
+        "v0/clients/ready",
+        "v0/clients/confirm-ready",
+        "v0/clients/disabled",
+        "v0/clients/access-request",
+        "v0/clients/long-title",
+        "v0/clients/empty"
       ],
       "states": {
-        "loading": "compact client list skeleton",
+        "loading": "named loading state in the compact client list",
         "empty": "no clients assigned; potential client without a workspace",
         "success": "ready client workspace with admins, participation, portfolio summary, import history, assignments",
         "error": "import duplicates or errors; save failed",
@@ -1242,27 +1260,43 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "none",
-      "backendNotes": "Clients, case-owner assignments, users, invites and import exist. The plan field is never surfaced.",
+      "backendImpact": "conceptual",
+      "backendNotes": "BF-16 derives client onboarding evidence and attributed readiness on existing client routes from saved domain, owners, people, invitation methods, portfolio/import results and scoped work. No new route or permission; pending backend verification. The plan field is never surfaced.",
       "storyIds": [
+        "surfaces-clients-and-onboarding--photon-admin",
+        "surfaces-clients-and-onboarding--case-owner",
         "surfaces-clients-and-onboarding--potential-client",
         "surfaces-clients-and-onboarding--new-client",
+        "surfaces-clients-and-onboarding--no-owner",
         "surfaces-clients-and-onboarding--no-admin",
         "surfaces-clients-and-onboarding--no-inventors",
         "surfaces-clients-and-onboarding--no-portfolio",
         "surfaces-clients-and-onboarding--import-in-progress",
         "surfaces-clients-and-onboarding--import-errors",
         "surfaces-clients-and-onboarding--ready",
+        "surfaces-clients-and-onboarding--ready-case-owner",
         "surfaces-clients-and-onboarding--disabled",
         "surfaces-clients-and-onboarding--access-request",
         "surfaces-clients-and-onboarding--loading",
-        "surfaces-clients-and-onboarding--error"
+        "surfaces-clients-and-onboarding--error",
+        "surfaces-clients-and-onboarding--empty",
+        "surfaces-clients-and-onboarding--long-title",
+        "surfaces-clients-and-onboarding--invite-admin",
+        "surfaces-clients-and-onboarding--invite-link",
+        "surfaces-clients-and-onboarding--import-result",
+        "surfaces-clients-and-onboarding--confirm-readiness",
+        "surfaces-clients-and-onboarding--edit-domain",
+        "surfaces-clients-and-onboarding--save-failed",
+        "surfaces-clients-and-onboarding--client-support",
+        "surfaces-clients-and-onboarding--client-settings",
+        "surfaces-clients-and-onboarding--shared-invitation",
+        "surfaces-clients-and-onboarding--owner-assignment"
       ],
       "excludes": [
         "decorative client cards",
         "plan or price selection"
       ],
-      "dsn": null
+      "dsn": "DSN-0018"
     },
     {
       "brief": "surfaces/photon-admin-dashboard.md",

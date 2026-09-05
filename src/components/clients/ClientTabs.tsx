@@ -12,6 +12,7 @@ type ClientTabsProps = {
   caseOwnerName?: string;
   onChangeCaseOwner?: () => void;
   canManageTeam?: boolean;
+  onEditClient?: () => void;
 };
 
 const ClientTabs: React.FC<ClientTabsProps> = ({
@@ -21,6 +22,7 @@ const ClientTabs: React.FC<ClientTabsProps> = ({
   caseOwnerName,
   onChangeCaseOwner,
   canManageTeam,
+  onEditClient,
 }) => {
   const { theme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -55,57 +57,6 @@ const ClientTabs: React.FC<ClientTabsProps> = ({
     }
   }, [tabFromUrl]);
 
-  return (
-    <Tabs
-      value={activeTab}
-      onValueChange={handleTabChange}
-      className="w-full min-w-0"
-    >
-      <TabsList
-        className={`text-muted-foreground items-center flex w-full sm:w-fit sm:min-w-[300px] justify-start p-1 rounded-sm h-auto mb-5 border ${
-          theme === "dark"
-            ? "bg-zinc-900 border border-[#cccccc20]"
-            : "bg-black/[0.02] border border-black/[0.08]"
-        } min-w-0`}
-      >
-        <TabsTrigger
-          value="overview"
-          className={`${
-            theme === "dark"
-              ? "data-[state=active]:!bg-[#F9B418] data-[state=active]:!text-zinc-900 data-[state=active]:!border-transparent text-zinc-400 hover:text-zinc-400 hover:bg-[#cccccc20]"
-              : "data-[state=active]:!bg-black/[0.08] data-[state=active]:!text-zinc-600 data-[state=active]:!border-transparent text-zinc-600 hover:text-zinc-700 hover:bg-black/[0.05]"
-          } inline-flex flex-1 items-center justify-center gap-1.5 border border-transparent py-1 whitespace-nowrap h-9 px-4 rounded-xs transition-all text-sm font-medium focus-visible:ring-0 focus-visible:ring-offset-0  min-w-0`}
-        >
-          Overview
-        </TabsTrigger>
-        <TabsTrigger
-          value="patents"
-          className={`${
-            theme === "dark"
-              ? "data-[state=active]:!bg-[#F9B418] data-[state=active]:!text-zinc-900 data-[state=active]:!border-transparent text-zinc-400 hover:text-zinc-400 hover:bg-[#cccccc20]"
-              : "data-[state=active]:!bg-black/[0.08] data-[state=active]:!text-zinc-600 data-[state=active]:!border-transparent text-zinc-600 hover:text-zinc-700 hover:bg-black/[0.05]"
-          } inline-flex flex-1 items-center justify-center gap-1.5 border border-transparent py-1 whitespace-nowrap h-9 px-4 rounded-xs transition-all text-sm font-medium focus-visible:ring-0 focus-visible:ring-offset-0  min-w-0`}
-        >
-          Patents
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="overview" className="mt-0 min-w-0">
-        <OverviewTab
-          clientTeam={clientTeam}
-          clientId={clientId}
-          clientData={clientData}
-          caseOwnerName={caseOwnerName}
-          onChangeCaseOwner={onChangeCaseOwner}
-          canManageTeam={canManageTeam}
-        />
-      </TabsContent>
-
-      <TabsContent value="patents" className="mt-0 min-w-0">
-        <PatentsTab />
-      </TabsContent>
-    </Tabs>
-  );
+  return <Tabs value={activeTab} onValueChange={handleTabChange} className="min-w-0"><TabsList className="mb-3 h-9 md:mb-5 justify-start gap-5 rounded-none border-b border-pl-border bg-transparent p-0"><TabsTrigger value="overview" className="h-9 rounded-none border-b-2 border-transparent bg-transparent px-0 text-sm text-pl-text-2 shadow-none data-[state=active]:border-pl-brand data-[state=active]:bg-transparent data-[state=active]:text-pl-ink data-[state=active]:shadow-none">Setup and support</TabsTrigger><TabsTrigger value="patents" className="h-9 rounded-none border-b-2 border-transparent bg-transparent px-0 text-sm text-pl-text-2 shadow-none data-[state=active]:border-pl-brand data-[state=active]:bg-transparent data-[state=active]:text-pl-ink data-[state=active]:shadow-none">Portfolio</TabsTrigger></TabsList><TabsContent value="overview" className="mt-0 min-w-0"><OverviewTab clientTeam={clientTeam} clientId={clientId} clientData={clientData} caseOwnerName={caseOwnerName} onChangeCaseOwner={onChangeCaseOwner} canManageTeam={canManageTeam} onEditClient={onEditClient}/></TabsContent><TabsContent value="patents" className="mt-0 min-w-0"><PatentsTab/></TabsContent></Tabs>;
 };
-
 export default ClientTabs;

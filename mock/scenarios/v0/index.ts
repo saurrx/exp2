@@ -490,6 +490,39 @@ const photonDashboardStates = ["healthy-operations", "unassigned-client", "aging
   return d;
 }));
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...photonDashboardStates, ...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const clientStates = ["potential-client", "new-client", "no-owner", "no-admin", "no-inventors", "no-portfolio", "import-in-progress", "import-errors", "ready", "confirm-ready", "disabled", "access-request", "long-title", "empty"].map(slug => v0(`v0/clients/${slug}`, `Clients and onboarding: ${slug}`, "Synthetic client setup evidence and assigned client support.", U.photonAdmin.email, [U.photonAdmin.email, U.caseOwner.email], () => {
+  const d=structuredClone(northwindBuild(`v0/clients/${slug}`,{[NORTHWIND.id]:portfolio(18,"clients-northwind",NORTHWIND,0),[BEACON.id]:portfolio(6,"clients-beacon",BEACON,0)},northwind().filter(i=>i.state!=="DRAFT")));
+  d.imports=d.imports.filter(i=>i.status!=="FAILED");
+  const client=d.clients.find(c=>c.id===NORTHWIND.id)!;
+  client.onboarding_confirmed_at=clock.daysAgo(2);client.onboarding_confirmed_by=U.photonAdmin.id;
+  if(["potential-client","new-client","no-owner","no-admin","no-inventors","no-portfolio","import-in-progress","import-errors","confirm-ready"].includes(slug)){client.onboarding_confirmed_at=null;client.onboarding_confirmed_by=null;}
+  if(["potential-client","new-client"].includes(slug)) {
+    client.type="POTENTIAL";client.domain="";client.created_at=clock.iso();
+    d.users=d.users.filter(u=>u.client_id!==client.id);d.invites=d.invites.filter(i=>i.client_id!==client.id);d.ideas=d.ideas.filter(i=>i.client_id!==client.id);
+    d.users.forEach(u=>u.assigned_client_ids=u.assigned_client_ids.filter(id=>id!==client.id));
+  }
+  if(slug==="no-owner")d.users.forEach(u=>u.assigned_client_ids=u.assigned_client_ids.filter(id=>id!==client.id));
+  if(slug==="no-admin")d.users=d.users.filter(u=>!(u.client_id===client.id && u.role==="LEGAL_COUNSEL"));
+  if(slug==="no-inventors") {d.users=d.users.filter(u=>!(u.client_id===client.id && u.role==="INVENTOR"));d.invites=d.invites.filter(i=>i.client_id!==client.id);d.ideas=d.ideas.filter(i=>i.client_id!==client.id);}
+  if(["potential-client","new-client","no-portfolio","import-in-progress"].includes(slug)){d.portfolios[client.id]=portfolio(0,"clients-empty",client,0);d.dueDates=d.dueDates.filter(e=>e.client_id!==client.id);d.actionRequests=d.actionRequests.filter(a=>a.client_id!==client.id);}
+  const latest=d.imports.find(i=>i.client_id===client.id);
+  if(latest && ["import-in-progress","import-errors"].includes(slug)) {latest.status=slug==="import-errors"?"PARTIAL":"RUNNING";latest.failed_count=slug==="import-errors"?2:0;latest.duplicate_in_file=slug==="import-errors"?1:0;latest.created_count=slug==="import-errors"?15:0;latest.updated_count=0;latest.unchanged_count=0;latest.completed_at=slug==="import-errors"?clock.iso():null;latest.created_at=clock.iso();latest.errors=slug==="import-errors"?[{row:2,message:"Jurisdiction column is empty."},{row:7,message:"Application number is missing."},{row:11,message:"Duplicate of row 4; skipped. Keep one row for this application number in the corrected file."}]:[];}
+  else if(["potential-client","new-client","no-portfolio"].includes(slug))d.imports=d.imports.filter(i=>i.client_id!==client.id);
+  if(["ready","confirm-ready","long-title"].includes(slug)) {
+    const rng=rngFor(`v0/clients/${slug}/dates`),patent=generatePortfolio(client,d.portfolios[client.id]).patents[0];
+    d.patentOverrides[patent.id]={...d.patentOverrides[patent.id],application_number:"SYN-NWI-2025-0042"};
+    const event={id:uuid(rng),patent_id:patent.id,client_id:client.id,title:"Response to examination report",event_type:"Office Action Response Due",due_at:clock.daysAhead(4),status:"PENDING" as const,created_at:clock.daysAgo(20),updated_at:clock.daysAgo(1)};
+    d.dueDates.push(event);
+    const template=d.actionTemplates.find(t=>t.event_types.includes(event.event_type))!;
+    d.actionRequests.push({id:uuid(rng),client_id:client.id,due_date_id:event.id,template_id:template.id,instruction:template.label,selected_countries:[],note:null,status:"NEW",submission_state:"SUBMITTED",version:1,requested_by_id:U.admin.id,requested_at:clock.daysAgo(1),updated_at:clock.daysAgo(1)});
+  }
+  if(slug==="disabled")client.is_active=false;
+  if(slug==="access-request"){d.users.find(u=>u.id===U.caseOwner.id)!.assigned_client_ids=[BEACON.id];d.access=d.access.filter(a=>!(a.user_id===U.caseOwner.id && a.client_id===client.id));}
+  if(slug==="long-title"){client.name="Northwind Instruments and Advanced Measurement Research Laboratories";client.domain="advanced-measurement-research.northwind.test";client.about="Synthetic research workspace for distributed optical measurement, thermal calibration and process instrumentation. Client records are maintained by the assigned Case Owner.";}
+  if(slug==="empty"){d.users=d.users.filter(u=>u.client_id===null);d.users.forEach(u=>u.assigned_client_ids=[]);d.portfolios={};d.ideas=[];d.dueDates=[];d.actionRequests=[];d.access=[];d.imports=[];}
+  return d;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...clientStates, ...photonDashboardStates, ...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

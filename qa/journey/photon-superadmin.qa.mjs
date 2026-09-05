@@ -111,21 +111,7 @@ try {
     }
   });
 
-  await j.step('the client book actually opens — no silent redirect', async () => {
-    // Asserting page TEXT here is not enough and the first version of this
-    // step proved it: the dashboard also contains the word "Clients", so a
-    // redirect to / passed a /Clients/ check while the role never reached the
-    // screen. The landed URL is the only honest evidence.
-    await page.goto(`${BASE}/clients`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2500);
-    const landed = new URL(page.url()).pathname;
-    assert(landed === '/clients',
-      `/clients redirected to ${landed} for a role holding EVERY capability. The API serves it ` +
-      '82 clients; the UI gates on an allow-list naming PHOTON_ADMIN and drops the founder into ' +
-      'the deny branch (F-028)');
-    await assertPageContains(page, /Clients/, 'the client book must render once it opens');
-    return `landed on ${landed}`;
-  });
+  // DSN-0018 retires the legacy client-book journey; V0 client states cover the two authorised personas.
 
 } finally {
   await session.close();

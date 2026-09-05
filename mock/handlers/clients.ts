@@ -1,3 +1,4 @@
+import { clientOnboarding } from "./clientOnboarding";
 import { route } from "../runtime/registry";
 import { getDb, touched } from "../runtime/db";
 import { clock } from "../runtime/clock";
@@ -8,14 +9,14 @@ import type { Client, User } from "../runtime/types";
 
 const counts = (c: Client) => { const db = getDb(); return { patents: allPatents([c.id]).length, ideas: db.ideas.filter((i) => i.client_id === c.id).length, users: db.users.filter((u) => u.client_id === c.id && u.status !== "SUSPENDED").length }; };
 const member = (u: User) => ({ id: u.id, name: u.name, email: u.email, role: u.role, status: u.status, last_login_at: u.last_login_at, created_at: u.created_at });
-const view = (c: Client, withUsers = true) => ({ ...c, logo_file: c.logo_file_id ? { id: c.logo_file_id } : null, users: withUsers ? getDb().users.filter((u) => u.client_id === c.id).map(member) : [], _count: counts(c) });
+const view = (c: Client, withUsers = true) => ({ ...c, ...(getDb().flags.v0 ? { onboarding:clientOnboarding(c) } : {}), logo_file: c.logo_file_id ? { id: c.logo_file_id } : null, users: withUsers ? getDb().users.filter((u) => u.client_id === c.id).map(member) : [], _count: counts(c) });
 const photon = (u: User | null) => !!u && ["CASE_OWNER", "PHOTON_ADMIN", "PHOTON_SUPERADMIN"].includes(u.role);
 
 export const clientHandlers = [
   route("get", "/v1/clients", () => {
     const db = getDb(); const u = currentUser();
     const scope = scopeFor(u);
-    return db.clients.filter((c) => (scope === null || scope.includes(c.id)) && (photon(u) || c.is_active)).map((c) => view(c));
+    return db.clients.filter((c) => (scope === null || scope.includes(c.id)) && (photon(u) || c.is_active)).map((c) => view(c)).sort((a,b) => db.flags.v0 ? a.name.localeCompare(b.name) : 0);
   }),
   route("post", "/v1/clients", async ({ body }) => {
     const b = (await body()) as { name?: string; domain?: string; admin_emails?: string[]; has_tech_committee?: boolean };
@@ -58,10 +59,27 @@ export const clientHandlers = [
     return view(c);
   }),
   route("patch", "/v1/clients/:id", async ({ params, body }) => {
-    const b = (await body()) as Partial<Client>;
+    const b = (await body()) as Partial<Client> & { confirm_onboarding?: boolean };
     const db = getDb();
     const c = db.clients.find((x) => x.id === params.id);
     if (!c) return { status: 404, body: { message: "Client not found." } };
+    if (db.flags.v0) {
+      const user = currentUser();
+      const canConfigure = user?.role === "PHOTON_ADMIN" || (user?.role === "CASE_OWNER" && user.assigned_client_ids.includes(c.id)) || (user?.role === "LEGAL_COUNSEL" && user.client_id === c.id);
+      if (!canConfigure) return { status:403, body:{ message:"You do not have access to configure this client." } };
+      if ((b.type !== undefined || b.is_active !== undefined) && user?.role !== "PHOTON_ADMIN") return { status:403, body:{message:"Only a Photon Admin changes the client relationship or active state."} };
+      if (b.domain !== undefined && b.domain) {
+        b.domain = b.domain.trim().toLowerCase();
+        if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(b.domain)) return {status:400,body:{message:"Enter a valid company domain."}};
+        if (db.clients.some(other=>other.id!==c.id && other.domain.toLowerCase()===b.domain)) return {status:409,body:{message:"This domain is already used by another client."}};
+      }
+      if (b.confirm_onboarding) {
+        if (user?.role !== "PHOTON_ADMIN" && user?.role !== "CASE_OWNER") return {status:403,body:{message:"Photon Legal checks client onboarding."}};
+        const setup = clientOnboarding(c);
+        if (!c.is_active || setup.steps.some(step=>!step.done)) return {status:409,body:{message:"Complete the missing setup steps before recording readiness."}};
+        c.onboarding_confirmed_at=clock.iso(); c.onboarding_confirmed_by=user.id;
+      }
+    }
     for (const k of ["name", "domain", "about", "logo_file_id", "idea_reference_prefix", "is_active", "has_tech_committee", "type", "plan"] as const) if (b[k] !== undefined) (c as Record<string, unknown>)[k] = b[k];
     c.updated_at = clock.iso(); touched();
     return view(c);

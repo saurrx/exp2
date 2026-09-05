@@ -1,3 +1,8 @@
+import { Link } from "react-router-dom";
+import { rawApi } from "@/lib/apiConfig";
+import { actionPrimary, actionDate } from "@/components/actions/ActionsWorkspace";
+import { colors } from "@/styles/tokens.tailwind";
+import type { ClientSetup } from "./ClientBook";
 import useUserCookie from "@/hooks/use-auth";
 import { track } from "@/lib/analytics";
 import { Badge } from "@/components/ui/badge";
@@ -24,9 +29,10 @@ type OverviewTabProps = {
   caseOwnerName?: string;
   onChangeCaseOwner?: () => void;
   canManageTeam?: boolean;
+  onEditClient?: () => void;
 };
 
-const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, clientData, caseOwnerName, onChangeCaseOwner, canManageTeam }) => {
+const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, clientData, caseOwnerName, onChangeCaseOwner, canManageTeam, onEditClient }) => {
   const { user: sessionUser } = useUserCookie();
   // Off-assignment case owners see this page read-only: the server would 403
   // their writes anyway (client:configure is assignment-scoped through RLS),
@@ -39,7 +45,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, cl
   // was a `patentFileHistory` prop reading a key the clean API has never
   // returned, so the button stayed hidden even right after an import; the prop
   // is gone.)
-  const { data: importHistoryData } = useQuery({
+  const { data: importHistoryData, isError: historyError, refetch: refreshHistory } = useQuery({
     queryKey: ["client_import_history", clientId],
     queryFn: async () =>
       (await API_CONFIG.get(`/api/v1/clients/${clientId}/import-history`))?.data?.data,
@@ -63,7 +69,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, cl
   const [inviteMode, setInviteMode] = useState<"email" | "share">("email");
   const [inviteLinkCopied, setInviteLinkCopied] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"INVENTOR" | "TECH_COMMITTEE" | "LEGAL_COUNSEL">("INVENTOR");
+  const [inviteRole, setInviteRole] = useState<"INVENTOR" | "LEGAL_COUNSEL">("INVENTOR");
   const [referencePrefix, setReferencePrefix] = useState(
     clientData?.idea_reference_prefix || "IRN",
   );
@@ -147,6 +153,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, cl
     mutationFn: async () => API_CONFIG.post(`/api/v1/clients/${clientId}/invite-link`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client_invite_link", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["client", clientId] });
     },
   });
 
@@ -156,6 +163,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, cl
       API_CONFIG.delete(`/api/v1/clients/${clientId}/invite-link/${inviteLinkData?.id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client_invite_link", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["client", clientId] });
     },
   });
 
@@ -218,7 +226,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, cl
   const formatDate = (value?: string) => value
     ? new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value))
     : "—";
-  const panelClass = theme === "dark" ? "border-[#cccccc20] bg-neutral-900" : "border-[var(--pulse-line)] bg-[var(--pulse-surface)] shadow-[0_18px_45px_-38px_rgba(17,16,60,0.45)]";
+
   const inventorInviteLink = inviteLinkData?.token ? `${window.location.origin}/i/${inviteLinkData.token}` : "";
   const copyInventorInvite = async () => {
     await navigator.clipboard.writeText(inventorInviteLink);
@@ -269,281 +277,95 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ clientTeam = [], clientId, cl
       toast.error("Could not download the QR code");
     }
   };
-  const metrics = [
-    { label: "Total patents", value: metricsData?.data?.total_patents ?? 0, icon: TrendingUp, color: "text-[var(--pulse-data-primary)]" },
-    { label: "Granted", value: metricsData?.data?.granted_patents ?? 0, icon: CircleCheck, color: "text-[var(--pulse-success)]" },
-    { label: "Pending", value: metricsData?.data?.pending_patents ?? 0, icon: CircleAlert, color: "text-[#A86F00]" },
-    { label: "Inactive", value: metricsData?.data?.inactive_patents ?? metricsData?.data?.rejected_patents ?? 0, icon: CircleX, color: "text-[var(--pulse-data-risk)]" },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <section>
-        <div className="mb-3">
-          <h3 className="text-sm font-semibold text-[var(--pulse-ink)] dark:text-zinc-300">Patent portfolio</h3>
-          <p className="mt-1 text-xs text-neutral-500">Current patent position for this client</p>
-        </div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {metrics.map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className={`rounded-md border p-5 ${panelClass}`}>
-              <div className="mb-3 flex items-center gap-2 text-xs font-medium text-neutral-500"><Icon className={`h-4 w-4 ${color}`} />{label}</div>
-              <p className={`text-3xl font-semibold tracking-[-0.03em] ${color}`}>{value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className={`rounded-md border p-6 ${panelClass}`}>
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2">
-              <Hash className="h-4 w-4 text-[var(--pulse-data-primary)]" />
-              <h3 className="text-sm font-semibold text-[var(--pulse-ink)] dark:text-zinc-300">
-                Idea reference numbering
-              </h3>
-            </div>
-            <p className="mt-1 text-xs leading-5 text-neutral-500">
-              Choose the client-specific prefix used for new idea references.
-              Existing references stay unchanged.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="grid gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-400">
-              Reference prefix
-              <Input
-                name="idea_reference_prefix"
-              disabled={readOnlyForCaseOwner}
-                value={referencePrefix}
-                onChange={(event) =>
-                  setReferencePrefix(
-                    event.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9]/g, "")
-                      .slice(0, 6),
-                  )
-                }
-                className="h-9 w-32 font-mono uppercase"
-                aria-label="Idea reference prefix"
-              />
-            </label>
-            <div className="grid gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-400">
-              Next reference preview
-              <div className="flex h-9 min-w-28 items-center rounded-sm border border-[var(--pulse-line)] bg-[var(--pulse-surface-subtle)] px-3 font-mono text-sm font-semibold text-[var(--pulse-ink)]">
-                {(referencePrefix || "IRN")}
-                {String(clientData?.idea_reference_next_number || 1).padStart(2, "0")}
-              </div>
-            </div>
-            <Button
-              size="sm"
-              disabled={
-                readOnlyForCaseOwner ||
-                referencePrefix.length < 2 ||
-                referencePrefix === clientData?.idea_reference_prefix ||
-                referenceSettingsMutation.isPending
-              }
-              title={readOnlyForCaseOwner ? "You are not assigned to this client — request access to edit." : undefined}
-              onClick={() => referenceSettingsMutation.mutate(referencePrefix)}
-              className="h-9 bg-[#F9B418] text-neutral-950 hover:bg-[#e5a310]"
-            >
-              {referenceSettingsMutation.isPending ? "Saving…" : "Save format"}
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <div className="grid items-start gap-6 lg:grid-cols-3">
-        <section className={`rounded-md border p-6 lg:col-span-2 ${panelClass}`}>
-          <div className="mb-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold text-[var(--pulse-ink)] dark:text-zinc-300">Patent data</h3>
-              <p className="mt-1 text-xs text-neutral-500">Import a portfolio file or add an individual patent</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {/* Always offered. Hiding it when the list is empty meant every
-                  client imported before imports were recorded looked as though
-                  the feature did not exist; the dialog can say "nothing yet"
-                  far more honestly than an absent button can. */}
-              <Button variant="outline" size="sm" onClick={() => { track("import_history_viewed", { client_id: clientId }); setHistoryDialogOpen(true); }}><History className="mr-1.5 h-4 w-4" />Import history</Button>
-              <input id="data-upload" type="file" className="hidden" accept=".xls,.xlsx,.csv" onChange={handleFileUpload} disabled={isUploadingPatentFile} />
-              <Button asChild variant="outline" size="sm"><label htmlFor="data-upload" className="cursor-pointer"><Upload className="mr-1.5 h-4 w-4" />{isUploadingPatentFile ? "Uploading…" : "Upload portfolio"}</label></Button>
-              <Button size="sm" onClick={() => setShowAddPatentModal(true)} className="bg-[#F9B418] text-neutral-950 hover:bg-[#e5a310]"><Plus className="mr-1.5 h-4 w-4" />Add patent</Button>
-            </div>
-          </div>
-
-          {importHistory.length > 0 ? (
-            <div className="flex items-center justify-between gap-4 rounded-md border border-neutral-200 bg-neutral-50 p-4 dark:border-[#cccccc20] dark:bg-neutral-800">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="rounded-sm bg-white p-2 shadow-sm dark:bg-neutral-900"><FileText className="h-5 w-5 text-neutral-500" /></div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{importHistory[0]?.created ?? 0} patents imported</p>
-                  <p className="mt-1 truncate text-xs text-neutral-500">Latest import · {formatDate(importHistory[0]?.at)} · {importHistory[0]?.by}{importHistory[0]?.failed ? ` · ${importHistory[0].failed} row(s) failed` : ""}</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-md border border-dashed border-neutral-300 px-5 py-8 text-center dark:border-neutral-700"><FileText className="mx-auto mb-2 h-6 w-6 text-neutral-400" /><p className="text-sm font-medium">{(metricsData?.data?.total_patents ?? 0) > 0 ? "No import on record for these patents" : "No portfolio file imported"}</p><p className="mt-1 text-xs text-neutral-500">{(metricsData?.data?.total_patents ?? 0) > 0 ? "This client’s patents predate import tracking. New uploads are recorded here." : "Upload Excel or CSV to add this client’s patent records."}</p></div>
-          )}
-        </section>
-
-        <aside className={`rounded-md border p-6 ${panelClass}`}>
-          <h3 className="text-sm font-semibold text-[var(--pulse-ink)] dark:text-zinc-300">Client details</h3>
-          <dl className="mt-5 space-y-5">
-            <div><dt className="flex items-center gap-2 text-xs text-neutral-500"><Globe2 className="h-4 w-4" />Email domain</dt><dd className="mt-1 text-sm font-medium">{clientData?.allowed_domain?.split("@").pop() || "—"}</dd></div>
-            <div><dt className="flex items-center gap-2 text-xs text-neutral-500"><CalendarDays className="h-4 w-4" />Client since</dt><dd className="mt-1 text-sm font-medium">{clientData?.createdAt ? new Date(clientData.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"}</dd></div>
-            <div><dt className="flex items-center gap-2 text-xs text-neutral-500"><BriefcaseBusiness className="h-4 w-4" />Case owner</dt><dd className="mt-1 flex items-center justify-between gap-3 text-sm font-medium"><span>{caseOwnerName || "Not assigned"}</span>{onChangeCaseOwner && <button onClick={onChangeCaseOwner} className="text-xs font-semibold text-amber-700 hover:text-amber-800">Change</button>}</dd></div>
-            <div><dt className="text-xs text-neutral-500">Status</dt><dd className="mt-1"><Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50">Active</Badge></dd></div>
-          </dl>
-        </aside>
-      </div>
-
-      <section className={`overflow-hidden rounded-md border ${panelClass}`}>
-        <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-5 dark:border-[#cccccc20]">
-          <div><h3 className="text-sm font-semibold text-[var(--pulse-ink)] dark:text-zinc-300">Client team</h3><p className="mt-1 text-xs text-neutral-500">People with access to this client workspace</p></div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{clientTeam.length} members</Badge>
-            {canManageTeam && <Button size="sm" onClick={() => setInviteDialogOpen(true)} className="bg-[#F9B418] text-neutral-950 hover:bg-[#e5a310]"><UserPlus className="mr-1.5 h-4 w-4" />Invite people</Button>}
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left">
-            <thead className="bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500 dark:bg-neutral-800/60"><tr><th className="px-6 py-3 font-semibold">Team member</th><th className="px-6 py-3 font-semibold">Email</th><th className="px-6 py-3 font-semibold">Role</th><th className="px-6 py-3 font-semibold">Status</th></tr></thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-[#cccccc20]">
-              {clientTeam.map((member, index) => {
-                const name = member?.name || member?.email?.split("@")[0] || "User";
-                const initials = name.split(/\s+/).map((part: string) => part[0]).join("").slice(0, 2).toUpperCase();
-                return <tr key={member?.id || member?.email || index} className="text-sm">
-                  <td className="px-6 py-4"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-800">{initials}</span><span className="font-medium">{name}</span></div></td>
-                  <td className="px-6 py-4 text-neutral-500">{member?.email || "—"}</td>
-                  <td className="px-6 py-4"><Badge variant="outline">{ROLE_LABEL[member?.role] ?? "Inventor"}</Badge></td>
-                  <td className="px-6 py-4">{member?.active === false ? <span className="inline-flex items-center gap-1.5 text-sm text-amber-700"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" />Invited</span> : <span className="inline-flex items-center gap-1.5 text-sm text-emerald-700"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />Active</span>}</td>
-                </tr>;
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-        <DialogContent className="max-w-xl bg-white dark:bg-neutral-950">
-          <DialogHeader>
-            <DialogTitle>Invite people</DialogTitle>
-            <DialogDescription>Add people to the {clientData?.name} client workspace.</DialogDescription>
-          </DialogHeader>
-          <div className="mt-2 grid grid-cols-2 rounded-sm border border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-700 dark:bg-neutral-900">
-            <button onClick={() => setInviteMode("email")} className={`rounded-xs px-3 py-2 text-sm font-medium transition-all ${inviteMode === "email" ? "bg-white text-neutral-900 shadow-sm dark:bg-neutral-800 dark:text-white" : "text-neutral-500"}`}>Email invitation</button>
-            <button onClick={() => setInviteMode("share")} className={`rounded-xs px-3 py-2 text-sm font-medium transition-all ${inviteMode === "share" ? "bg-white text-neutral-900 shadow-sm dark:bg-neutral-800 dark:text-white" : "text-neutral-500"}`}>Share link</button>
-          </div>
-
-          {inviteMode === "email" ? (
-            <div className="space-y-5 pt-3">
-              <div>
-                <label htmlFor="team-email" className="text-sm font-medium">Email address</label>
-                <input id="team-email" autoFocus type="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder={`name@${clientData?.allowed_domain?.split("@").pop() || "company.com"}`} className="mt-2 h-10 w-full rounded-sm border border-neutral-300 bg-transparent px-3 text-sm outline-none transition-colors focus:border-[#F9B418] focus:ring-2 focus:ring-[#F9B418]/20 dark:border-neutral-700" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Access role</p>
-                {/* IP Committee was assignable in the People tab and rendered
-                    as a badge, but could not be invited — the only way into the
-                    role was to invite someone as an inventor and change it
-                    afterwards. */}
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  <button type="button" onClick={() => setInviteRole("INVENTOR")} className={`rounded-md border p-3 text-left transition-colors ${inviteRole === "INVENTOR" ? "border-[#F9B418] bg-[#F9B418]/10" : "border-neutral-200 dark:border-neutral-700"}`}><span className="block text-sm font-semibold">Inventor</span><span className="mt-1 block text-xs text-neutral-500">Submit and track ideas</span></button>
-                  <button type="button" onClick={() => setInviteRole("TECH_COMMITTEE")} className={`rounded-md border p-3 text-left transition-colors ${inviteRole === "TECH_COMMITTEE" ? "border-[#F9B418] bg-[#F9B418]/10" : "border-neutral-200 dark:border-neutral-700"}`}><span className="block text-sm font-semibold">Tech Committee</span><span className="mt-1 block text-xs text-neutral-500">Review before legal</span></button>
-                  <button type="button" onClick={() => setInviteRole("LEGAL_COUNSEL")} className={`rounded-md border p-3 text-left transition-colors ${inviteRole === "LEGAL_COUNSEL" ? "border-[#F9B418] bg-[#F9B418]/10" : "border-neutral-200 dark:border-neutral-700"}`}><span className="block text-sm font-semibold">Administrator</span><span className="mt-1 block text-xs text-neutral-500">Manage the client workspace</span></button>
-                </div>
-              </div>
-              {inviteRole === "LEGAL_COUNSEL" && <p className="rounded-md bg-amber-50 p-3 text-xs leading-5 text-amber-800">Administrator invitations are email-only so the recipient’s identity can be verified before privileged access is granted.</p>}
-              <Button onClick={() => inviteMutation.mutate()} disabled={!inviteEmail.trim() || inviteMutation.isPending} className="w-full bg-[#F9B418] text-neutral-950 hover:bg-[#e5a310]">{inviteMutation.isPending ? "Sending invitation…" : `Send ${inviteRole === "LEGAL_COUNSEL" ? "administrator" : "inventor"} invitation`}</Button>
-            </div>
-          ) : (
-            <div className="pt-4">
-              {inviteLinkData?.active ? <>
-                <div className="mb-4 flex items-start justify-between gap-4 rounded-md border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-                  <div><p className="text-sm font-semibold text-emerald-900 dark:text-emerald-300">Inventor access</p><p className="mt-1 text-xs text-emerald-800 dark:text-emerald-400">Anyone with this link can join as an inventor. Administrator access is never granted through shared links.</p></div>
-                  <Badge className="shrink-0 bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Active</Badge>
-                </div>
-                <div className="grid gap-5 sm:grid-cols-[190px_1fr] sm:items-center">
-                  <div className="mx-auto rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
-                    <QRCodeSVG ref={qrCodeRef} value={inventorInviteLink} size={164} level="M" marginSize={4} bgColor="#ffffff" fgColor="#171717" title={`QR code for ${clientData?.name} inventor invitation`} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold">Shareable invite link</p>
-                    <p className="mt-1 text-xs text-neutral-500">Restricted to {clientData?.allowed_domain?.split("@").pop() || "the client’s approved domain"}.</p>
-                    <div className="mt-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-900"><code className="block break-all text-xs leading-5 text-neutral-700 dark:text-neutral-300">{inventorInviteLink}</code></div>
-                    <Button onClick={copyInventorInvite} className="mt-3 w-full bg-[#F9B418] text-neutral-950 hover:bg-[#e5a310]">{inviteLinkCopied ? <Check className="mr-1.5 h-4 w-4" /> : <Copy className="mr-1.5 h-4 w-4" />}{inviteLinkCopied ? "Invite link copied" : "Copy invite link"}</Button>
-                    <div className="mt-2 grid grid-cols-2 gap-2"><Button onClick={copyQrCode} variant="outline"><Copy className="mr-1.5 h-4 w-4" />Copy QR</Button><Button onClick={downloadQrCode} variant="outline"><Download className="mr-1.5 h-4 w-4" />Download QR</Button></div>
-                  </div>
-                </div>
-                <div className="mt-5 grid grid-cols-3 divide-x rounded-md border border-neutral-200 py-3 text-center dark:border-neutral-700">
-                  <div><p className="text-xs uppercase tracking-wider text-neutral-500">Validity</p><p className="mt-1 text-xs font-semibold">{inviteLinkData.expires_at ? `Until ${new Date(inviteLinkData.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : "14 days"}</p></div>
-                  <div><p className="text-xs uppercase tracking-wider text-neutral-500">Joined</p><p className="mt-1 text-xs font-semibold">{typeof inviteLinkData.uses === "number" ? inviteLinkData.uses : "—"}</p></div>
-                  <div><p className="text-xs uppercase tracking-wider text-neutral-500">Created by</p><p className="mt-1 truncate px-2 text-xs font-semibold">{inviteLinkData.createdBy || "—"}</p></div>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center justify-end gap-3 border-t border-neutral-200 pt-4 dark:border-neutral-700">
-                  <div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => window.confirm("Generate a new link? The current QR code and link will stop working immediately.") && regenerateInviteMutation.mutate()} disabled={regenerateInviteMutation.isPending}><RefreshCw className="mr-1.5 h-3.5 w-3.5" />Regenerate</Button><Button size="sm" variant="ghost" onClick={() => window.confirm("Deactivate this invite link? Anyone who has it will no longer be able to join.") && deactivateInviteMutation.mutate()} disabled={deactivateInviteMutation.isPending} className="text-red-600 hover:bg-red-50 hover:text-red-700"><Ban className="mr-1.5 h-3.5 w-3.5" />Deactivate</Button></div>
-                </div>
-              </> : <div className="rounded-md border border-dashed border-neutral-300 px-6 py-10 text-center dark:border-neutral-700"><Ban className="mx-auto h-7 w-7 text-neutral-400" /><p className="mt-3 text-sm font-semibold">Invite link is inactive</p><p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-neutral-500">Generate a new opaque link before sharing. The previous link can no longer be redeemed.</p><div className="mx-auto mt-4 flex w-fit items-center gap-2"><Button onClick={() => regenerateInviteMutation.mutate()} className="bg-[#F9B418] text-neutral-950 hover:bg-[#e5a310]">Generate new link</Button></div></div>}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
-        <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-xl dark:bg-neutral-950">
-          <DialogHeader><DialogTitle>Portfolio import history</DialogTitle><DialogDescription>Previous patent portfolio uploads for this client.</DialogDescription></DialogHeader>
-          <div className="mt-3 max-h-[380px] space-y-3 overflow-auto">
-            {importHistory.length === 0 && (
-              <div className="rounded-md border border-dashed border-neutral-300 px-5 py-8 text-center dark:border-neutral-700">
-                <FileText className="mx-auto mb-2 h-6 w-6 text-neutral-400" />
-                <p className="text-sm font-medium">No imports recorded yet</p>
-                <p className="mt-1 text-xs text-neutral-500">Patents added before import tracking do not appear here. Every upload from now on is recorded with who ran it and how many rows landed.</p>
-              </div>
-            )}
-            {importHistory.map((row) => (
-              <div key={row?.id} className="flex items-start gap-3 rounded-md border p-4">
-                <FileText className="mt-0.5 h-5 w-5 shrink-0 text-neutral-400" />
-                <div className="min-w-0 flex-1">
-                  {/* The spreadsheet itself, kept in storage. A portfolio is
-                      whatever the client asserted in the file they sent, so the
-                      file is the record — not just a count of rows. */}
-                  <p className="truncate text-sm font-medium">{row?.file?.original_name || "Portfolio import"}</p>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    {formatDate(row?.at)} · {row?.by || "Unknown"}
-                    {row?.status && row.status !== "COMPLETED" ? ` · ${row.status}` : ""}
-                  </p>
-                  <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
-                    {row?.created ?? 0} added
-                    {row?.updated ? ` · ${row.updated} updated` : ""}
-                    {row?.unchanged ? ` · ${row.unchanged} unchanged` : ""}
-                    {row?.failed ? ` · ${row.failed} failed` : ""}
-                    {row?.due_dates_created ? ` · ${row.due_dates_created} deadlines` : ""}
-                    {row?.rows ? ` · of ${row.rows} row(s)` : ""}
-                  </p>
-                  {row?.unmapped_columns?.length > 0 && (
-                    <p className="mt-1 text-xs text-amber-700 dark:text-amber-500">
-                      Columns not imported: {row.unmapped_columns.join(", ")}
-                    </p>
-                  )}
-                </div>
-                {row?.file?.id && (
-                  <Button
-                    variant="ghost" size="sm" className="shrink-0"
-                    title={`Download ${row.file.original_name}`}
-                    onClick={() => downloadImportFile(row.file.id, row.file.original_name)}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <DuplicatePatentsModal open={duplicateModalOpen} onOpenChange={(open) => { setDuplicateModalOpen(open); if (!open) queryClient.invalidateQueries({ queryKey: ["client", clientId] }); }} duplicatePatents={duplicatePatents} excelDuplicateEntries={excelDuplicateEntries} errorCount={errorCount} successCount={successCount} updatedCount={updatedCount} dueDatesCreated={dueDatesCreated} unmappedColumns={unmappedColumns} missingRequired={missingRequired} />
-      {showAddPatentModal && <AddPatentModal open={showAddPatentModal} onOpenChange={setShowAddPatentModal} clientId={clientId} onAdded={() => { queryClient.invalidateQueries({ queryKey: ["client", clientId] }); queryClient.invalidateQueries({ queryKey: ["client_metrics", clientId] }); }} />}
-    </div>
-  );
+  const setup: ClientSetup | undefined = clientData?.onboarding;
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const [readinessOpen, setReadinessOpen] = useState(false);
+  const [clientSettingError, setClientSettingError] = useState("");
+  const clientSettings = useMutation({
+    mutationFn: async (changes: { confirm_onboarding?: boolean; is_active?: boolean; type?: string }) => {
+      setClientSettingError("");
+      return rawApi.patch(`/v1/clients/${clientId}`, changes);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["fetch_clients"] });
+      setReadinessOpen(false);
+    },
+    onError: (error: any) => setClientSettingError(error?.response?.data?.message || "The change could not be saved. Try again."),
+  });
+  const openInvite = (role: "INVENTOR" | "LEGAL_COUNSEL", mode: "email" | "share" = "email") => {
+    setInviteRole(role); setInviteMode(mode); setInviteDialogOpen(true); inviteMutation.reset();
+  };
+  const openHistory = () => { track("import_history_viewed", { client_id: clientId }); setHistoryDialogOpen(true); };
+  const nextKey = setup?.next.key;
+  const nextAction = () => {
+    if (nextKey === "domain") onEditClient?.();
+    else if (nextKey === "owner") onChangeCaseOwner?.();
+    else if (nextKey === "admin") openInvite("LEGAL_COUNSEL");
+    else if (nextKey === "inventors") openInvite("INVENTOR", "share");
+    else if (nextKey === "portfolio") uploadRef.current?.click();
+    else if (nextKey === "confirm") setReadinessOpen(true);
+    else if (nextKey === "import-errors" || nextKey === "import-running") openHistory();
+    else onEditClient?.();
+  };
+  const actionLabels: Record<string, string> = {domain:"Configure domain",owner:"Assign Case Owner",admin:"Invite Workspace Admin",inventors:"Set up invitations",portfolio:"Import portfolio",confirm:"Review readiness","import-errors":"Review import result","import-running":"Check import history",inactive:"Review client information"};
+  const canChange = !readOnlyForCaseOwner;
+  const detailClass = "border-t border-pl-border py-4";
+  const summaryClass = "scroll-mt-56 cursor-pointer text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-pl-brand";
+  const fieldClass = "mt-2 h-9 border-pl-border bg-pl-bg text-sm text-pl-ink";
+  return <div className="min-w-0 text-pl-ink">
+    <input ref={uploadRef} aria-label="Import client portfolio" type="file" className="hidden" accept=".xls,.xlsx,.csv" onChange={handleFileUpload} disabled={isUploadingPatentFile || !canChange}/>
+    <section className="pb-6 pt-2">
+      <h2 className="text-lg font-semibold">{setup?.next.title || "Review client setup"}</h2>
+      <p className="mt-3 hidden max-w-prose text-sm leading-relaxed text-pl-text-2 md:block">{setup?.next.detail || "Review the domain, people and portfolio for this workspace."}</p>
+      {nextKey === "ready" ? <Button asChild size="sm" className={`mt-4 ${actionPrimary}`}><Link to={`/patents?client=${encodeURIComponent(clientId)}`}>Open client portfolio</Link></Button> : nextKey === "owner" && !onChangeCaseOwner ? <p className="mt-4 text-sm text-pl-text-2">A Photon Admin can assign a Case Owner.</p> : <Button size="sm" onClick={nextAction} disabled={!canChange || isUploadingPatentFile} className={`mt-4 ${actionPrimary}`}>{isUploadingPatentFile ? "Importing portfolio…" : actionLabels[nextKey || ""] || "Review client information"}</Button>}
+    </section>
+    <details className={`${detailClass} scroll-mt-56`}>
+      <summary className={summaryClass}>Setup evidence{setup ? ` · ${setup.steps.filter(step => step.done).length} of ${setup.steps.length} in place` : ""}</summary>
+      <ul className="mt-4 space-y-3 text-sm">{setup?.steps.map(step => <li key={step.key} className="flex gap-3"><span className="text-pl-text-2">{step.done ? "✓" : "—"}</span><span>{step.label}<span className="ml-2 text-xs text-pl-text-2">{step.done ? "In place" : "Needed"}</span></span></li>)}</ul>
+      {setup?.confirmed_at && <p className="mt-4 text-xs leading-relaxed text-pl-text-2">Readiness checked {actionDate(setup.confirmed_at)}{setup.confirmed_by ? ` by ${setup.confirmed_by}` : ""}. The steps above reflect the current workspace.</p>}
+    </details>
+    <details className={`${detailClass} scroll-mt-56`}>
+      <summary className={summaryClass}>People and invitations{setup ? ` · ${setup.admins.active + setup.admins.invited} Workspace Admins · ${setup.inventors.active + setup.inventors.invited} inventors` : ""}</summary>
+      <p className="mt-4 text-sm leading-relaxed text-pl-text-2">{setup ? `${setup.admins.active} active Workspace Admins, ${setup.admins.invited} invited. ${setup.inventors.active} active inventors, ${setup.inventors.invited} invited.` : "People invited to this workspace."}</p>
+      {canManageTeam && <div className="mt-4 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => openInvite("LEGAL_COUNSEL")}>Invite Workspace Admin</Button><Button size="sm" variant="outline" onClick={() => openInvite("INVENTOR")}>Invite inventor</Button><Button size="sm" variant="outline" onClick={() => openInvite("INVENTOR", "share")}>Inventor invitation link</Button></div>}
+      <ul className="mt-4 divide-y divide-pl-border">{clientTeam.map((member, index) => <li key={member.id || index} className="py-3 text-sm"><p className="break-words font-medium">{member.name || member.email}</p><p className="mt-1 break-words text-xs text-pl-text-2">{ROLE_LABEL[member.role] || "Inventor"} · {member.suspended || member.status === "SUSPENDED" ? "Inactive" : member.status === "INVITED" || member.active === false ? "Invited" : "Active"}</p><p className="mt-1 break-all text-xs text-pl-text-2">{member.email}</p></li>)}</ul>
+    </details>
+    <details className={`${detailClass} scroll-mt-56`}>
+      <summary className={summaryClass}>Ideas, portfolio and upcoming work</summary>
+      <p className="mt-4 text-sm text-pl-text-2">{setup ? `${setup.ideas.in_review} ideas in Workspace Admin review · ${setup.ideas.approved} approved · ${setup.ideas.filed} filed.` : "Review this client's portfolio and upcoming work."}</p>
+      <div className="mt-4 flex flex-wrap gap-2"><Button asChild size="sm" variant="outline"><Link to={`/ideas?client=${encodeURIComponent(clientId)}&status=SEND_TO_OC`}>Open approved ideas</Link></Button><Button asChild size="sm" variant="outline"><Link to={`/ideas?client=${encodeURIComponent(clientId)}&status=FILED`}>Open filed ideas</Link></Button><Button asChild size="sm" variant="outline"><Link to={`/patents?client=${encodeURIComponent(clientId)}`}>View {setup?.patents ?? metricsData?.data?.total_patents ?? 0} patents</Link></Button></div>
+      <h3 className="mt-6 text-sm font-medium">Upcoming Actions and dates</h3>
+      {setup?.upcoming.length ? <ul className="mt-3 divide-y divide-pl-border">{setup.upcoming.map((event, index) => <li key={index} className="py-3"><Link to={event.href} className="text-sm underline decoration-pl-border-strong underline-offset-4">{event.title}</Link><p className="mt-2 text-xs text-pl-text-2">{event.reference} · {actionDate(event.due_at)}</p></li>)}</ul> : <p className="mt-3 text-sm text-pl-text-2">No upcoming dates recorded.</p>}
+      <Button asChild size="sm" variant="outline" className="mt-4"><Link to={`/due-dates?client=${encodeURIComponent(clientId)}&filter=all`}>Open all client dates</Link></Button>
+    </details>
+    <details className={`${detailClass} scroll-mt-56`}>
+      <summary className={summaryClass}>Portfolio imports</summary>
+      <p className="mt-4 text-sm text-pl-text-2">{setup?.latest_import ? `${setup.latest_import.created} added · ${setup.latest_import.updated} updated · ${setup.latest_import.duplicates} duplicate rows · ${setup.latest_import.failed} failed` : "No import recorded. Upload a spreadsheet to add patent records and review any rows that need correction."}</p>
+      <div className="mt-4 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={openHistory}>Import history</Button>{canChange && <><Button size="sm" variant="outline" disabled={isUploadingPatentFile} onClick={() => uploadRef.current?.click()}>Import portfolio</Button><Button size="sm" variant="outline" onClick={() => setShowAddPatentModal(true)}>Add patent</Button></>}</div>
+    </details>
+    <details className={`${detailClass} scroll-mt-56`}>
+      <summary className={summaryClass}>Client information and settings</summary>
+      <dl className="mt-4 space-y-4 text-sm"><div><dt className="text-xs text-pl-text-2">Allowed domain</dt><dd className="mt-2 break-words">{clientData?.domain || clientData?.allowed_domain || "Not configured"}</dd></div><div><dt className="text-xs text-pl-text-2">About the client</dt><dd className="mt-2 whitespace-pre-wrap break-words">{clientData?.about || "No description recorded."}</dd></div></dl>
+      {canChange && <Button size="sm" variant="outline" className="mt-4" onClick={onEditClient}>Edit client information</Button>}
+      <div className="mt-6 border-t border-pl-border pt-4"><label htmlFor="reference-prefix" className="text-sm font-medium">Idea reference prefix</label><p className="mt-2 text-xs leading-relaxed text-pl-text-2">Used for new idea references. Existing references keep their number.</p><Input id="reference-prefix" value={referencePrefix} disabled={!canChange} onChange={event => setReferencePrefix(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))} className={`${fieldClass} max-w-xs`}/><Button size="sm" variant="outline" className="mt-3" disabled={!canChange || referencePrefix.length < 2 || referencePrefix === clientData?.idea_reference_prefix || referenceSettingsMutation.isPending} onClick={() => referenceSettingsMutation.mutate(referencePrefix)}>{referenceSettingsMutation.isPending ? "Saving…" : "Save reference prefix"}</Button>{referenceSettingsMutation.isSuccess && <p role="status" className="mt-2 text-xs text-pl-text-2">Reference prefix saved.</p>}</div>
+      {sessionUser?.role === "PHOTON_ADMIN" && <div className="mt-6 border-t border-pl-border pt-4"><label htmlFor="client-relationship" className="text-sm font-medium">Client relationship</label><select id="client-relationship" value={clientData?.type || "POTENTIAL"} onChange={event => clientSettings.mutate({type:event.target.value})} disabled={clientSettings.isPending} className="mt-2 block h-9 w-full max-w-xs rounded-sm border border-pl-border bg-pl-bg px-3 text-sm"><option value="POTENTIAL">Potential client</option><option value="EXISTING">Existing client</option></select><p className="mt-4 text-xs leading-relaxed text-pl-text-2">Inactive clients remain in client records. This record setting does not revoke existing user accounts.</p><Button size="sm" variant="outline" className="mt-3" disabled={clientSettings.isPending} onClick={() => clientSettings.mutate({is_active:!clientData?.is_active})}>{clientData?.is_active ? "Mark client inactive" : "Reactivate client record"}</Button></div>}
+      {clientSettingError && <p role="alert" className="mt-3 text-sm text-pl-red-text">{clientSettingError}</p>}
+    </details>
+    <Dialog open={readinessOpen} onOpenChange={setReadinessOpen}><DialogContent className="max-h-screen overflow-y-auto border-pl-border bg-pl-bg text-pl-ink"><DialogHeader><DialogTitle>Confirm onboarding readiness</DialogTitle><DialogDescription>Record that the workspace setup has been reviewed. This check does not change anyone's access.</DialogDescription></DialogHeader><ul className="space-y-3 text-sm">{setup?.steps.map(step => <li key={step.key}>{step.done ? "✓" : "—"} {step.label}</li>)}</ul>{clientSettingError && <p role="alert" className="text-sm text-pl-red-text">{clientSettingError}</p>}<div className="flex flex-wrap justify-end gap-2"><Button size="sm" variant="outline" onClick={() => setReadinessOpen(false)}>Cancel</Button><Button size="sm" className={actionPrimary} disabled={clientSettings.isPending || !setup?.steps.every(step => step.done)} onClick={() => clientSettings.mutate({confirm_onboarding:true})}>{clientSettings.isPending ? "Saving…" : "Confirm readiness"}</Button></div></DialogContent></Dialog>
+    <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+      <DialogContent className="max-h-screen overflow-y-auto border-pl-border bg-pl-bg text-pl-ink sm:max-w-xl">
+        <DialogHeader><DialogTitle>{inviteMode === "share" ? "Inventor invitation link" : `Invite ${inviteRole === "LEGAL_COUNSEL" ? "Workspace Admin" : "inventor"}`}</DialogTitle><DialogDescription>{clientData?.name} · Allowed domain: {clientData?.domain || clientData?.allowed_domain || "not configured"}</DialogDescription></DialogHeader>
+        {inviteMode === "email" ? <form onSubmit={event => {event.preventDefault(); inviteMutation.mutate();}} className="space-y-4"><label className="block text-sm font-medium" htmlFor="team-email">Email address<Input id="team-email" autoFocus type="email" required value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} className={fieldClass}/></label><p className="text-xs leading-relaxed text-pl-text-2">{inviteRole === "LEGAL_COUNSEL" ? "Workspace Admins review submitted ideas and support participation. Invitations are sent to the named email address." : "Inventors can submit ideas and view the company portfolio."}</p>{inviteMutation.isError && <p role="alert" className="text-sm text-pl-red-text">{(inviteMutation.error as any)?.response?.data?.message || "Invitation could not be sent. Check the email and retry."}</p>}<div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => setInviteDialogOpen(false)}>Cancel</Button><Button type="submit" size="sm" className={actionPrimary} disabled={!inviteEmail.trim() || inviteMutation.isPending}>{inviteMutation.isPending ? "Sending…" : "Send invitation"}</Button></div></form> : <div>
+          <p className="text-sm leading-relaxed text-pl-text-2">The shared link invites inventors from the allowed domain. Workspace Admin invitations are sent by email.</p>
+          {inviteLinkData?.active ? <><div className="mt-4 flex flex-wrap items-start gap-5"><QRCodeSVG ref={qrCodeRef} value={inventorInviteLink} className="h-32 w-32 shrink-0" level="M" marginSize={4} bgColor={colors.pl.bg} fgColor={colors.pl.ink} title="Inventor invitation QR code"/><div className="min-w-0 flex-1"><p className="break-all text-xs leading-relaxed text-pl-text-2">{inventorInviteLink}</p><p className="mt-3 text-xs text-pl-text-2">Expires {actionDate(inviteLinkData.expires_at)}</p><Button size="sm" className={`mt-4 ${actionPrimary}`} onClick={copyInventorInvite}>{inviteLinkCopied ? "Invite link copied" : "Copy invite link"}</Button></div></div><div className="mt-4 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={copyQrCode}>Copy QR</Button><Button size="sm" variant="outline" onClick={downloadQrCode}>Download QR</Button></div><div className="mt-5 flex flex-wrap gap-2 border-t border-pl-border pt-4"><Button size="sm" variant="outline" disabled={regenerateInviteMutation.isPending} onClick={() => window.confirm("Generate a new link? The current link and QR code will stop working.") && regenerateInviteMutation.mutate()}>Replace link</Button><Button size="sm" variant="outline" disabled={deactivateInviteMutation.isPending} onClick={() => window.confirm("Deactivate this invitation link? New inventors will no longer be able to join through it.") && deactivateInviteMutation.mutate()}>Deactivate link</Button></div></> : <div className="mt-5 border-t border-pl-border pt-4"><h3 className="text-sm font-medium">No active invitation link</h3><p className="mt-2 text-sm text-pl-text-2">Create a link before sharing it with inventors.</p><Button size="sm" disabled={regenerateInviteMutation.isPending || !canChange} className={`mt-4 ${actionPrimary}`} onClick={() => regenerateInviteMutation.mutate()}>{regenerateInviteMutation.isPending ? "Creating…" : "Create invitation link"}</Button></div>}
+          {(regenerateInviteMutation.isError || deactivateInviteMutation.isError) && <p role="alert" className="mt-3 text-sm text-pl-red-text">The invitation link could not be changed. Try again.</p>}
+        </div>}
+      </DialogContent>
+    </Dialog>
+    <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}><DialogContent className="max-h-screen overflow-y-auto border-pl-border bg-pl-bg text-pl-ink sm:max-w-2xl"><DialogHeader><DialogTitle>Portfolio import history</DialogTitle><DialogDescription>Files imported into {clientData?.name}. Review the result before confirming readiness.</DialogDescription></DialogHeader><div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => {refreshHistory(); queryClient.invalidateQueries({queryKey:["client",clientId]});}}>Refresh history</Button>{canChange && <Button size="sm" className={actionPrimary} disabled={isUploadingPatentFile} onClick={() => uploadRef.current?.click()}>{isUploadingPatentFile ? "Importing…" : "Import corrected file"}</Button>}</div>{historyError ? <p role="alert" className="text-sm text-pl-red-text">Import history could not be loaded. Refresh to try again.</p> : !importHistory.length ? <p className="text-sm text-pl-text-2">No imports recorded yet.</p> : <ul className="divide-y divide-pl-border">{importHistory.map(row => <li key={row.id} className="py-4"><p className="break-words text-sm font-medium">{row.file?.original_name || "Portfolio import"}</p><p className="mt-2 text-xs text-pl-text-2">{formatDate(row.completed_at || row.created_at)} · {row.imported_by?.name || "User not recorded"}</p><p className="mt-2 text-sm text-pl-text-2">{row.status === "RUNNING" ? "Import in progress" : `${row.created_count ?? 0} added · ${row.updated_count ?? 0} updated · ${row.unchanged_count ?? 0} unchanged · ${row.duplicate_in_file ?? 0} skipped as duplicates · ${row.failed_count ?? 0} failed`}</p>{row.unmapped_columns?.length > 0 && <p className="mt-2 break-words text-xs text-pl-text-2">Columns not imported: {row.unmapped_columns.join(", ")}</p>}{row.file?.id && <Button size="sm" variant="outline" className="mt-3" onClick={() => downloadImportFile(row.file.id, row.file.original_name)}>Download source file</Button>}</li>)}</ul>}{!!setup?.latest_import?.errors?.length && <div className="border-t border-pl-border pt-4"><h3 className="text-sm font-medium">Rows to correct in the latest import</h3><ul className="mt-3 space-y-2 text-xs text-pl-text-2">{setup.latest_import.errors.map((error,index) => <li key={index}>Row {error.row}: {error.message}</li>)}</ul></div>}</DialogContent></Dialog>
+    <DuplicatePatentsModal open={duplicateModalOpen} onOpenChange={open => {setDuplicateModalOpen(open); if (!open) queryClient.invalidateQueries({queryKey:["client",clientId]});}} duplicatePatents={duplicatePatents} excelDuplicateEntries={excelDuplicateEntries} errorCount={errorCount} successCount={successCount} updatedCount={updatedCount} dueDatesCreated={dueDatesCreated} unmappedColumns={unmappedColumns} missingRequired={missingRequired}/>
+    {showAddPatentModal && <AddPatentModal open={showAddPatentModal} onOpenChange={setShowAddPatentModal} clientId={clientId} onAdded={() => {queryClient.invalidateQueries({queryKey:["client",clientId]}); queryClient.invalidateQueries({queryKey:["client_metrics",clientId]});}}/>}
+  </div>;
 };
-
 export default OverviewTab;

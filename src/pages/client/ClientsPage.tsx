@@ -22,7 +22,9 @@ import {
   ChevronDown,
   LayoutGridIcon,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import ClientBook from "@/components/clients/ClientBook";
+import { ActionsNavigation, actionPrimary } from "@/components/actions/ActionsWorkspace";
 import BlockedRedirect from "@/lib/BlockedRedirect";
 import { isOutsideCounselRole } from "@/lib/roleAccess";
 import { MainClass, PageHeader } from "@/components/DashboardChrome";
@@ -71,25 +73,8 @@ const clientOnboardSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   type: Yup.string().required("Type is required"),
   logo: Yup.mixed().optional(),
-  admin_users: Yup.array()
-    .of(Yup.string().email("Invalid email format").required())
-    .min(1, "At least one admin user is required")
-    .test(
-      "has-valid-emails",
-      "At least one valid admin email is required",
-      function (value) {
-        const validEmails = value?.filter(
-          (email) => email && email.trim() !== "",
-        );
-        return validEmails && validEmails.length > 0;
-      },
-    ),
-  allowed_domain: Yup.string()
-    .required("Allowed Domains are required")
-    .matches(
-      /^@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$/,
-      "Domain must be in format @domain.com (e.g., @example.com)",
-    ),
+  admin_users: Yup.array().optional(),
+  allowed_domain: Yup.string().optional(),
   patent_file: Yup.mixed().optional(),
 });
 
@@ -136,24 +121,21 @@ const getTypeBadgeVariant = (type: string) => {
 const ClientsPage: React.FC = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useUserCookie();
   const isCaseOwner = user?.role === "CASE_OWNER";
-  // Both roles now see the whole book (F-079) — a case owner reads every client
-  // and is fenced on what they can DO, not on what they can list. `scope` stays
-  // in the event because the two are still different screens: a case owner has
-  // "Request access" where an admin has "View as client". It reports the ROLE's
-  // reach, and after the widening that reach is the same list for both.
+  // Keep the existing analytics call; the V0 mock supplies assignment-scoped client records.
   useTrackOnce("client_book_viewed", { scope: "all" },
     !!user && isOutsideCounselRole(user.role));
   const [isOnboardModalOpen, setIsOnboardModalOpen] =
     useState<iClientOnboardModal>(initialValuesClientOnboardModal);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams.get("q") || "");
   const [clientTypeFilter, setClientTypeFilter] = useState<ClientType>("");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [viewType, setViewType] = useState<ViewType>("card");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(searchParams.get("page")) || 1));
   const [isDuplicatePatentsModalOpen, setIsDuplicatePatentsModalOpen] =
     useState(false);
   const [duplicatePatents, setDuplicatePatents] = useState<any[]>([]);
@@ -183,6 +165,7 @@ const ClientsPage: React.FC = () => {
         }
         return response?.data;
       } catch (error) {
+        formik.setStatus(error?.response?.data?.message || "Client could not be created. Your name is preserved; try again.");
         console.error("Error adding client", error);
         toast.error(error?.response?.data?.message || "Error adding client");
       }
@@ -239,6 +222,7 @@ const ClientsPage: React.FC = () => {
     initialValues: isOnboardModalOpen.data,
     enableReinitialize: true,
     onSubmit: async (values: iClientOnboardForm) => {
+      formik.setStatus(undefined);
       const payload: any = {
         name: values.name,
         type: values.type,
@@ -263,26 +247,24 @@ const ClientsPage: React.FC = () => {
           return;
         }
       }
-      mutate(payload);
+      mutate(payload, { onSuccess: (result: any) => { if (result?.data?.id) navigate(`/clients/${result.data.id}?tab=overview`); } });
     },
   });
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
+      if (searchQuery !== debouncedSearchQuery) setCurrentPage(1);
       setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(1); // Reset to first page when search changes
+      // // Reset to first page when search changes
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Reset to first page when filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [clientTypeFilter, sortField, sortDirection]);
 
-  const { data, isLoading, isError, error } = useQuery({
+
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [
       "fetch_clients",
       itemsPerPage,
@@ -351,8 +333,8 @@ const ClientsPage: React.FC = () => {
     }
   };
 
-  const handleClientClick = (clientId: number) => {
-    navigate(`/clients/${clientId}?tab=overview`);
+  const handleClientClick = (clientId: string) => {
+    navigate(`/clients/${clientId}?tab=overview&back=${encodeURIComponent(`/clients?${searchParams.toString()}`)}`);
   };
 
   const handleDeleteClick = (e: React.MouseEvent, clientId: number) => {
@@ -368,894 +350,13 @@ const ClientsPage: React.FC = () => {
     }
   };
 
-  const RadioIndicator = ({ checked }: { checked: boolean }) => (
-    <div
-      className={`w-4 h-4 rounded-full border-2 mr-2 flex items-center justify-center transition-all
-      ${checked ? "border-[#F9B418]" : "border-neutral-600"}
-    `}
-    >
-      {checked && <div className="w-2 h-2 rounded-full bg-[#F9B418]" />}
-    </div>
-  );
-
-   // Client portfolio access is available to OC admins (which includes
-   // superadmins — see isOCAdminRole) and scoped case owners.
-   if (user && !isOutsideCounselRole(user.role)) {
-     return <BlockedRedirect from="/clients" to="/" />;
-   }
-
-  return (
-    <>
-      <MainClass className="relative" />
-      <PageHeader
-        primaryAction={isCaseOwner
-          ? undefined
-          : {
-              label: "Onboard a client",
-              icon: <Plus className="h-4 w-4" />,
-              onClick: () => {
-                track("client_onboard_opened");
-                setIsOnboardModalOpen((prev) => ({ ...prev, open: true }));
-              },
-            }}
-      />
-      <div className="pulse-product-page pulse-table-page relative mx-auto flex min-h-0 flex-1 w-full max-w-[1680px] flex-col overflow-hidden px-6 py-6 lg:px-8">
-        <div
-          className={`pulse-toolbar !mx-0 !mb-5 !mt-0 ${
-            theme === "dark" ? "bg-[#0a0a0a] border-b-[#cccccc20]" : "bg-white"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="relative min-w-[300px]">
-                <Search
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 z-10 pointer-events-none ${
-                    theme === "dark" ? "text-neutral-500" : "text-neutral-400"
-                  }`}
-                />
-                <Input
-                  name="search"
-                  className={`w-full rounded-sm border pl-10 pr-4 h-[42px] text-sm focus:outline-none focus:border-[var(--pulse-brand)] transition-colors ${
-                    theme === "dark"
-                      ? "bg-neutral-900 border-neutral-800 text-neutral-100 placeholder:text-neutral-600"
-                      : "bg-neutral-50 border-neutral-200 text-neutral-900 placeholder:text-neutral-400"
-                  }`}
-                  placeholder="Search by client name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Plus
-                  onClick={() => setSearchQuery("")}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 rotate-45 w-4 h-4 z-10 cursor-pointer ${
-                    theme === "dark" ? "text-neutral-500" : "text-neutral-400"
-                  }`}
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="pulse-filter-control flex items-center font-normal font-sans py-5"
-                    title="View Type"
-                  >
-                    {viewType === "card" ? (
-                      <LayoutGridIcon
-                        className={`w-4 h-4 text-neutral-700 dark:text-neutral-300`}
-                      />
-                    ) : (
-                      <TableIcon
-                        className={`w-4 h-4 text-neutral-700 dark:text-neutral-300`}
-                      />
-                    )}
-                    <span className="text-neutral-700 dark:text-neutral-300">
-                      View
-                    </span>
-                    <ChevronDown
-                      className={`h-3 w-3 ${
-                        theme === "dark" ? "text-gray-300" : "text-foreground"
-                      }`}
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className={`w-[160px] font-sans p-2 ${
-                    theme === "dark"
-                      ? "bg-[#171717] border border-[#cccccc20]"
-                      : "bg-white"
-                  }`}
-                >
-                  <DropdownMenuLabel
-                    className={`font-bold font-sans ${
-                      theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                    }`}
-                  >
-                    View Mode
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setViewType("table")}>
-                    <div
-                      className={`w-4 h-4 rounded-full border-2 mr-2 flex items-center justify-center cursor-pointer transition-all  ${
-                        viewType !== "card"
-                          ? "border-[#F9B418]"
-                          : "border-neutral-600"
-                      }`}
-                    >
-                      {viewType !== "card" ? (
-                        <div className="w-2 h-2 rounded-full bg-[#F9B418]"></div>
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-transparent"></div>
-                      )}
-                    </div>
-                    <label
-                      className={`text-sm cursor-pointer flex items-center gap-2 ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-table w-4 h-4"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 3v18"></path>
-                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                        <path d="M3 9h18"></path>
-                        <path d="M3 15h18"></path>
-                      </svg>
-                      Table View
-                    </label>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setViewType("card")}>
-                    <div
-                      className={`w-4 h-4 rounded-full border-2 mr-2 flex items-center justify-center cursor-pointer transition-all ${
-                        viewType === "card"
-                          ? "border-[#F9B418]"
-                          : "border-neutral-600"
-                      }`}
-                    >
-                      {viewType === "card" ? (
-                        <div className="w-2 h-2 rounded-full bg-[#F9B418]"></div>
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-transparent"></div>
-                      )}
-                    </div>
-                    <label
-                      className={`text-sm cursor-pointer flex items-center gap-2 ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-layout-grid w-4 h-4"
-                        aria-hidden="true"
-                      >
-                        <rect width="7" height="7" x="3" y="3" rx="1"></rect>
-                        <rect width="7" height="7" x="14" y="3" rx="1"></rect>
-                        <rect width="7" height="7" x="14" y="14" rx="1"></rect>
-                        <rect width="7" height="7" x="3" y="14" rx="1"></rect>
-                      </svg>
-                      Card View
-                    </label>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center font-normal gap-2 rounded-sm py-5 bg-white hover:bg-white dark:bg-zinc-900 border dark:border-[#cccccc20]  hover:border-[#F9B418]  outline-none dark:hover:border-[#f9b51886]"
-                  >
-                    <Building2
-                      className={`w-4 h-4 text-neutral-700 dark:text-neutral-300`}
-                    />
-                    <span className="text-neutral-700 font-sans dark:text-neutral-300">
-                      {clientTypeFilter
-                        ? clientTypeFilter === "EXISTING"
-                          ? "Existing"
-                          : "Potential"
-                        : "All"}
-                    </span>
-                    <ChevronDown
-                      className={`h-3 w-3 ${
-                        theme === "dark" ? "text-gray-300" : "text-foreground"
-                      }`}
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className={`w-[160px] font-sans p-2 ${
-                    theme === "dark"
-                      ? "bg-zinc-900 border border-[#cccccc20]"
-                      : "bg-white"
-                  }`}
-                >
-                  <DropdownMenuLabel
-                    className={`font-bold font-sans ${
-                      theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                    }`}
-                  >
-                    Client Type
-                  </DropdownMenuLabel>
-                  {/* ALL CLIENTS */}
-                  <DropdownMenuItem
-                    onClick={() => setClientTypeFilter("")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator checked={!clientTypeFilter} />
-                    <label
-                      className={`text-sm cursor-pointer ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Show All
-                    </label>
-                  </DropdownMenuItem>
-
-                  {/* EXISTING */}
-                  <DropdownMenuItem
-                    onClick={() => setClientTypeFilter("EXISTING")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator checked={clientTypeFilter === "EXISTING"} />
-                    <label
-                      className={`text-sm cursor-pointer ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Existing
-                    </label>
-                  </DropdownMenuItem>
-
-                  {/* POTENTIAL */}
-                  <DropdownMenuItem
-                    onClick={() => setClientTypeFilter("POTENTIAL")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator
-                      checked={clientTypeFilter === "POTENTIAL"}
-                    />
-                    <label
-                      className={`text-sm cursor-pointer ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Potential
-                    </label>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 font-normal font-sans rounded-sm py-5 bg-white hover:bg-white dark:bg-zinc-900 border dark:border-[#cccccc20] outline-none dark:hover:border-[#f9b51886] hover:border-[#F9B418]"
-                  >
-                    <ArrowUpDown
-                      className={`w-4 h-4 text-neutral-700 dark:text-neutral-300`}
-                    />
-                    <span className="text-neutral-700 dark:text-neutral-300">
-                      Sort
-                    </span>
-                    <ChevronDown
-                      className={`h-3 w-3 ${
-                        theme === "dark" ? "text-gray-300" : "text-foreground"
-                      }`}
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className={`w-[180px] font-sans p-2 ${
-                    theme === "dark"
-                      ? "border border-[#cccccc20] bg-zinc-900"
-                      : "bg-white"
-                  }`}
-                >
-                  <DropdownMenuLabel
-                    className={`font-bold font-sans ${
-                      theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                    }`}
-                  >
-                    Sort Clients
-                  </DropdownMenuLabel>
-                  {/* NAME */}
-                  <DropdownMenuItem
-                    onClick={() => toggleSort("name")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator checked={sortField === "name"} />
-                    <span
-                      className={`text-sm flex items-center ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Name
-                    </span>
-                  </DropdownMenuItem>
-
-                  {/* TYPE */}
-                  <DropdownMenuItem
-                    onClick={() => toggleSort("type")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator checked={sortField === "type"} />
-                    <span
-                      className={`text-sm flex items-center ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Type
-                    </span>
-                  </DropdownMenuItem>
-
-                  {/* PATENTS */}
-                  <DropdownMenuItem
-                    onClick={() => toggleSort("patents")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator checked={sortField === "patents"} />
-                    <span
-                      className={`text-sm flex items-center ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Patents
-                    </span>
-                  </DropdownMenuItem>
-
-                  {/* LAST UPDATED */}
-                  <DropdownMenuItem
-                    onClick={() => toggleSort("updatedAt")}
-                    className="flex items-center"
-                  >
-                    <RadioIndicator checked={sortField === "updatedAt"} />
-                    <span
-                      className={`text-sm flex items-center gap-2 ${
-                        theme === "dark"
-                          ? "text-neutral-300"
-                          : "text-neutral-700"
-                      }`}
-                    >
-                      Last Updated
-                    </span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-
-        {isLoading && !data ? (
-          <Loader />
-        ) : viewType === "card" ? (
-          /* The page is a fixed-height flex column with overflow-hidden, so this
-             region must own its scrolling: flex-none clipped everything past the
-             fold. The demo has a handful of mock clients and never showed it;
-             there are 82 real ones. min-h-0 is what lets a flex child shrink
-             enough to actually scroll. */
-          <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-3">
-            {clientsData.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[300px] text-sidebar-foreground">
-                <p className="text-lg mb-2">No clients found</p>
-                <p className="text-sm text-muted-foreground">
-                  Try adjusting your search or filters
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 pb-4 pt-2 md:grid-cols-2 lg:grid-cols-3">
-                {clientsData.map((client: any, clientIndex: number) => (
-                  <div key={clientIndex} className="relative px font-sans">
-                    <Card
-                      className={`pulse-content-card group overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_45px_-34px_rgba(17,16,60,0.48)] ${
-                        theme === "dark"
-                          ? "bg-zinc-900 border-[#cccccc20] hover:bg-[#cccccc20]"
-                          : "bg-white border-[#E0E0E0]"
-                      }`}
-                      onClick={() => handleClientClick(client.id)}
-                    >
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between">
-                          <div className="flex">
-                            <div
-                              className={`mr-3 flex h-14 w-14 items-center justify-center overflow-hidden rounded-md border border-[var(--pulse-line)] bg-[var(--pulse-surface-subtle)] ${
-                                theme === "dark" && "bg-[#00000030]"
-                              }`}
-                            >
-                              <ClientLogo
-                                client={client}
-                                className="max-h-11 max-w-12 object-contain"
-                                fallbackClassName="text-xs font-semibold text-amber-700"
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-4 flex items-center gap-3 font-sans">
-                            {client.type?.toUpperCase() === "POTENTIAL" ? (
-                              <div className="inline-flex rounded-xs border border-[#7057C7]/20 bg-[#7057C7]/10 px-3 py-1 text-xs font-medium text-[#5943A6]">
-                                Potential
-                              </div>
-                            ) : (
-                              <div className="inline-flex rounded-xs border border-[var(--pulse-success)]/20 bg-[var(--pulse-success-soft)] px-3 py-1 text-xs font-medium text-[var(--pulse-success)]">
-                                Existing
-                              </div>
-                            )}
-                            {!isCaseOwner && (
-                              <button
-                                onClick={(e) => handleDeleteClick(e, client.id)}
-                                className="rounded-sm p-1 text-neutral-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
-                                aria-label={`Delete ${client.name}`}
-                              >
-                                <Trash2 size={17} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        <h3
-                          className={`border-b py-5 text-lg font-semibold tracking-[-0.01em] ${
-                            theme === "dark"
-                              ? "border-[#cccccc30] text-zinc-200"
-                              : "border-gray-300 text-zinc-900"
-                          }`}
-                        >
-                          {client.name}
-                        </h3>
-
-                        <div
-                          className={`grid grid-cols-2 text-[#1F1F1F] mt-5 font-sans`}
-                        >
-                          <div className="">
-                            <div
-                              className={`flex items-center text-xs ${
-                                theme === "dark"
-                                  ? "text-[#cccccc80]"
-                                  : "text-[#7D7D7D]"
-                              }`}
-                            >
-                              <FileText
-                                size={16}
-                                className="mr-2 flex-shrink-0"
-                              />{" "}
-                              Patents
-                            </div>
-                            <div
-                              className={`text-3xl mt-2 font-semibold ${
-                                theme === "dark"
-                                  ? "text-zinc-200"
-                                  : " text-zinc-900"
-                              }`}
-                            >
-                              {client?._count?.Patent}
-                            </div>
-                          </div>
-
-                          <div className="">
-                            <div
-                              className={`flex items-center text-xs ${
-                                theme === "dark"
-                                  ? "text-[#cccccc80]"
-                                  : "text-[#7D7D7D]"
-                              }`}
-                            >
-                              <Clock size={16} className="mr-2 flex-shrink-0" />
-                              Updated
-                            </div>
-                            <div
-                              className={`text-[13px] mt-2 ${
-                                theme === "dark"
-                                  ? "text-zinc-400"
-                                  : " text-zinc-700"
-                              }`}
-                            >
-                              {moment(client.updatedAt).format("MMM D, YYYY")}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div
-            className={`${
-              theme === "dark"
-                ? "bg-transparent"
-                : "bg-white border-photon-gray-200 "
-            } pulse-table-frame !mx-0 !mb-3 min-h-0 flex-1 overflow-hidden flex flex-col`}
-          >
-            <div
-              className={`flex-shrink-0 overflow-x-auto border-b ${
-                theme === "dark" && "border-[#cccccc20]"
-              }`}
-            >
-              <table className="pulse-data-table w-full">
-                <thead
-                  className={`sticky top-0 z-10 ${
-                    theme === "dark" ? "bg-neutral-950" : "bg-white"
-                  }`}
-                >
-                  <tr>
-                    <th
-                      className="text-center p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ width: "70px" }}
-                    >
-                      S.No
-                    </th>
-                    <th
-                      className="text-center p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ width: "100px" }}
-                    >
-                      Logo
-                    </th>
-                    <th
-                      className="text-left p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ minWidth: "150px" }}
-                    >
-                      Client Name
-                    </th>
-                    <th
-                      className="text-left p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ minWidth: "140px" }}
-                    >
-                      Type
-                    </th>
-                    <th
-                      className="text-left p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ minWidth: "120px" }}
-                    >
-                      Patents
-                    </th>
-                    <th
-                      className="text-left p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ minWidth: "120px" }}
-                    >
-                      Last Updated
-                    </th>
-                    {!isCaseOwner && <th
-                      className="text-left p-4 text-xs uppercase tracking-wider text-neutral-600 dark:text-[#737373]"
-                      style={{ width: "130px" }}
-                    >
-                      Actions
-                    </th>}
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            <div className="flex-1 overflow-y-auto overflow-x-auto">
-              <table className="pulse-data-table w-full">
-                <tbody>
-                  {clientsData?.map((client: any, index: number) => (
-                    <tr
-                      key={index}
-                      className={`border-b ${
-                        theme === "dark"
-                          ? "border-[#cccccc20] hover:bg-[#cccccc05]"
-                          : "border-gray-200 bg-neutral-50 hover:bg-neutral-40"
-                      } cursor-pointer transition-colors`}
-                      onClick={() => handleClientClick(client.id)}
-                    >
-                      <td
-                        className={`text-center p-4 text-sm ${
-                          theme === "dark"
-                            ? "text-neutral-400"
-                            : "text-gray-500"
-                        }`}
-                        style={{ width: "70px" }}
-                      >
-                        {startIndex + index + 1}
-                      </td>
-                      <td
-                        className="text-center p-4"
-                        style={{ width: "100px" }}
-                      >
-                        <div className="flex items-center justify-center">
-                          <div
-                            className={`flex h-10 w-10 items-center justify-center rounded-md border p-1.5 ${
-                              theme === "dark" &&
-                              "bg-[#00000030] border-zinc-900"
-                            }`}
-                          >
-                            <ClientLogo
-                              client={client}
-                              className="max-h-7 max-w-8 object-contain"
-                              fallbackClassName="text-[10px] font-semibold text-amber-700"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4" style={{ minWidth: "150px" }}>
-                        <span
-                          className={`text-sm ${
-                            theme === "dark"
-                              ? "text-zinc-200"
-                              : "text-neutral-900"
-                          }`}
-                        >
-                          {client.name}
-                        </span>
-                      </td>
-                      <td className="p-4" style={{ minWidth: "140px" }}>
-                        {client.type?.toUpperCase() === "POTENTIAL" ? (
-                          <div className="inline-flex rounded-xs border border-[#7057C7]/20 bg-[#7057C7]/10 px-3 py-1 text-xs font-medium text-[#5943A6]">
-                            Potential
-                          </div>
-                        ) : (
-                          <div className="inline-flex rounded-xs border border-[var(--pulse-success)]/20 bg-[var(--pulse-success-soft)] px-3 py-1 text-xs font-medium text-[var(--pulse-success)]">
-                            Existing
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-4" style={{ minWidth: "120px" }}>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-neutral-500" />
-                          <span
-                            className={`text-sm ${
-                              theme === "dark"
-                                ? "text-zinc-200"
-                                : "text-gray-700"
-                            }`}
-                          >
-                            {client?._count?.Patent || 0}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4" style={{ minWidth: "50px" }}>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-400" />
-                          <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {moment(client.updatedAt).format("MMM D, YYYY")}
-                          </span>
-                        </div>
-                      </td>
-                      {!isCaseOwner && <td className="text-left p-4" style={{ width: "130px" }}>
-                        <div
-                          className="p-2 rounded-full cursor-pointer transition-colors inline-flex"
-                          onClick={(e) => handleDeleteClick(e, client.id)}
-                          title="Delete Client"
-                        >
-                          <Trash2 size={16} className="text-red-500" />
-                        </div>
-                      </td>}
-                    </tr>
-                  ))}
-                  {clientsData.length === 0 && (
-                    <tr>
-                      <td colSpan={isCaseOwner ? 6 : 7} className="text-center p-4 text-gray-500">
-                        No clients found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {clientsData.length > 0 && totalItems > 0 && (
-          <div
-            className={`pulse-pagination-bar !mx-0 !mb-0 !mt-0 rounded-md border ${
-              theme === "dark"
-                ? "bg-transparent border-[#cccccc20]"
-                : "bg-white border-photon-gray-300"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`text-sm ${
-                    theme === "dark" ? "text-neutral-500" : "text-gray-500"
-                  }`}
-                >
-                  Showing {startIndex + 1} to{" "}
-                  {Math.min(startIndex + clientsData.length, totalItems)} of{" "}
-                  {totalItems} entries
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`flex items-center justify-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9B418] focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed p-1 w-7 h-7 ${
-                    theme === "dark"
-                      ? "hover:bg-white/5 text-neutral-400 hover:text-neutral-200"
-                      : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
-                  }`}
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPageFromApi === 1}
-                  title="First page"
-                >
-                  <ChevronsLeft className={`w-4 h-4`} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`flex items-center justify-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9B418] focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed p-1 w-7 h-7 ${
-                    theme === "dark"
-                      ? "hover:bg-white/5 text-neutral-400 hover:text-neutral-200"
-                      : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
-                  }`}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(1, prev - 1))
-                  }
-                  disabled={currentPageFromApi === 1}
-                  title="Previous page"
-                >
-                  <ChevronLeft className={`w-4 h-4`} />
-                </Button>
-                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPageFromApi <= 2) {
-                    pageNum = i + 1;
-                  } else if (currentPageFromApi >= totalPages - 1) {
-                    pageNum = totalPages - 2 + i;
-                  } else {
-                    pageNum = currentPageFromApi - 1 + i;
-                  }
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={
-                        currentPageFromApi === pageNum ? "default" : "outline"
-                      }
-                      size="sm"
-                      className={`px-3 py-1.5 w-8 text-sm font-sans ${
-                        currentPageFromApi === pageNum
-                          ? "bg-[#F9B418] text-zinc-900 hover:bg-[#F9B418]"
-                          : `text-neutral-300 ${
-                              theme === "dark"
-                                ? "bg-neutral-900 text-neutral-300"
-                                : "bg-neutral-100 text-neutral-900"
-                            } border border-[#cccccc20] hover:bg-neutral-800 hover:text-neutral-300`
-                      }`}
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`flex items-center justify-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9B418] focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed p-1 w-7 h-7 ${
-                    theme === "dark"
-                      ? "hover:bg-white/5 text-neutral-400 hover:text-neutral-200"
-                      : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
-                  }`}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                  }
-                  disabled={currentPageFromApi === totalPages}
-                  title="Next page"
-                >
-                  <ChevronRight className={`w-4 h-4`} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`flex items-center justify-center rounded-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#F9B418] focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed p-1 w-7 h-7 ${
-                    theme === "dark"
-                      ? "hover:bg-white/5 text-neutral-400 hover:text-neutral-200"
-                      : "hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
-                  }`}
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPageFromApi === totalPages}
-                  title="Last page"
-                >
-                  <ChevronsRight className={`w-4 h-4`} />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <OnboardClientModal
-        formik={formik}
-        open={isOnboardModalOpen.open}
-        isSubmitting={isPending}
-        onOpenChange={() => {
-          setIsOnboardModalOpen(initialValuesClientOnboardModal);
-          formik.resetForm();
-        }}
-      />
-
-      <DuplicatePatentsModal
-        open={isDuplicatePatentsModalOpen}
-        onOpenChange={setIsDuplicatePatentsModalOpen}
-        duplicatePatents={duplicatePatents}
-        excelDuplicateEntries={excelDuplicateEntries}
-        errorCount={errorCount}
-        successCount={successCount}
-      />
-
-      <AlertDialog
-        open={isDeleteConfirmOpen}
-        onOpenChange={setIsDeleteConfirmOpen}
-      >
-        <AlertDialogContent
-          className={`${
-            theme === "dark" ? "bg-[#0a0a0a] border-[#cccccc20]" : "bg-white"
-          } rounded-lg`}
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle
-              className={`font-sans ${
-                theme === "dark" ? "text-zinc-200" : "text-zinc-900"
-              }`}
-            >
-              Delete Client
-            </AlertDialogTitle>
-            <AlertDialogDescription
-              className={`font-sans ${
-                theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-              }`}
-            >
-              This action cannot be undone. This will permanently delete the
-              client and all associated data including patents, files, and
-              records.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={isDeleting}
-              className={`bg-transparent border font-sans rounded-sm ${
-                theme === "dark"
-                  ? "border-[#cccccc20] text-zinc-300 hover:bg-transparent hover:text-zinc-300 border-white bg-input/30"
-                  : ""
-              }`}
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              disabled={isDeleting}
-              className={`text-zinc-100 font-bold font-sans rounded-sm bg-[#ff0000] hover:bg-[#db0f0f]`}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
+  const openCreate = () => { track("client_onboard_opened"); setIsOnboardModalOpen(prev=>({...prev,open:true})); };
+  if (user && !isOutsideCounselRole(user.role)) return <BlockedRedirect from="/clients" to="/" />;
+  return <>
+    <PageHeader title="Clients" actions={<div className="flex items-center gap-3">{!isCaseOwner && clientsData.length>0 && <Button size="sm" variant="outline" onClick={openCreate}>Create client</Button>}<ActionsNavigation /></div>}/>
+    <ClientBook clients={clientsData} loading={isLoading} error={isError} search={searchQuery} onSearch={setSearchQuery} openClient={handleClientClick} createClient={openCreate} isCaseOwner={isCaseOwner} page={currentPageFromApi} totalPages={totalPages} total={totalItems} onPage={page=>{setCurrentPage(page);const next=new URLSearchParams(searchParams);next.set("page",String(page));setSearchParams(next,{replace:true});}} retry={()=>refetch()}/>
+    <OnboardClientModal formik={formik} open={isOnboardModalOpen.open} isSubmitting={isPending} onOpenChange={()=>{setIsOnboardModalOpen(initialValuesClientOnboardModal);formik.resetForm();}}/>
+    <DuplicatePatentsModal open={isDuplicatePatentsModalOpen} onOpenChange={setIsDuplicatePatentsModalOpen} duplicatePatents={duplicatePatents} excelDuplicateEntries={excelDuplicateEntries} errorCount={errorCount} successCount={successCount}/>
+  </>;
 };
-
 export default ClientsPage;

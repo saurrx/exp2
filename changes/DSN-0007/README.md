@@ -51,10 +51,26 @@ Builder review: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 
 - This is rendered design evidence, not proof of increased disclosure quality or submission conversion.
 
 ## Validation
-Initial full stories: 243 passed / four visibility checks failed during dialog animation. Visibility waits corrected; full rerun: **244/244 passed**. V0 semantics: **33/33 passed**. Typecheck and both design / Storybook builds passed. Final gate and screenshot logs accompany this record.
+Initial full stories: 243 passed / four visibility checks failed during dialog animation. Visibility waits corrected; full rerun: **244/244 passed**. V0 semantics: **33/33 passed**. Typecheck and both design / Storybook builds passed. Final selected gates: **8/8 passed** (including role lint, tokens, V0 semantics, coverage, stories and runtime graph). The informational isolation probe remains contaminated through the shared cookie; story tests run serially as required. Both final builds passed; Storybook required one retry after a transient generated-font copy EEXIST. Stable screenshots reported zero egress. Logs accompany this record.
 
 ## Known compromises
 The optional evaluation rail reuses the complete assessment; on a short laptop the strengthening section is below the fold, and the detailed-report dialog gives it a readable full-width view. No report download was newly invented; the supported action here is Open detailed report. The readonly idea-detail shell remains the next brief's work.
 
 ## Independent evaluation
-Pending fresh-context evaluation.
+Round 1 requested three fixes: primary emphasis/focus for Return to disclosure, visible re-evaluation confirmation after the rail shrinks, and an explicit Reload evaluation recovery action without a competing Evaluate idea action. All three are addressed; regenerated evidence and round 2 review follow.
+
+```text
+VERDICT: NEEDS_WORK
+SURFACE: evaluation  PERSONA: Inventor, Workspace Admin
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — At both default review widths, both personas can follow the assessment without unnecessary recall, but the focused prior-art disclosure dominates Return to disclosure, contrary to the builder’s claimed action hierarchy.
+FINDINGS (most severe first, max 7):
+
+1. Return to disclosure — Both personas encounter a subdued outlined action beneath prominently focused optional evidence; the charter requires the primary action to dominate — Give Return to disclosure primary emphasis and set initial dialog focus without promoting prior art.
+2. Re-evaluating — Both screenshots show a blank evaluation column at the captured scroll position, leaving the Inventor guessing whether the request started — Keep confirmation visible after starting re-evaluation and capture its actual status at both widths.
+3. Evaluation loading error — “Try again” and “Evaluate idea” appear together with equal emphasis, requiring the Inventor to guess whether recovery reloads an existing result or starts another evaluation — Label the recovery action explicitly and distinguish it from starting a new evaluation.
+
+STATES MISSING: Re-evaluating is not visually demonstrated by its supplied screenshots; all other brief states are represented.
+REFERENCE MATCH: no — Typography, neutral separators and restrained styling match, but the dialog lacks the reference screens’ clearly dominant primary action.
+
+```

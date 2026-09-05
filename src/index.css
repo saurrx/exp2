@@ -87,11 +87,11 @@
   }
 
   /* DSN-0005 reflows at desktop zoom; the device access gate is unchanged. */
-  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]), body:has([data-ideas-list]), body:has([data-review-queue]), body:has([data-patent-portfolio]), body:has([data-patent-detail]), body:has([data-actions-workspace]), body:has([data-photon-due-dates]), body:has([data-case-owner-work]) {
+  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]), body:has([data-ideas-list]), body:has([data-review-queue]), body:has([data-patent-portfolio]), body:has([data-patent-detail]), body:has([data-actions-workspace]), body:has([data-photon-due-dates]), body:has([data-case-owner-work]), body:has([data-client-view]) {
     min-width: 0;
   }
 
-  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh, body:has([data-ideas-list]) .h-dvh, body:has([data-review-queue]) .h-dvh, body:has([data-patent-portfolio]) .h-dvh, body:has([data-patent-detail]) .h-dvh, body:has([data-actions-workspace]) .h-dvh, body:has([data-photon-due-dates]) .h-dvh, body:has([data-case-owner-work]) .h-dvh {
+  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh, body:has([data-ideas-list]) .h-dvh, body:has([data-review-queue]) .h-dvh, body:has([data-patent-portfolio]) .h-dvh, body:has([data-patent-detail]) .h-dvh, body:has([data-actions-workspace]) .h-dvh, body:has([data-photon-due-dates]) .h-dvh, body:has([data-case-owner-work]) .h-dvh, body:has([data-client-view]) .h-dvh {
     min-height: 0;
   }
 

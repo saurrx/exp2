@@ -1,0 +1,121 @@
+{
+  "clientViewErrorRepeat": {
+    "count": 53,
+    "maxChannelDifference": 51,
+    "nonGray": 0,
+    "inNotice": 0,
+    "interpretation": "Scattered grayscale rounding at shared chrome and reference card edges; no changed notice pixels or layout. Both full images opened."
+  },
+  "existingMyWorkDifferences": [
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--access-expired--at-1280x720.png",
+      "count": 8,
+      "box": [
+        14,
+        86,
+        62,
+        121
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--access-expired--at-1440x900.png",
+      "count": 2,
+      "box": [
+        24,
+        110,
+        25,
+        110
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--access-request-error--at-1280x720.png",
+      "count": 8,
+      "box": [
+        14,
+        86,
+        62,
+        121
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--access-request-error--at-1440x900.png",
+      "count": 2,
+      "box": [
+        24,
+        110,
+        25,
+        110
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--access-requested--at-1440x900.png",
+      "count": 1,
+      "box": [
+        320,
+        834,
+        320,
+        834
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--new-approved-idea--at-1440x900.png",
+      "count": 2,
+      "box": [
+        24,
+        110,
+        25,
+        110
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--portfolio-context--at-1280x720.png",
+      "count": 8,
+      "box": [
+        14,
+        86,
+        62,
+        121
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--portfolio-context--at-1440x900.png",
+      "count": 2,
+      "box": [
+        24,
+        110,
+        25,
+        110
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--quiet--at-1280x720.png",
+      "count": 8,
+      "box": [
+        14,
+        86,
+        62,
+        121
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--urgent-action--at-1280x720.png",
+      "count": 8,
+      "box": [
+        14,
+        86,
+        62,
+        121
+      ]
+    },
+    {
+      "file": "qa/visual/baselines/surfaces-case-owner-my-work--urgent-action--at-1440x900.png",
+      "count": 2,
+      "box": [
+        24,
+        110,
+        25,
+        110
+      ]
+    }
+  ]
+}

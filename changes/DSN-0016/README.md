@@ -28,7 +28,7 @@ All three low-fidelity renders were opened before UI changes. A is selected: the
 ## What moved and what stayed
 The Case Owner branch of the existing home component now renders the priority queue and selected brief instead of aggregate panels and a ranking. Assigned clients, filing updates and the scoped map follow operational work. Selection is stored in the URL so Back restores the brief; exact downstream record links preserve event/instruction identity. Long titles reflow at 200% zoom and supporting explanation moves into progressive disclosure. Empty, loading and failed data reads remain distinct; an access request exposes pending, stored-success and retry states.
 
-The route, dashboard query, adapter, shared hooks, auth, analytics, reference components and token source stay intact. The map receives an optional supplied jurisdiction summary; existing consumers keep their original behavior. The only shared navigation change renames the Case Owner home to My work, without a badge. The legacy Case Owner Dashboard story/capture and its two accessibility fingerprints are retired. The existing client journey belongs to Clients and onboarding and remains for DSN-0018.
+The route, dashboard query, adapter, shared hooks, analytics module, reference components and token source stay intact. The user explicitly authorized the client-view auth exception on 2026-09-05; its bounded changes are recorded below. The map receives an optional supplied jurisdiction summary; existing consumers keep their original behavior. The only shared navigation change renames the Case Owner home to My work, without a badge. The legacy Case Owner Dashboard story/capture and its two accessibility fingerprints are retired. The existing client journey belongs to Clients and onboarding and remains for DSN-0018.
 
 ## Mock additions
 BF-14 supplies the assigned-client dashboard summary and stored access-request timestamp using existing routes. Approval age comes from the actual recorded transition, pending events use their own recorded dates, and health comes from workspace/person membership. Previously expired access carries only assignment metadata and a request action; the client GET still returns 403. Active-patent geography excludes unassigned clients. All added scenarios are deterministic synthetic V0 scenarios. See the BF-14 reconciliation entry; no real backend compatibility is claimed.
@@ -46,16 +46,16 @@ Repeated accessibility review passes all 28 main-content/overflow contexts (14 s
 ### Scorecard — provisional, not ready
 | Category | Score | Rendered evidence / remaining gap |
 | --- | --- | --- |
-| Product fit | 3 | Work hierarchy and assigned scope fit; the required client-view exit fails. |
+| Product fit | 4 | Assigned work leads; the client-view round trip now restores the original persona. |
 | Hierarchy | 4 | One selected brief and primary action lead; map and client context follow. |
-| Usability | 3 | Exact links, Back, retained requests and recovery pass; client-view exit blocks overall readiness. |
-| Trust | 3 | Dates and scope are grounded; a failed identity restoration remains unresolved. |
+| Usability | 4 | Exact links, Back, retained requests, persistent client-view exit and recovery pass. |
+| Trust | 4 | Dates and scope are grounded; failed restoration retains client mode and offers retry or sign-in. |
 | Craft | 4 | Token-based typography, hairline groups and consistent controls across the inspected widths. |
 | Accessibility and resilience | 4 | Long-title and error zoom controls remain visible; 28 axe/overflow contexts pass. |
 | Business | 4 | New approvals and urgent events lead into existing records; no measured outcome claim. |
 
 ### Cognitive-load check on the render
-As Devika, I first see the selected newly approved idea, with client and reference adjacent. I read its client, approval age, title and next step before Open approved idea; I skip the lower map, filing history and client roster. I retain no cross-column values because the selected queue row yields to the coherent brief. I do not see rankings, general metrics or a badge. Work-level uncertainty has a named next action. The overall check remains **fail** because entering client view currently leaves me without a working exit; that cannot be waived by the quality of My work itself.
+As Devika, I first see the selected newly approved idea, with client and reference adjacent. I read its client, approval age, title and next step before Open approved idea; I skip the lower map, filing history and client roster. I retain no cross-column values because the selected queue row yields to the coherent brief. I do not see rankings, general metrics or a badge. Work-level uncertainty has a named next action. The revised check is **pass**: client mode names the viewed workspace, exit remains visible even at 200% zoom, and a failed restoration retains an explicit recovery path.
 
 ### Story and viewport evidence
 Every ID starts `surfaces-case-owner-my-work--`: no-assigned-clients, newly-assigned-client, new-approved-idea, urgent-action, overdue-date, onboarding-incomplete, access-expired, data-error, loading, long-title, quiet, access-request-error, access-requested, portfolio-context. All select synthetic `v0/` scenarios as Case Owner. Every state has 1280×720 and 1440×900 captures; new-approved-idea also has 1366×768, 1920×1080 and 640×360@2; long-title, access-expired and access-request-error add 640×360@2. The client-view failure screenshot is separate boundary evidence, outside the new-content shots directory.
@@ -86,7 +86,7 @@ Final shared-navigation review found two remaining legacy client captures with t
 
 Two durable V0 API tests now guard BF-14 boundaries: foreign client filters cannot widen the work summary or its map, no-assignment summaries are empty, and requesting expired access stores its timestamp while client GET remains 403 and assignments remain unchanged. `npm run test:v0` passes 45/45 including both new tests (v0-boundaries.log). No auth code changed.
 
-## Final validation and blocked completion audit
+## Pre-authorization validation and blocked completion audit (historical)
 The revised build:design and Storybook builds pass. `shots2.log` records all 34 scoped captures stable across two clean contexts with no egress. All were copied into shots; the five final default viewports and all material revisions (long title, selected setup states and map captures) were opened. The seven other changed PNGs differ by only 2–8 pixels; revision-shot-diffs.json records the comparison to the prior fully inspected set. Revised axe/overflow checks pass all 28 contexts (`axe3.log`). Final condition gate passes 7/7 (`gates-required1.log`), lint:roles passes (`roles2.log`), and V0 passes 45/45 including the two new boundary tests.
 
 The full broad runner finished 18/23 before the reviewer UI corrections. Its recorded failures are older documentation-host allowlist entries, 99 visual differences and three unstable other-surface captures, 27 new accessibility fingerprints plus one reference Ideas age-label contrast block, 54 layout violations, and 1,257 historical conformance deviations. Of the visual differences, 22 are superseded by the final My work captures and 37 are the separately inspected navigation-label updates; 40 other/mixed differences remain unaccepted. No My work accessibility or unstable-capture finding occurred. See broad-gate-details for the full results. The runtime graph, reproducible lockfile, smoke, crawl, desktop and visible-identifier checks pass.
@@ -105,3 +105,37 @@ The full broad runner finished 18/23 before the reviewer UI corrections. Its rec
 | 10 Merge and recap | Checkpoint committed on branch; no merge or completion recap. |
 
 The auth exception remains pending. Once authorized, fix original-persona restoration and show an explicit client-view/recovery boundary, verify entry and exit including failure, refresh affected evidence, and obtain independent PASS before updating coverage or merging. The overall run is not complete.
+
+
+## Authorized client-view correction — 2026-09-05
+The user explicitly approved the requested exception with “yes fix that and continue the goal.” This addresses independent finding 1. The Case Owner must know which workspace is being viewed and return to their own assigned-client work without acquiring Photon Admin permissions. A compact persistent client-view strip places the workspace and Exit client view together above scrolling content; the existing menu exit invokes the same callback. The normal dashboard DOM is unchanged outside client mode.
+
+The mock resolves the literal exit route before the client-ID route, restores the saved tab origin against the seeded database and returns that user's current assigned scope. It refuses missing, malformed or non-Photon-side origins rather than substituting a Photon Admin. The UI reads the existing adapter's nested user envelope, verifies original ID and role before setting the cookie or clearing mode state, and preserves the existing analytics calls. On failure the viewed identity, mode and saved origin remain intact, with an inline explanation, retry through Exit client view, and Sign in again recovery. The adapter, auth hooks, analytics module and reference components remain untouched.
+
+Five additional durable API tests cover Case Owner and Photon Admin restoration plus missing, malformed and invalid original identity. The full-app browser journey entered client view, checked the strip at all five widths, retained client mode after a damaged origin, retried successfully, and verified exact original ID, role and assigned-client IDs on /clients. Both personas pass. The existing adapter retains its Photon-side client sentinel; no client workspace object survives restoration.
+
+Two additional V0 stories exercise the real dashboard chrome: client-view-active (all five widths) and client-view-exit-error (1280, 1440 and 200%). The failure story returns HTTP 503 from the exit route and verifies an enabled retry, Sign in again, and retained mode. The 34 prior My work captures plus these eight boundary captures comprise the revised 42-image story set. Separate full-app screenshots corroborate the actual entry journey. Final gates, captures and independent round 2 follow below.
+
+### Revised validation for independent round 2
+Both builds and lint:roles pass; the required serial gate passes 7/7 including all story tests and V0 50/50. Axe and horizontal-overflow checks pass 32/32 contexts, including the entire client-view column. All 42 scoped story captures are re-baselined and copied; all eight new client-view images were opened and inspected. The prior 34 content captures are unchanged except 1–8 grayscale edge pixels in eleven images (auth-render-audit.json).
+
+The optional two-context stability check passes the 34 My work images and seven of eight new boundary images. The remaining 1440 client-view failure pair differs at 53 grayscale edge pixels in the unchanged shared chrome/reference cards, with zero changed pixels in the client-mode/recovery notice. Both full images were opened; geometry confirms no page scroll or overflow. This is a recorded capture-rasterization limitation, not a waived product defect. The required single-capture update passes all three failure-state widths with no egress (auth-shots-final.log). No screenshot threshold or reference component was changed.
+
+## Independent review round 2
+```text
+VERDICT: NEEDS_WORK
+SURFACE: case-owner-my-work  PERSONA: Case Owner
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, my default-state roleplay agrees with the builder’s six answers, but repeated setup responsibilities in other current renders still break the charter’s no-repeated-title/status rule.
+FINDINGS (most severe first, max 7):
+
+1. Setup task and assigned-client roster — The selected-state duplication is fixed, but urgent-action and overdue-date at 1440×900 still repeat Beacon’s “Invite inventors” and assignment age in both locations; new-approved-idea at 1920×1080 does likewise, requiring Devika to reconcile two presentations of one responsibility — Suppress roster task and age whenever that responsibility already appears in the work queue, regardless of selection.
+
+STATES MISSING: none — All 49 current screenshots inspected; browser evidence confirms restoration of both original personas and scopes, supported by passing API tests; exit failure retains visible recovery.
+REFERENCE MATCH: yes — Typography, amber primary controls, hairline separation and list/detail composition follow the reference language; three directions and the chosen tradeoff are recorded; the disclosed 53 grayscale edge pixels have no visible effect on readability, layout, scope or recovery.
+```
+
+The sole round-2 finding is corrected: the supporting client roster now suppresses setup task and assignment age whenever that client has a setup responsibility in the work queue, independently of which item is selected. The primary queue retains the responsibility and age. Client-view restoration and its error boundary are accepted by the reviewer. Sign-in recovery also attempts the existing logout endpoint before clearing local auth state. Revised captures and final review follow.
+
+### Final review evidence
+After the roster correction, both builds pass, all 34 core captures pass two-context stability/no-egress and are copied into the record, and the required gates pass 7/7. Axe/overflow remains clean in all 32 contexts. Opened the five final default viewports and all materially changed urgent, overdue and map captures. round3-render-diffs.json identifies the five material changes; all other differences are small rendering noise or unchanged. A separate full-app test confirms Sign in again calls logout, reaches /login and clears both saved client-mode keys (signin-recovery.log).

@@ -23,3 +23,25 @@ export const Quiet: Story = { ...state("quiet"), play:async({canvasElement}) => 
 export const AccessRequestError: Story = { ...state("access-request-error"), tags:["viewport:640x360@2"], play:async({canvasElement}) => { const c=await ready(canvasElement);await userEvent.click(c.getByRole("button",{name:"Request client access"}));await expect(await c.findByRole("alert")).toHaveTextContent("Access could not be requested"); } };
 export const AccessRequested: Story = { ...state("access-expired"), play:async({canvasElement}) => { const c=await ready(canvasElement);await userEvent.click(c.getByRole("button",{name:"Request client access"}));await expect(await c.findByRole("status")).toHaveTextContent("A Photon Admin will review your request"); } };
 export const PortfolioContext: Story = { play:async({canvasElement}) => { const c=await ready(canvasElement);c.getByRole("region",{name:"Assigned-client portfolio"}).scrollIntoView();await expect(c.getByRole("heading",{name:"Active patents worldwide"})).toBeVisible(); } };
+
+// The Case Owner's cross-persona boundary uses the existing seeded identities.
+// Successful navigation is checked in the full-app browser journey because
+// location.replace intentionally leaves Storybook's memory router.
+const clientView = {
+  persona: "LEGAL_COUNSEL",
+  prepare: (db: import("../../../mock/runtime/types").Db) => {
+    const original = db.users.find(u => u.role === "CASE_OWNER")!;
+    sessionStorage.setItem("pl_original_admin_user", JSON.stringify(original));
+    sessionStorage.setItem("pl_client_mode", "true");
+  },
+};
+export const ClientViewActive: Story = {
+  tags: full,
+  parameters: { pulse: clientView },
+  play: async ({canvasElement}) => { const c=within(canvasElement); await expect(await c.findByRole("button", {name:"Exit client view",exact:true})).toBeVisible(); await expect(c.getByRole("region", {name:"Client view"})).toHaveTextContent("Northwind Instruments"); },
+};
+export const ClientViewExitError: Story = {
+  tags: ["viewport:640x360@2"],
+  parameters: { pulse: clientView, msw: {handlers: [route("post", "/v1/auth/view-as/exit", () => ({status:503, body:{message:"Session restoration unavailable"}}))]} },
+  play: async ({canvasElement}) => { const c=within(canvasElement); await userEvent.click(await c.findByRole("button", {name:"Exit client view",exact:true})); await expect(await c.findByRole("alert")).toHaveTextContent("Could not restore your session"); await expect(c.getByRole("button", {name:"Sign in again"})).toBeVisible(); await expect(c.getByRole("button", {name:"Exit client view",exact:true})).toBeEnabled(); await expect(sessionStorage.getItem("pl_client_mode")).toBe("true"); },
+};

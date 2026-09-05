@@ -305,3 +305,5 @@ Clients and onboarding is complete and merged into main with --no-ff (ddbda84). 
 Next surface: **DSN-0019 — Authentication and access**. The overall run remains incomplete.
 
 Concurrency yield — 2026-09-05T13:50:12.499529+00:00: this scheduled firing yielded to other-run commit 391545d (DSN-0019) inside the 25-minute exclusion window; active dirty codex/dsn-0019-auth checkout preserved untouched. Yield recorded from a separate main worktree; no surface edits or validation performed.
+
+Concurrency yield — 2026-09-05T14:51:45.694788+00:00: this scheduled firing yielded to other-run DSN-0019 commit 3dfb0cf inside the 25-minute exclusion window. Active codex/dsn-0019-auth checkout and validation artifacts preserved; yield recorded from a separate main worktree. No surface edits or validation performed.

@@ -311,6 +311,23 @@ const authFailures = v0("v0/auth/failures", "Authentication failures",
   "The only V0 scenario that returns 401 on purpose: invalid login, expired session with a failed refresh, revoked access, SSO failure, unknown domain at signup.",
   U.admin.email, [U.admin.email], () => { const d = emptyDataV0({ authFails: true }); d.portfolios = SMALL; return d; });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+const ideasListStates = ["drafts-only", "mixed", "long-titles"].map((slug) => v0(`v0/ideas/${slug}`, `Ideas list: ${slug}`, "Own and credited ideas with direct next steps.", U.inventor.email, [U.inventor.email], () => {
+  const specs: IdeaSpec[] = slug === "drafts-only" ? [
+    { invention: 0, author: U.inventor, state: "DRAFT", completion: 40, ageDays: 2 },
+    { invention: 1, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 4 },
+  ] : [
+    { invention: 0, author: U.inventor, state: "CHANGES_REQUESTED", ageDays: 1, reviewer: U.admin, comment: "Please explain how the adjustment loop responds when cable load changes.", evaluation: { state: "SUCCEEDED", score: 62 } },
+    { invention: 1, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 2, evaluation: { state: "RUNNING" } },
+    { invention: 2, author: U.coinventor, coInventors: [U.inventor], state: "LEGAL_REVIEW", ageDays: 3, evaluation: { state: "SUCCEEDED", score: 74 } },
+    { invention: 3, author: U.inventor, state: "SENT_TO_PHOTON", ageDays: 4, reviewer: U.admin },
+    { invention: 4, author: U.inventor, state: "REJECTED", ageDays: 5, reviewer: U.admin, comment: "The disclosed mechanism overlaps with the supplied reference. A revised distinction would help reconsideration." },
+    { invention: 5, author: U.inventor, state: "DRAFT", completion: 40, ageDays: 6 },
+  ];
+  const data = northwindBuild(`v0/ideas/${slug}`, SMALL, specs);
+  if (slug === "long-titles") data.ideas[0].title = "Self-tensioning cable harness with a load-responsive adjustment loop and independent reference setting for assemblies exposed to repeated mechanical movement";
+  return data;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

@@ -43,6 +43,7 @@ export function hydrateIdea(db: Db, i: Idea, now: number) {
     inventors,
     patent_link: patent ? { patent: { id: patent.id, title: patent.title, application_number: patent.application_number, jurisdiction: patent.jurisdiction, status: patent.status, filing_date: patent.filing_date, grant_date: patent.grant_date } } : null,
     ...(db.flags.v0 ? { files: db.files.filter((file) => file.idea_id === i.id && file.status === "STORED").map((file) => ({ ...file, file_path: `/v1/files/${file.id}/raw` })) } : {}),
+    ...(db.flags.v0 ? { case_owners: db.users.filter((owner) => owner.role === "CASE_OWNER" && owner.assigned_client_ids.includes(i.client_id)).map((owner) => ({ id: owner.id, name: owner.name })) } : {}),
     score: draft?.score ?? null,
     ageDays: Math.max(0, Math.floor((now - Date.parse(since)) / 86_400_000)),
   };

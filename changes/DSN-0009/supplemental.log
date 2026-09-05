@@ -1,0 +1,23 @@
+inventor-mixed 1280 720 no horizontal overflow; primary action visible {"x":1097.0625,"y":13.5,"width":150.9375,"height":36}
+inventor-mixed 1366 768 no horizontal overflow; primary action visible {"x":1183.0625,"y":13.5,"width":150.9375,"height":36}
+inventor-mixed 1440 900 no horizontal overflow; primary action visible {"x":1257.0625,"y":13.5,"width":150.9375,"height":36}
+inventor-mixed 1920 1080 no horizontal overflow; primary action visible {"x":1737.0625,"y":13.5,"width":150.9375,"height":36}
+inventor-mixed 640 360 no horizontal overflow; primary action visible {"x":465.0625,"y":13.5,"width":150.9375,"height":36}
+case-owner 1280 720 no horizontal overflow; primary action visible {"x":1097.859375,"y":13.5,"width":150.140625,"height":36}
+case-owner 1366 768 no horizontal overflow; primary action visible {"x":1183.859375,"y":13.5,"width":150.140625,"height":36}
+case-owner 1440 900 no horizontal overflow; primary action visible {"x":1257.859375,"y":13.5,"width":150.140625,"height":36}
+case-owner 1920 1080 no horizontal overflow; primary action visible {"x":1737.859375,"y":13.5,"width":150.140625,"height":36}
+case-owner 640 360 no horizontal overflow; primary action visible {"x":465.859375,"y":13.5,"width":150.140625,"height":36}
+photon-admin 1280 720 no horizontal overflow; primary action visible {"x":1097.859375,"y":13.5,"width":150.140625,"height":36}
+photon-admin 1366 768 no horizontal overflow; primary action visible {"x":1183.859375,"y":13.5,"width":150.140625,"height":36}
+photon-admin 1440 900 no horizontal overflow; primary action visible {"x":1257.859375,"y":13.5,"width":150.140625,"height":36}
+photon-admin 1920 1080 no horizontal overflow; primary action visible {"x":1737.859375,"y":13.5,"width":150.140625,"height":36}
+photon-admin 640 360 no horizontal overflow; primary action visible {"x":465.859375,"y":13.5,"width":150.140625,"height":36}
+workspace-admin-pending 1280 720 no horizontal overflow; primary action visible {"x":1059.484375,"y":668,"width":196.515625,"height":40}
+workspace-admin-pending 1366 768 no horizontal overflow; primary action visible {"x":1145.484375,"y":716,"width":196.515625,"height":40}
+workspace-admin-pending 1440 900 no horizontal overflow; primary action visible {"x":1219.484375,"y":848,"width":196.515625,"height":40}
+workspace-admin-pending 1920 1080 no horizontal overflow; primary action visible {"x":1699.484375,"y":1028,"width":196.515625,"height":40}
+workspace-admin-pending 640 360 no horizontal overflow; primary action visible {"x":419.484375,"y":308,"width":196.515625,"height":40}
+Inventor search and clear filters recover all six ideas
+Case Owner client filter and received/filed scope clear
+supplemental checks passed; egress 0

@@ -284,3 +284,5 @@ Photon Admin dashboard is complete, merged into main with --no-ff (29e5f6c) and 
 Next surface: **DSN-0018 — Clients and onboarding**. The overall run remains incomplete.
 
 Concurrency yield — 2026-09-05T11:50:15.641546+00:00: this scheduled firing yielded to other-run commit 92db9b2 (DSN-0018) inside the 25-minute exclusion window. Active dirty codex/dsn-0018-clients checkout preserved untouched; yield recorded from a separate main worktree. No surface edits or validation performed.
+
+Concurrency yield — 2026-09-05T12:50:07.945407+00:00: this scheduled firing yielded to other-run commit 397b205 (DSN-0018) inside the 25-minute exclusion window; active dirty codex/dsn-0018-clients checkout preserved untouched. Yield recorded from a separate main worktree; no surface edits or validation performed.

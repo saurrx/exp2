@@ -1,0 +1,5 @@
+CONFIRMED EXISTING BLOCKER signup new@northwind.test 400 Email and password are required.
+CONFIRMED EXISTING BLOCKER signup new@not-onboarded.test 400 Email and password are required.
+PASS full-app invalid login → preserved values → corrected login → home
+PASS reset request → check/resend → preserved email → repeat request
+PASS reset API → real success UI → existing timed sign-in return

@@ -1,3 +1,4 @@
+import { AuthLayout, AuthMessage, AuthBackLink } from "./AuthLayout";
 import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -45,6 +46,7 @@ const ResetPassword: React.FC = () => {
   const [currentPageStatus, setCurrentPageStatus] =
     useState<CurrentPageStatusType>("PENDING");
   const [searchParams] = useSearchParams();
+  const [entryError, setEntryError] = useState<string>();
   const navigate = useNavigate();
   const source = searchParams?.get("source");
   const isForgotPasswordFlow = source === "forgot_password";
@@ -80,8 +82,7 @@ const ResetPassword: React.FC = () => {
   // Redirect to login if token is missing or invalid
   useEffect(() => {
     if (!token) {
-      toast.error("Invalid or missing reset token");
-      navigate("/login");
+      navigate("/login", { state: { passwordLinkUnavailable: true } });
     }
   }, [token, navigate]);
 
@@ -165,9 +166,7 @@ const ResetPassword: React.FC = () => {
         return response?.data;
       } catch (error: any) {
         console.error("Error resetting password:", error);
-        toast.error(
-          error?.response?.data?.message || "Error resetting password"
-        );
+        setEntryError(error?.response?.data?.message || "Your password could not be saved. Try again or request a new reset link.");
       }
     },
   });
@@ -204,127 +203,28 @@ const ResetPassword: React.FC = () => {
     },
   });
 
+  const complete = currentPageStatus === "SUCCESS_RESET" || currentPageStatus === "SUCCESS_SET";
+  if (complete) return <PasswordCompletion reset={isForgotPasswordFlow} />;
   return (
-    <div className="pulse-auth-shell relative flex h-screen items-center justify-center overflow-hidden">
+    <AuthLayout title={isForgotPasswordFlow ? "Reset your password" : "Set your password"}
+      description="Use at least 8 characters, with an uppercase letter, lowercase letter, number and special character.">
       <AuthLoadingOverlay show={isLoadingLogin} />
-
-      <div className="pulse-auth-panel w-full flex items-center justify-center p-6 relative z-10">
-        {/* Diagonal yellow line */}
-        <div className="pulse-auth-card">
-          <div className="mb-6">
-            <img
-              src="/assets/photon-legal.png"
-              alt="Photon Legal"
-              className="h-10"
-            />
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-3xl mb-2 text-white font-display font-semibold">
-              {currentPageStatus === "SUCCESS_RESET"
-                ? "Password reset successfully!" : currentPageStatus === "SUCCESS_SET"
-                  ? "Password set successfully!"
-                  : isForgotPasswordFlow
-                    ? "Reset Your Password"
-                    : "Set Your Password"}
-            </h1>
-
-            <p className="text-neutral-400 font-sans">
-              {isForgotPasswordFlow ? (
-                "Enter your new password below"
-              ) : email ? (
-                <>
-                  for <b>{email}</b>
-                </>
-              ) : (
-                "Set your new password below"
-              )}
-            </p>
-          </div>
-
-          {currentPageStatus === "PENDING" && (
-            <form
-              className="ph-no-capture font-sans space-y-2"
-              noValidate
-              onSubmit={(e) => {
-                setSubmitted(true);
-                handleSubmit(e);
-              }}
-            >
-              <AuthField
-                label="New Password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="New password"
-                error={submitted ? errors.password : undefined}
-                value={values.password}
-                onChange={handleChange}
-              />
-
-              <AuthField
-                label="Confirm Password"
-                name="confirm_password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Confirm password"
-                error={submitted ? errors.confirm_password : undefined}
-                value={values.confirm_password}
-                onChange={handleChange}
-              />
-
-              <button
-                type="submit"
-                className="w-full font-sans py-3 rounded-sm bg-[#F9B418] text-black font-medium hover:bg-[#F9B418]/90 transition-all"
-                disabled={isPending}
-                style={{ boxShadow: "rgba(249, 180, 24, 0.3) 0px 0px 20px" }}
-              >
-                {isPending ? "Please wait..." : "Submit"}
-              </button>
-            </form>
-          )}
-
-          {(currentPageStatus === "SUCCESS_RESET" || currentPageStatus === "SUCCESS_SET") && (
-            <div className="flex flex-col items-center gap-4 w-[400px]">
-              <p className="text-sm text-gray-500 text-center">
-                Redirecting to login page...
-              </p>
-            </div>
-          )}
-
-          <div className="mt-8 text-center font-sans">
-            <p className="text-xs text-neutral-700">
-              © {new Date().getFullYear()} Photon Legal. All rights reserved.
-            </p>
-          </div>
-
-     
-        </div>
-      </div>
-
-      {/* <div className="flex flex-col text-center my-[56px]">
-        <p className="font-bold text-[32px] tracking-tight">
-          {currentPageStatus === "SUCCESS_RESET"
-            ? "Password reset successfully!"
-            : isForgotPasswordFlow
-            ? "Reset Your Password"
-            : "Set Your Password"}
-        </p>
-        <p className="font-normal text-xl text-[#0E0E0EBF]">
-          {isForgotPasswordFlow ? (
-            "Enter your new password below"
-          ) : email ? (
-            <>
-              for <b>{email}</b>
-            </>
-          ) : (
-            "Set your new password below"
-          )}
-        </p>
-      </div> */}
-
-    </div>
+      {<form className="ph-no-capture space-y-2" noValidate aria-busy={isPending} onSubmit={(e) => { setSubmitted(true); setEntryError(undefined); handleSubmit(e); }}>
+        <AuthField label="New password" name="password" type="password" autoComplete="new-password" error={submitted ? errors.password : undefined} value={values.password} onChange={handleChange} />
+        <AuthField label="Confirm password" name="confirm_password" type="password" autoComplete="new-password" error={submitted ? errors.confirm_password : undefined} value={values.confirm_password} onChange={handleChange} />
+        <AuthMessage>{entryError}</AuthMessage>
+        <Button type="submit" size="sm" className="w-full" disabled={isPending}>{isPending ? "Saving password…" : isForgotPasswordFlow ? "Reset password" : "Set password"}</Button>
+      </form>}
+      {entryError ? <Button variant="link" size="sm" className="mt-6 h-auto px-0 py-0" onClick={() => navigate(isForgotPasswordFlow ? "/forgot-password" : "/signup")}>{isForgotPasswordFlow ? "Request a new reset link" : "Return to account setup"}</Button> : <AuthBackLink />}
+    </AuthLayout>
   );
 };
 
 export default ResetPassword;
+
+/** The transient completion shown before the existing two-second sign-in return. */
+export function PasswordCompletion({ reset = true }: { reset?: boolean }) {
+  return <AuthLayout title={reset ? "Password reset" : "Password set"} description={<span role="status">Taking you back to sign in. Use your new password when you return.</span>}>
+    <AuthBackLink />
+  </AuthLayout>;
+}

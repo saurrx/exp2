@@ -523,6 +523,14 @@ const clientStates = ["potential-client", "new-client", "no-owner", "no-admin", 
   return d;
 }));
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...clientStates, ...photonDashboardStates, ...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+// DSN-0019: public entry scenarios reuse existing users/invitations and statuses.
+const authenticationStates = ["entry", "expired-invitation", "access-denied"].map(slug => v0(`v0/auth/${slug}`, `Authentication and access: ${slug}`, "Synthetic public entry and existing access-state evidence.", U.inventor.email, [U.inventor.email, U.admin.email, U.caseOwner.email, U.photonAdmin.email], () => {
+  const d = structuredClone(northwindBuild(`v0/auth/${slug}`, SMALL));
+  if (slug === "expired-invitation") d.invites.forEach(i => { i.status = "EXPIRED"; i.expires_at = clock.daysAgo(1); });
+  if (slug === "access-denied") d.users.find(u => u.id === U.inventor.id)!.status = "SUSPENDED";
+  return d;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...authenticationStates, ...clientStates, ...photonDashboardStates, ...myWorkStates, ...dueDatesStates, ...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

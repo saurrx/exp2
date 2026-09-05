@@ -74,8 +74,8 @@ for (const f of screens) {
 const field = readFileSync(join(AUTH, 'AuthField.tsx'), 'utf8');
 if (!/aria-invalid=\{invalid/.test(field)) failures.push('AuthField.tsx: does not set aria-invalid');
 if (!/aria-describedby=/.test(field)) failures.push('AuthField.tsx: message is not tied to the input');
-if (!/border-red-\d+/.test(field)) failures.push('AuthField.tsx: invalid state does not paint the border');
-if (!/min-h-\[\d+px\]/.test(field)) failures.push('AuthField.tsx: message slot reserves no height — the layout will jump');
+if (!/border-pl-red/.test(field)) failures.push('AuthField.tsx: invalid state does not paint the border');
+if (!/min-h-5/.test(field)) failures.push('AuthField.tsx: message slot reserves no height — the layout will jump');
 // The message node must be unconditional; a `&&` around it is the height back.
 if (!/\{error \?\? ""\}/.test(field)) failures.push('AuthField.tsx: message node is conditional — reserved space is not reserved');
 

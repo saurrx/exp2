@@ -12,27 +12,28 @@ page.on("pageerror", (e) => errors.push("pageerror: " + e.message.slice(0, 200))
 const step = async (name, fn) => { try { await fn(); console.log("ok  ", name); } catch (e) { console.log("FAIL", name, "-", String(e.message || e).slice(0, 300)); } };
 
 await step("login page renders on mock", async () => {
-  await page.goto(base + "/login?scenario=committee/queue", { waitUntil: "networkidle" });
+  await page.goto(base + "/login?scenario=v0/auth/entry", { waitUntil: "networkidle" });
   await page.waitForSelector("#design-tools", { state: "attached", timeout: 15000 });
   await page.getByRole("button", { name: "Open design tools" }).click();
   await page.getByRole("region", { name: "Design tools" }).waitFor();
-  await page.getByRole("heading", { name: "Sign in" }).waitFor();
+  await page.getByRole("heading", { name: "Sign in to Pulse" }).waitFor();
   await page.screenshot({ path: `${shots}/01-login.png` });
 });
 await step("wrong email is refused with a visible error", async () => {
-  await page.locator("input[name=email]").fill("nobody@acme.test");
+  await page.getByRole("button", { name: "Sign in with email", exact: true }).click();
+  await page.locator("input[name=email]").fill("unknown@northwind.test");
   await page.locator("input[name=password]").fill("x");
-  await page.getByRole("button", { name: "Sign In" }).click();
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.getByText("Invalid email or password.").first().waitFor({ timeout: 8000 });
 });
-await step("committee persona logs in and lands on the dashboard", async () => {
-  await page.locator("input[name=email]").fill("committee@acme.test");
+await step("Inventor signs in and lands on their home", async () => {
+  await page.locator("input[name=email]").fill("inventor@northwind.test");
   await page.locator("input[name=password]").fill("any");
-  await page.getByRole("button", { name: "Sign In" }).click();
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL(base + "/", { timeout: 15000 });
   await page.waitForLoadState("networkidle");
-  await page.getByText("Tomás Ibarra").first().waitFor({ timeout: 10000 });
-  await page.screenshot({ path: `${shots}/02-dashboard-committee.png` });
+  await page.getByText("Anika Sharma").first().waitFor({ timeout: 10000 });
+  await page.screenshot({ path: `${shots}/02-inventor-home.png` });
 });
 // DSN-0010: V0 review decision replaces the retired committee/counsel journeys.
 await step("Workspace Admin records a filing handoff", async () => {

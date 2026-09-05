@@ -1,9 +1,9 @@
+import { AuthLayout } from "./AuthLayout";
 import API_CONFIG from "@/lib/apiConfig";
 import { Loader2 } from "lucide-react";
 import Cookies from "js-cookie";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "@/lib/toast";
 import { track } from "@/lib/analytics";
 
 /**
@@ -34,19 +34,18 @@ const SamlCallback = () => {
         track("login_succeeded", { method: "saml" });
         navigate("/", { replace: true });
       } catch {
-        toast.error("SSO sign-in could not be completed. Please try again.");
         navigate("/login?sso_error=1", { replace: true });
       }
     })();
   }, [navigate]);
 
   return (
-    <div className="pulse-auth-shell flex h-screen w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F9B418]" />
-        <p className="font-sans text-neutral-500">Completing sign in…</p>
+    <AuthLayout title="Completing sign in" description="Checking your workspace session.">
+      <div role="status" className="flex items-center gap-3 text-sm text-pl-text-2">
+        <Loader2 aria-hidden="true" className="h-5 w-5 animate-spin motion-reduce:animate-none text-pl-navy" />
+        Please wait…
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

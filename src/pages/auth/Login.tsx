@@ -1,15 +1,15 @@
 import API_CONFIG from "@/lib/apiConfig";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { toast } from "@/lib/toast";
+import { useEffect, useState } from "react";
 import { track } from "@/lib/analytics";
 import Cookies from "js-cookie";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import "@/style.css";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { AuthLayout, AuthMessage } from "./AuthLayout";
 import { AuthField } from "./AuthField";
 import { SsoButton, SsoEmailStep } from "./SsoPanel";
 import { PlatformPayloadInterface } from "./Signup";
@@ -40,29 +40,13 @@ const formInitialValues: iLoginForm = {
 };
 
 const Login = () => {
-  const loaction = useLocation();
-  const { state } = loaction;
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const [screenHeight, setScreenHeight] = useState(0);
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  useLayoutEffect(() => {
-    const updateHeight = () => {
-      setScreenHeight(window?.innerHeight || 0);
-    };
-
-    // Set initial height
-    updateHeight();
-
-    // Add resize event listener
-    window.addEventListener("resize", updateHeight);
-
-    // Cleanup event listener on unmount
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, []);
+  const [entryError, setEntryError] = useState<string | undefined>(() => searchParams.has("session_expired") ? "Your session has expired. Sign in again to return to your workspace." : undefined);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   const { data, mutate, isSuccess, isPending } = useMutation({
     mutationKey: ["social_login"],
@@ -80,7 +64,7 @@ const Login = () => {
 
         return response.data;
       } catch (error) {
-        toast.error(error?.response?.data?.message || "Error registering user");
+        setEntryError(error?.response?.data?.message || "Sign-in could not be completed. Try again or choose another method.");
       }
     },
   });
@@ -110,7 +94,7 @@ const Login = () => {
     // ordinary login form with no idea what happened.
     const err = searchParams.get("error") ?? (searchParams.get("sso_error") ? "sso" : null);
     if (!err) return;
-    toast.error(
+    setEntryError(
       err === "oauth_state"
         ? "That sign-in link expired. Please try again."
         : err === "sso"
@@ -137,14 +121,14 @@ const Login = () => {
           mutate(payload);
         }
       } catch (error) {
-        toast.error("Error during sign in");
+        setEntryError("Google sign-in could not be completed. Try again or choose another method.");
       } finally {
         setIsLoading(false);
       }
     },
     onError: (error) => {
       setIsLoading(false);
-      toast.error("Error during sign in");
+      setEntryError("Google sign-in could not be completed. Try again or choose another method.");
     },
   });
 
@@ -214,7 +198,9 @@ const Login = () => {
           }
         }
       } catch (error) {
-        toast.error(error?.response?.data?.message || "Error logging in");
+        setEntryError(error?.response?.data?.message === "This account has been disabled."
+          ? "This account has been disabled. Contact the person who manages your Pulse access, or use another work account."
+          : error?.response?.data?.message || "Sign-in could not be completed. Try again.");
       }
     },
   });
@@ -237,174 +223,52 @@ const Login = () => {
     window.location.href = "/v1/auth/microsoft";
   };
 
+  if (location.state?.passwordLinkUnavailable) return <AuthLayout title="Password link unavailable" description="This password link is incomplete. Request a new reset link to continue.">
+    <Button size="sm" className="w-full" onClick={() => navigate("/forgot-password")}>Request a new reset link</Button>
+    <Button variant="link" size="sm" className="mt-6 h-auto px-0 py-0" onClick={() => navigate("/login", { replace: true, state: null })}>Back to sign in</Button>
+  </AuthLayout>;
+
   return (
-    <div className="pulse-auth-shell relative flex h-screen items-center justify-center overflow-hidden">
+    <AuthLayout
+      title={ssoStep === "email" ? "Sign in with workspace SSO" : emailOpen ? "Sign in with email" : "Sign in to Pulse"}
+      description={ssoStep === "email" ? "Enter your work email to continue to your workspace’s sign-in service." : "Use the work account connected to your workspace."}
+    >
       <AuthLoadingOverlay show={isLoading} />
-
-      <div className="pulse-auth-panel w-full flex items-center justify-center p-6 relative z-10">
-        <div className="pulse-auth-card">
-          <div className="mb-5">
-            <img
-              src="/assets/photon-legal.png"
-              alt="Photon Legal"
-              className="h-10"
-            />
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-3xl mb-2 font-display font-semibold text-white">
-              Sign in
-            </h1>
-            <p className="text-neutral-400 font-sans">Welcome back to Pulse</p>
-          </div>
-
-          {ssoStep === "email" ? (
-            <SsoEmailStep onCancel={() => setSsoStep("idle")} />
-          ) : (
-            <>
-          <div className="flex items-center gap-5">
-            <motion.button
-              initial={
-                state?.fromForgotPage ? { scaleY: 0, display: "none" } : false
-              }
-              animate={
-                state?.fromForgotPage ? { scaleY: 1, display: "flex" } : false
-              }
-              transition={{
-                ease: "easeInOut",
-                duration: 0.1,
-                delay: 0.06,
-              }}
-              style={{ transformOrigin: "center" }}
-              onClick={() => {
-                track("login_attempted", { method: "google" });
-                handleLogin();
-              }}
-              disabled={isLoading || isPending}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 mb-5 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <GoogleIcon />
-              <span className="text-white font-sans">Google</span>
-            </motion.button>
-
-            <motion.button
-              initial={
-                state?.fromForgotPage ? { scaleY: 0, display: "none" } : false
-              }
-              animate={
-                state?.fromForgotPage ? { scaleY: 1, display: "flex" } : false
-              }
-              transition={{
-                ease: "easeInOut",
-                duration: 0.1,
-                delay: 0.06,
-              }}
-              style={{ transformOrigin: "center" }}
-              onClick={() => microsoftLogin()}
-              disabled={isLoading || isPending}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 mb-5 rounded-sm border border-white/10 bg-white/5 hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <MicrosoftIcon />
-
-              <span className="text-white font-sans">Microsoft</span>
-            </motion.button>
-          </div>
-
-          <SsoButton onStart={() => setSsoStep("email")} disabled={isLoading || isPending} />
-
-          <div className="relative mb-6 flex items-center">
-            <div className="flex-1 h-px bg-neutral-900" />
-
-            <span className="px-4 text-sm text-neutral-500 font-sans whitespace-nowrap">
-              Or continue with email
-            </span>
-            <div className="flex-1 h-px bg-neutral-900" />
-          </div>
-
-          <form
-            className="ph-no-capture space-y-2"
-            noValidate
-            onSubmit={(e) => {
-              setSubmitted(true);
-              handleSubmit(e);
-            }}
-          >
-            <AuthField
-              label="Email"
-              name="email"
-              type="email"
-              maxLength={50}
-              autoComplete="username"
-              placeholder="you@company.com"
-              error={submitted ? errors.email : undefined}
-              value={values.email}
-              onChange={(e) =>
-                handleChange({
-                  target: {
-                    name: "email",
-                    // trim() only strips the ends; a space TYPED mid-way
-                    // stayed. No email contains whitespace — drop it all.
-                    value: e.target.value?.replace(/\s+/g, "").toLowerCase(),
-                  },
-                })
-              }
-            />
-
-            <AuthField
-              label="Password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              error={submitted ? errors.password : undefined}
-              value={values.password}
-              onChange={handleChange}
-            />
-
-            <div className="flex justify-end font-sans pb-3">
-              <button
-                type="button"
-                onClick={() => navigate("/forgot-password")}
-                className="text-sm text-[#F9B418] hover:text-[#F9B418]/80 transition-colors"
-              >
-                Forgot password?
-              </button>
-            </div>
-            {/* Not gated on `isValid`: the button used to disable itself the
-                moment a field was invalid, which — now that errors wait for a
-                submit — would mean the user could never trigger the validation
-                they are waiting to see. */}
-            <button
-              type="submit"
-              disabled={isLoadingLogin}
-              className="w-full py-3 rounded-sm bg-[#F9B418] text-black font-medium hover:bg-[#F9B418]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-sans"
-              style={{ boxShadow: "rgba(249, 180, 24, 0.3) 0px 0px 20px" }}
-            >
-              {isLoadingLogin ? "Please wait..." : "Sign In"}
-            </button>
+      {!emailOpen && <AuthMessage>{entryError}</AuthMessage>}
+      {ssoStep === "email" ? (
+        <SsoEmailStep onCancel={() => setSsoStep("idle")} />
+      ) : emailOpen ? (
+        <>
+          <Button variant="link" size="sm" className="mb-4 h-auto px-0 py-0" onClick={() => setEmailOpen(false)}>Other sign-in methods</Button>
+          <form className="ph-no-capture space-y-2" noValidate aria-busy={isLoadingLogin} onSubmit={(e) => {
+            setSubmitted(true);
+            setEntryError(undefined);
+            handleSubmit(e);
+          }}>
+            <AuthField label="Work email" name="email" type="email" maxLength={50} autoComplete="username" placeholder="you@company.test"
+              error={submitted ? errors.email : undefined} value={values.email}
+              onChange={(e) => handleChange({ target: { name: "email", value: e.target.value?.replace(/\s+/g, "").toLowerCase() } })} />
+            <AuthField label="Password" name="password" type="password" autoComplete="current-password"
+              error={submitted ? errors.password : undefined} value={values.password} onChange={handleChange} />
+            <div className="flex justify-end pb-2"><Button variant="link" size="sm" type="button" className="h-auto px-0 py-0" onClick={() => navigate("/forgot-password")}>Forgot password?</Button></div>
+            <AuthMessage>{entryError}</AuthMessage>
+            <Button size="sm" type="submit" className="w-full" disabled={isLoadingLogin}>{isLoadingLogin ? "Signing in…" : "Sign in"}</Button>
           </form>
-            </>
-          )}
-
-          <div className="mt-5 text-center">
-            <p className="text-sm text-neutral-500 font-sans">
-              Don't have an account?{" "}
-              <button
-                onClick={() => navigate("/signup")}
-                className="text-[#F9B418] hover:text-[#F9B418]/80 transition-colors font-medium"
-              >
-                Sign Up
-              </button>
-            </p>
+        </>
+      ) : (
+        <>
+          <div className="space-y-3">
+            <Button size="sm" className="w-full" onClick={() => { track("login_attempted", { method: "google" }); handleLogin(); }} disabled={isLoading || isPending}><GoogleIcon />Continue with Google</Button>
+            <Button variant="outline" size="sm" className="w-full" onClick={microsoftLogin} disabled={isLoading || isPending}><MicrosoftIcon />Continue with Microsoft</Button>
+            <SsoButton onStart={() => setSsoStep("email")} disabled={isLoading || isPending} />
           </div>
-          <div className={`text-center ${screenHeight < 720 ? "mt-2" : "mt-8"}`}>
-            <p className="text-xs text-neutral-700 font-sans">
-              © {new Date().getFullYear()} Photon Legal. All rights reserved.
-            </p>
+          <div className="mt-5 border-t border-pl-border pt-5">
+            <Button variant="link" size="sm" className="h-auto px-0 py-0" onClick={() => setEmailOpen(true)}>Sign in with email</Button>
           </div>
-        </div>
-      </div>
-    </div>
+        </>
+      )}
+      <p className="mt-6 text-sm text-pl-text-2">New to Pulse? <Button variant="link" size="sm" className="h-auto px-0 py-0" onClick={() => navigate("/signup")}>Create an account</Button></p>
+    </AuthLayout>
   );
 };
 

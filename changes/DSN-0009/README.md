@@ -115,3 +115,20 @@ REFERENCE MATCH: no — desktop typography, restrained color, hairlines, and rev
 Final verification and evaluator round 2 pending.
 
 Round 2 validation: full stories 263/263, V0 38/38, selected gates 7/7, both builds and refreshed stable screenshots pass. All twenty primary-action/overflow probes pass, zoom filters open and close, and eight focused axe contexts have no findings. Settled navigation captures were reopened and show opaque legible menus. Required Storybook build twice failed with a public-assets mkdir race; `.storybook/main.ts` now disables Vite’s duplicate public-directory copy while retaining Storybook staticDirs. The next build passed. The initial unchanged-desktop comparison log predates the evaluator’s repetition/content corrections; remaining legacy review baselines are refreshed for those documented defects.
+
+## Evaluator round 2 — NEEDS_WORK
+```text
+VERDICT: NEEDS_WORK
+SURFACE: ideas.md  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 3 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — At 1280×720 and 1440×900, retrieval, ownership and next steps support the recorded roleplays, but the Workspace Admin must still infer whether the assessment is advisory before deciding.
+FINDINGS (most severe first, max 7):
+
+1. Workspace Admin assessment — “AI evaluated” identifies its source but never states its advisory nature in the pending or large-queue brief; Leah must infer how much authority to give the score before sending the idea to Photon Legal — state once beside the assessment that it is AI-assisted and advisory.
+
+STATES MISSING: none — all ten brief states are represented across the 45 inspected PNGs.
+REFERENCE MATCH: yes — restrained typography, hairline separation, compact controls and the desktop review panes preserve the reference language; settled zoom menus are now legible.
+```
+
+## Round 3 correction
+The Workspace Admin assessment now says “AI-assisted and advisory” once beside the assessment and full-evaluation link. This corrects the evaluator-exposed trust defect without changing review behavior.

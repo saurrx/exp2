@@ -104,3 +104,6 @@ Ideas list built in place with eleven V0 stories. Inventor state/score/next step
 
 ### DSN-0009 evaluator corrections
 Round 1 NEEDS_WORK: transient menu captures, placeholder/missing review content, repeated selected title/score, and first-run retrieval controls. All corrected: opaque reduced-motion menus with settled captures; canonical disclosure field reads and substantive scenario evidence; selected reference cue; genuinely empty first-run controls omitted. The reference changes fix those documented defects and preserve the two-pane arrangement and decision mutations. Repeated Storybook public-copy race fixed in its build configuration after two failures. Round 2 verification: stories 263/263, V0 38/38, selected gates 7/7, builds, stable captures, twenty geometry probes and focused axe pass. Fresh evaluator round 2 next; coverage remains pending.
+
+### DSN-0009 final review checkpoint
+Round 2 found one remaining trust issue: the Workspace Admin AI assessment did not explicitly state its advisory nature. Corrected its source label to “AI-assisted and advisory”; refreshed and opened the five default viewports, stable screenshot checks and twenty geometry/interaction probes pass. Fresh evaluator round 3 running; coverage remains 6/17 pending PASS.

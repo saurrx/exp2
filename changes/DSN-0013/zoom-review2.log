@@ -1,0 +1,71 @@
+PASS zoom notes editable with save visible { x: 371.734375, y: 64, width: 160.453125, height: 36 }
+GEOMETRY [
+  {
+    tag: 'HEADER',
+    rect: {
+      x: 0,
+      y: 0,
+      width: 640,
+      height: 64,
+      top: 0,
+      right: 640,
+      bottom: 64,
+      left: 0
+    },
+    scrollTop: 0,
+    scrollHeight: 63,
+    clientHeight: 63
+  },
+  {
+    tag: 'SECTION',
+    rect: {
+      x: 0,
+      y: 64,
+      width: 640,
+      height: 296,
+      top: 64,
+      right: 640,
+      bottom: 360,
+      left: 0
+    },
+    scrollTop: 0,
+    scrollHeight: 992,
+    clientHeight: 296
+  },
+  {
+    tag: 'MAIN',
+    rect: {
+      x: 0,
+      y: 0,
+      width: 640,
+      height: 360,
+      top: 0,
+      right: 640,
+      bottom: 360,
+      left: 0
+    },
+    scrollTop: 0,
+    scrollHeight: 360,
+    clientHeight: 360
+  },
+  {
+    tag: 'HTML',
+    rect: {
+      x: 0,
+      y: 0,
+      width: 640,
+      height: 360,
+      top: 0,
+      right: 640,
+      bottom: 360,
+      left: 0
+    },
+    scrollTop: 0,
+    scrollHeight: 360,
+    clientHeight: 360
+  }
+]
+PASS retained save retry at zoom
+PASS retained upload retry at zoom
+PASS workspace-admin-upcoming-event primary visible at zoom
+PASS inventor primary visible at zoom

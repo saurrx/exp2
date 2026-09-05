@@ -1,0 +1,9 @@
+PASS INVENTOR role boundary, faithful recorded inventors, document retrieval, portfolio return context
+PASS LEGAL_COUNSEL contextual date link sends identical application search
+PASS LEGAL_COUNSEL role boundary, faithful recorded inventors, document retrieval, portfolio return context
+PASS CASE_OWNER canonical assignee/family save, refresh, same-client upload/download bytes, cancel/remove confirmation
+PASS CASE_OWNER contextual date link sends identical application search
+PASS CASE_OWNER role boundary, faithful recorded inventors, document retrieval, portfolio return context
+PASS PHOTON_ADMIN canonical assignee/family save, refresh, same-client upload/download bytes, cancel/remove confirmation
+PASS PHOTON_ADMIN contextual date link sends identical application search
+PASS PHOTON_ADMIN role boundary, faithful recorded inventors, document retrieval, portfolio return context

@@ -1,0 +1,8 @@
+VERDICT: PASS
+SURFACE: patent-detail  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — Independent six-question roleplays at 1280×720 and 1440×900 agree with the record: identity leads, persona-appropriate controls are clear, supporting evidence recedes, and recovery avoids unnecessary remembering or guessing.
+FINDINGS (most severe first, max 7):
+None in the 72 inspected screenshots; the record documents three directions and the chosen tradeoff.
+STATES MISSING: none
+REFERENCE MATCH: yes — Typography, compact amber controls, restrained borders, whitespace and hairline separation follow the Workspace Admin reference language.

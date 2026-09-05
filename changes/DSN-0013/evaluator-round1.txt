@@ -1,0 +1,12 @@
+VERDICT: NEEDS_WORK
+SURFACE: patent-detail  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: fail — Default views at both review widths support the builder’s roleplay, but operator editing repeats identity/status and document recovery requires avoidable guessing.
+FINDINGS (most severe first, max 7):
+
+1. Document removal, Photon Admin — At 1280×720 the confirmation is outside the viewport; at 1440×900 its question appears at the bottom with the decision controls below it, requiring the operator to hunt after clicking Delete — Place confirmation beside the selected document or bring the complete confirmation into view.
+2. Operator editors, both personas — At 1280×720 and 1440×900 the patent title and status appear in both the header and editable fields, breaking the charter’s explicit no-repetition rule and requiring comparison between saved and edited values — Use a compact editing header retaining client context, with title and status shown once in their fields.
+3. Failed document upload, Case Owner — “No file chosen” contradicts “Selected: synthetic-evidence.txt” and the retained-file reassurance, including at 200% zoom; the operator must decide which message to trust before retrying — Present one authoritative retained-file state with a clear retry control.
+
+STATES MISSING: none of the brief’s named states; the removal confirmation controls are not visible in either supplied removal capture.
+REFERENCE MATCH: yes — Typography, compact amber controls, restrained borders, whitespace and hairline separation match the reference language.

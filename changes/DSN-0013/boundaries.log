@@ -1,0 +1,4 @@
+PASS INVENTOR foreign/unassigned patent detail returns 404
+PASS LEGAL_COUNSEL foreign/unassigned patent detail returns 404
+PASS CASE_OWNER foreign/unassigned patent detail returns 404
+PASS inventor originating disclosure opens existing detail route

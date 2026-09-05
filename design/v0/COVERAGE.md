@@ -26,7 +26,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Review decision | Workspace Admin | `/ideas` | 5 | 12 | conceptual | DSN-0010 |
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
 | Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 9 | 16 | none | DSN-0012 |
-| Patent detail | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents/:patentId` | 6 | 15 | unwired |  |
+| Patent detail | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents/:patentId` | 6 | 15 | conceptual | DSN-0013 |
 | Actions | Workspace Admin, Case Owner, Photon Admin | `/due-dates`, `/actions` | 5 | 14 | none |  |
 | Photon due dates | Case Owner, Photon Admin | `/due-dates` | 5 | 10 | none |  |
 | Workspace, people and profile | Workspace Admin, Inventor, Case Owner, Photon Admin | `/workspace`, `/profile` | 6 | 12 | unwired |  |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 213 intended stories, 55 V0 scenarios; backend impact conceptual on 6, unwired on 5, none on 6.
+17 surfaces, 213 intended stories, 55 V0 scenarios; backend impact conceptual on 7, unwired on 4, none on 6.
 
 ## Inventor home
 
@@ -183,7 +183,7 @@ Brief: `product-context/surfaces/patent-portfolio.md` · Storybook title: `Surfa
 
 ## Patent detail
 
-Brief: `product-context/surfaces/patent-detail.md` · Storybook title: `Surfaces/Patent detail` · DSN: none yet
+Brief: `product-context/surfaces/patent-detail.md` · Storybook title: `Surfaces/Patent detail` · DSN: DSN-0013
 
 - **Personas:** Inventor, Workspace Admin, Case Owner, Photon Admin
 - **User goal:** Understand one patent's identity, legal and lifecycle state, family, documents and relationship to the originating idea.
@@ -193,7 +193,7 @@ Brief: `product-context/surfaces/patent-detail.md` · Storybook title: `Surfaces
 - **States:** loading — identity first, sections follow; empty — incomplete imported record; no originating idea; no documents; success — pending, filed, granted, inactive, closed with the lifecycle timeline; error — record unavailable; permission — Inventor read-only with no dates; Workspace Admin read-only with contextual dates and Actions; Photon roles edit
 - **Surface-specific states:** pending, filed, granted, inactive, closed, incomplete-imported-record, multiple-family-members, no-originating-idea, many-documents, upcoming-event
 - **Navigation badge:** none
-- **Backend impact:** unwired — GET and PATCH /v1/patents/:id exist with family and timeline fields; documents attached to a patent are not modelled beyond import files today.
+- **Backend impact:** conceptual — Existing patent read/update and file routes retained. BF-11 models same-client patent document association; canonical metadata, family and lifecycle fields remain faithful. No real backend was contacted.
 - **Intended story ids:** `surfaces-patent-detail--inventor`, `surfaces-patent-detail--workspace-admin-upcoming-event`, `surfaces-patent-detail--case-owner-editor`, `surfaces-patent-detail--photon-admin-editor`, `surfaces-patent-detail--pending`, `surfaces-patent-detail--filed`, `surfaces-patent-detail--granted`, `surfaces-patent-detail--inactive`, `surfaces-patent-detail--closed`, `surfaces-patent-detail--incomplete-imported-record`, `surfaces-patent-detail--multiple-family-members`, `surfaces-patent-detail--no-originating-idea`, `surfaces-patent-detail--many-documents`, `surfaces-patent-detail--loading`, `surfaces-patent-detail--error`
 - **Excluded here:** due dates shown to Inventors, equal-weight sections, raw database fields, duplicated status
 

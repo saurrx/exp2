@@ -1,0 +1,30 @@
+wrote  surfaces-patent-detail--case-owner-editor--at-1280x720
+wrote  surfaces-patent-detail--case-owner-editor--at-1440x900
+   note surfaces-patent-detail--case-owner-editor--at-1366x768: 26 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--case-owner-editor--at-1366x768
+   note surfaces-patent-detail--case-owner-editor--at-1920x1080: 33 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--case-owner-editor--at-1920x1080
+wrote  surfaces-patent-detail--case-owner-editor--at-640x360@2
+   note surfaces-patent-detail--photon-admin-editor--at-1280x720: 26 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--photon-admin-editor--at-1280x720
+wrote  surfaces-patent-detail--photon-admin-editor--at-1440x900
+   note surfaces-patent-detail--photon-admin-editor--at-1366x768: 26 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--photon-admin-editor--at-1366x768
+UNSTABLE surfaces-patent-detail--photon-admin-editor--at-1920x1080: two clean renders differ by 49 pixels in [560,114,1647,717]
+wrote  surfaces-patent-detail--photon-admin-editor--at-640x360@2
+wrote  surfaces-patent-detail--many-documents--at-1280x720
+wrote  surfaces-patent-detail--many-documents--at-1440x900
+   note surfaces-patent-detail--save-failure--at-1280x720: 15 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--save-failure--at-1280x720
+   note surfaces-patent-detail--save-failure--at-1440x900: 23 anti-aliasing pixel(s) between renders, within tolerance
+wrote  surfaces-patent-detail--save-failure--at-1440x900
+wrote  surfaces-patent-detail--save-failure--at-640x360@2
+wrote  surfaces-patent-detail--saving--at-1280x720
+wrote  surfaces-patent-detail--saving--at-1440x900
+wrote  surfaces-patent-detail--document-failure--at-1280x720
+wrote  surfaces-patent-detail--document-failure--at-1440x900
+wrote  surfaces-patent-detail--document-failure--at-640x360@2
+wrote  surfaces-patent-detail--remove-document--at-1280x720
+wrote  surfaces-patent-detail--remove-document--at-1440x900
+wrote  surfaces-patent-detail--remove-document--at-640x360@2
+shots: 1 failure(s)

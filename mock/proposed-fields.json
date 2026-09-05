@@ -70,6 +70,13 @@
       "type": "Array<{ id, name }> (V0 only)",
       "finding": "BF-10",
       "reason": "DSN-0009: Photon Ideas list needs Case Owner context beside each client. Derived from existing assigned client scope; no assignment or permission changes."
+    },
+    {
+      "entity": "Patent",
+      "field": "documents",
+      "type": "string[] (PATCH /v1/patents/:id, V0 only)",
+      "finding": "BF-11",
+      "reason": "DSN-0013: associate stored same-client uploads with the patent using its existing update flow. The mock had a files response but ignored the existing component documents body, leaving successful uploads unattached. Only Case Owner and Photon Admin within client scope can maintain associations. No new route or persona."
     }
   ],
   "collections": [

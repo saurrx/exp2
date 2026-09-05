@@ -846,8 +846,8 @@
         ]
       },
       "badge": "none",
-      "backendImpact": "unwired",
-      "backendNotes": "GET and PATCH /v1/patents/:id exist with family and timeline fields; documents attached to a patent are not modelled beyond import files today.",
+      "backendImpact": "conceptual",
+      "backendNotes": "Existing patent read/update and file routes retained. BF-11 models same-client patent document association; canonical metadata, family and lifecycle fields remain faithful. No real backend was contacted.",
       "storyIds": [
         "surfaces-patent-detail--inventor",
         "surfaces-patent-detail--workspace-admin-upcoming-event",
@@ -871,7 +871,7 @@
         "raw database fields",
         "duplicated status"
       ],
-      "dsn": null
+      "dsn": "DSN-0013"
     },
     {
       "brief": "surfaces/actions.md",

@@ -148,3 +148,8 @@ Fresh evaluator round 1 NEEDS_WORK: retained filename was not rendered consisten
 
 ### DSN-0012 complete — evaluator PASS
 Fresh evaluator round 2 PASS: all seven scores 4, no findings or missing states across 56 inspected screenshots. Sixteen V0 portfolio stories, focused 16/16, final required gates 8/8, both builds, stable changed captures, focused axe, four-persona filtered CSV, detail/Back, import recovery/empty scope and actual status save checks pass. The final status save probe exposed an ignored legacy body field; corrected to the existing canonical status payload in the component and verified the saved response and refreshed row. No adapter/auth/analytics or reference-screen change. Coverage 9/17; ready for no-ff merge. Next: DSN-0013 Patent detail.
+
+## DSN-0012 merged recap — 2026-09-05 05:12 UTC
+Patent portfolio is complete and merged to main with --no-ff (a0bdb84), pushed to origin. The four-persona compact list preserves scope, filtered export and direct detail navigation; operational import/edit recovery is verified. Sixteen V0 stories replace five legacy portfolio stories. Independent evaluator round 2 PASS, all seven scores 4, no findings or missing states across 56 PNGs. Final required gates 8/8, focused 16/16, both builds, stable captures and focused accessibility/recovery/save checks pass. Coverage is 9/17. Preserved the concurrent firing's yield entry when resolving the PROGRESS-only merge conflict. No founder decision required.
+
+Next surface: **DSN-0013 — Patent detail** (`product-context/surfaces/patent-detail.md`). No surface remains in progress. The overall RUN COMPLETE condition remains unmet.

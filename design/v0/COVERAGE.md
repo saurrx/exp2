@@ -27,7 +27,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
 | Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 9 | 16 | none | DSN-0012 |
 | Patent detail | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents/:patentId` | 6 | 15 | conceptual | DSN-0013 |
-| Actions | Workspace Admin, Case Owner, Photon Admin | `/due-dates`, `/actions` | 5 | 14 | none |  |
+| Actions | Workspace Admin, Case Owner, Photon Admin | `/due-dates`, `/actions` | 16 | 14 | conceptual | DSN-0014 |
 | Photon due dates | Case Owner, Photon Admin | `/due-dates` | 5 | 10 | none |  |
 | Workspace, people and profile | Workspace Admin, Inventor, Case Owner, Photon Admin | `/workspace`, `/profile` | 6 | 12 | unwired |  |
 | Case Owner my work | Case Owner | `/` | 3 | 9 | unwired |  |
@@ -35,7 +35,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Photon Admin dashboard | Photon Admin | `/` | 3 | 9 | unwired |  |
 | Authentication and access | Inventor, Workspace Admin, Case Owner, Photon Admin | `/login`, `/signup`, `/i/:inviteCode`, `/invite`, `/forgot-password`, `/reset-password`, `/auth/saml/callback` | 3 | 11 | none |  |
 
-17 surfaces, 213 intended stories, 55 V0 scenarios; backend impact conceptual on 7, unwired on 4, none on 6.
+17 surfaces, 213 intended stories, 70 V0 scenarios; backend impact conceptual on 8, unwired on 4, none on 5.
 
 ## Inventor home
 
@@ -199,17 +199,17 @@ Brief: `product-context/surfaces/patent-detail.md` · Storybook title: `Surfaces
 
 ## Actions
 
-Brief: `product-context/surfaces/actions.md` · Storybook title: `Surfaces/Actions` · DSN: none yet
+Brief: `product-context/surfaces/actions.md` · Storybook title: `Surfaces/Actions` · DSN: DSN-0014
 
 - **Personas:** Workspace Admin, Case Owner, Photon Admin
 - **User goal:** Workspace Admin: decide and submit the client's instruction for an upcoming patent event. Case Owner and Photon Admin: receive, process and update client requests.
 - **Business goal:** Reduce coordination delay between the client's instruction and Photon's operational response.
 - **Routes:** `/due-dates` (Workspace Admin) — production's client Actions page lives on this path; V0 offers it as Actions and adds no Due Dates destination; `/actions` (Case Owner, Photon Admin)
-- **Required scenarios:** `v0/workspace-admin/queue`, `v0/case-owner/my-work`, `v0/photon-admin/firm`, `v0/shape/slow`, `v0/shape/failure`
-- **States:** loading — queue skeleton ordered by urgency; empty — no upcoming event needing an instruction; success — saved draft, submitted, updated; Photon side acknowledged, in progress, completed, declined; error — submission error with the instruction preserved; missing template or configuration; permission — Inventor is refused; every status names who owns the next step
+- **Required scenarios:** `v0/actions/action-required`, `v0/actions/saved-draft`, `v0/actions/submitted`, `v0/actions/updated`, `v0/actions/acknowledged`, `v0/actions/in-progress`, `v0/actions/completed`, `v0/actions/declined`, `v0/actions/overdue`, `v0/actions/missing-template`, `v0/actions/no-action`, `v0/actions/countries`, `v0/actions/many`, `v0/actions/empty-queue`, `v0/actions/long-title`, `v0/inventor/portfolio`
+- **States:** loading — loading message before events and instructions are available; empty — no upcoming event needing an instruction; success — saved draft, submitted, updated; Photon side acknowledged, in progress, completed, declined; error — submission error with the instruction preserved; missing template or configuration; permission — Inventor is refused; every status names who owns the next step
 - **Surface-specific states:** no-action, action-required, saved-draft, submitted, updated, acknowledged, in-progress, completed, declined, overdue, missing-template
 - **Navigation badge:** none
-- **Backend impact:** none — Templates, queue, submit-all, decide, request-status and resolve exist.
+- **Backend impact:** conceptual — Existing templates, queue, submit-all, decide, request-status and resolve routes retained. BF-12 declares selected action_ids submission, opt-in queue pagination and a separate response_note; these remain conceptual until verified against the real backend.
 - **Intended story ids:** `surfaces-actions--workspace-admin-action-required`, `surfaces-actions--workspace-admin-saved-draft`, `surfaces-actions--workspace-admin-submitted`, `surfaces-actions--workspace-admin-updated`, `surfaces-actions--workspace-admin-no-action`, `surfaces-actions--photon-acknowledged`, `surfaces-actions--photon-in-progress`, `surfaces-actions--photon-completed`, `surfaces-actions--photon-declined`, `surfaces-actions--photon-overdue`, `surfaces-actions--missing-template`, `surfaces-actions--submission-error`, `surfaces-actions--loading`, `surfaces-actions--inventor-refused`
 - **Excluded here:** purchasing, checkout, pricing, invoice controls, navigation badge, client Due Dates navigation
 

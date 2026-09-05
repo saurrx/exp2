@@ -24,7 +24,7 @@ Three low-fidelity renders accompany these descriptions. Selection is pre-author
 Keep the existing routes, components, query identities and adapter. Add only brief-required mock behavior through recorded proposed fields/routes when necessary. Existing client route selection is local-only; saved drafts/submission are explicitly authorized by the brief and WORKFLOWS. Endpoint/transport gaps will be traced before implementation. Do not redesign Photon Due dates during this surface; that is DSN-0015. The references, auth, analytics, shared query-hook files and dependencies remain untouched.
 
 ## Validation
-In progress; coverage remains null.
+Independent review round 2 returned PASS. Revised required gates pass 8/8, all 58 captures are stable, and all 22 states pass accessibility and zoom checks. Coverage is DSN-0014; broad regression follow-ups are recorded below.
 
 ## First implementation and flow verification
 The main client view stays inside DueDatesContent with the existing all_due_dates query. The /actions client alias and operator component retain their query identities and canonical existing Actions routes. Canonical reads preserve event_type, saved instruction and requested_by that the legacy translation dropped. Draft save and selective send use existing decide/submit-all routes; the latter accepts declared BF-12 action_ids so other drafts remain unsent. BF-12 also supplies opt-in queue pagination and a separate decline response. Scope enforcement follows the four-persona brief. The references, adapter, auth, analytics source and shared query hooks are unchanged.
@@ -90,3 +90,16 @@ The broad gate attempt passed typecheck, role lint, routes, manifest, token fres
 The revised required gate set passes 8/8 (`gates-review2.log`), including role lint and the full serial story suite. Both builds pass. Accessibility has zero findings and no page overflow across all 22 states at 1440 and 640 (`axe-review2.log`). The zoom recovery probe checks actual viewport bounds for the event heading, patent reference and final decision control together, then successfully retries the failed send and completes the decline (`recovery-zoom.log`). The laptop render now shows all three allowed choices together; the operator submitter and next action are visible without overlay. At zoom, event/date/reference lead instead of generic introductory copy. Missing configuration has one truthful dependency and contact step. Confirmation suppresses the earlier summary and holds one compact identity block while the reader acts.
 
 All 58 revised captures passed two clean renders with the unchanged 40-pixel tolerance and no egress (`shots-review2.log`). They replace the first-review images in `shots/`. The revised defaults were opened at all five prescribed viewports; full choices and operator attribution fit at laptop widths, and the event leads at zoom.
+
+## Independent review round 2 — PASS
+
+```text
+VERDICT: PASS
+SURFACE: actions  PERSONA: Workspace Admin, Case Owner, Photon Admin; Inventor refusal
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — At 1280×720 and 1440×900, all three personas can identify the event, read the necessary decision context, and understand the next action and owner without cross-screen recall, consistent with the record’s six answers.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none; all required states and Inventor refusal are represented across the 58 inspected images.
+REFERENCE MATCH: yes — Typography, amber primary controls, restrained hairlines, whitespace and the two-pane queue/detail structure follow the Workspace Admin reference language.
+```

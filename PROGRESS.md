@@ -129,3 +129,8 @@ Fresh evaluator round 1 NEEDS_WORK: long disclosure at 200% zoom left too little
 
 ### DSN-0010 complete — evaluator PASS
 Fresh evaluator round 2 PASS: all seven categories 4, cognitive-load pass, no findings or missing states across 45 screenshots. Full stories 271/271, focused review 12/12 after pending-refresh guard, final coverage-aware gates 6/6, both builds, stable changed-story captures, focused axe and supplemental recovery/navigation checks pass. Coverage 8/17; ready for no-ff merge. Next uncovered lane A surface is DSN-0012 Patent portfolio; Workspace Admin dashboard is already complete under DSN-0002.
+
+## DSN-0010 merged recap — 2026-09-05 04:31 UTC
+Review decision is complete and merged to main with --no-ff (0e485a1), pushed to origin. The reference queue now preserves failed reasons, pending protection and saved selection, shows actual decision actors, handles absent/partial evidence and attachments, and provides readable disclosure scrolling at 200% zoom. Twelve V0 stories replace legacy review coverage. Independent evaluator round 2 PASS, all scores 4, no findings or missing states across 45 PNGs. Full stories 271/271, focused review 12/12, final gates 6/6, builds, stable captures and focused accessibility/recovery/navigation checks pass. Coverage is 8/17. No founder decision required.
+
+Next surface: **DSN-0012 — Patent portfolio** (`product-context/surfaces/patent-portfolio.md`). DSN-0011 is skipped because Workspace Admin dashboard already has DSN-0002 in the coverage matrix. No surface remains in progress; the overall RUN COMPLETE condition remains unmet.

@@ -25,3 +25,7 @@ Keep the existing routes, components, query identities and adapter. Add only bri
 
 ## Validation
 In progress; coverage remains null.
+
+## First implementation and flow verification
+The main client view stays inside DueDatesContent with the existing all_due_dates query. The /actions client alias and operator component retain their query identities and canonical existing Actions routes. Canonical reads preserve event_type, saved instruction and requested_by that the legacy translation dropped. Draft save and selective send use existing decide/submit-all routes; the latter accepts declared BF-12 action_ids so other drafts remain unsent. BF-12 also supplies opt-in queue pagination and a separate decline response. Scope enforcement follows the four-persona brief. The references, adapter, auth, analytics source and shared query hooks are unchanged.
+Twenty-two initial stories pass. Full-app checks verified durable saved drafts, one-instruction send, reload, changed instruction returned as UPDATED/NEW/version 2, and Case Owner acknowledgment, work start and completion. Unsent drafts do not enter the Photon queue. Initial render review prompted persistent operator controls and a focused send confirmation; client scope stays in the header and local choices survive event switching. Later verification will supersede these initial results.

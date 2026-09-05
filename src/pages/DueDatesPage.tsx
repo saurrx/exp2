@@ -1,3 +1,5 @@
+import useUserCookie from "@/hooks/use-auth";
+import { ActionsNavigation } from "@/components/actions/ActionsWorkspace";
 
 import React from 'react';
 import { useTrackOnce } from "@/lib/analytics";
@@ -12,6 +14,8 @@ import { CalendarDays, List } from 'lucide-react';
 const DueDatesPage: React.FC = () => {
   useTrackOnce("due_dates_viewed");
   const location = useLocation();
+  const { user } = useUserCookie();
+  const isClient = user?.role === "LEGAL_COUNSEL";
   const initialView = (location.state?.initialView || 'list') as DueDatesViewType;
   const [headerState, setHeaderState] = React.useState<DueDatesHeaderState>({
     viewType: initialView,
@@ -22,7 +26,8 @@ const DueDatesPage: React.FC = () => {
   return (
     <>
       <PageHeader
-        actions={(
+        title={isClient ? "Actions" : undefined}
+        actions={isClient ? <ActionsNavigation/> : (
           <>
             <div className="hidden h-9 items-center gap-1 rounded-sm border border-[var(--pulse-line)] bg-[var(--pulse-surface-subtle)] p-1 sm:flex">
               <button

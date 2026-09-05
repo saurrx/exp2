@@ -77,6 +77,13 @@
       "type": "string[] (PATCH /v1/patents/:id, V0 only)",
       "finding": "BF-11",
       "reason": "DSN-0013: associate stored same-client uploads with the patent using its existing update flow. The mock had a files response but ignored the existing component documents body, leaving successful uploads unattached. Only Case Owner and Photon Admin within client scope can maintain associations. No new route or persona."
+    },
+    {
+      "entity": "ActionRequest / Actions queue",
+      "field": "submit-all.action_ids, queue.page_info, response_note",
+      "type": "Optional selected request IDs on POST submit-all; opt-in pagination envelope on GET queue; separate Photon response note on resolve",
+      "finding": "BF-12",
+      "reason": "DSN-0014: send only the reviewed instruction while unrelated drafts stay unsent, retain pagination for the operational queue, and preserve the client instruction note when Photon Legal declines with a response. Existing routes, roles and status vocabularies remain. V0 only; conceptual until the backend contract is verified."
     }
   ],
   "collections": [

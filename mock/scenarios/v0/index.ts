@@ -393,6 +393,31 @@ const patentDetailStates = ["record", "pending", "filed", "granted", "inactive",
   return data;
 }));
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+// DSN-0014: deterministic events and instructions for the three authorized personas.
+const actionsStates = ["action-required", "saved-draft", "submitted", "updated", "acknowledged", "in-progress", "completed", "declined", "overdue", "missing-template", "no-action", "countries", "many", "empty-queue", "long-title"].map(slug => v0(`v0/actions/${slug}`, `Actions: ${slug}`, "Synthetic patent-event instructions with client and Photon ownership.", U.admin.email, [U.admin.email,U.caseOwner.email,U.photonAdmin.email,U.inventor.email], () => {
+  const data = emptyDataV0();
+  const count = slug === "many" ? 35 : 4;
+  data.portfolios = { [NORTHWIND.id]: portfolio(count, "actions-northwind", NORTHWIND, 0), [BEACON.id]: portfolio(2, "actions-beacon", BEACON, 0) };
+  const pats = generatePortfolio(NORTHWIND, data.portfolios[NORTHWIND.id]).patents;
+  const rng = rngFor(`v0/actions/${slug}`);
+  if (slug === "no-action" || slug === "empty-queue") return data;
+  const states: Record<string, string> = { "submitted":"NEW", "updated":"NEW", "acknowledged":"ACKNOWLEDGED", "in-progress":"IN_PROGRESS", "completed":"COMPLETED", "declined":"DECLINED", "overdue":"NEW", "many":"NEW", "long-title":"NEW" };
+  for (let n=0;n<count;n++) {
+    const isForeign = n === 0 && slug === "countries";
+    const event_type = isForeign ? "National Phase Entry Due (30m)" : n % 2 === 0 ? "Office Action Response Due" : "Renewal Fee Due";
+    const title = isForeign ? "National phase entry" : n % 2 === 0 ? "Response to examination report" : "Patent renewal";
+    const id = uuid(rng);
+    data.patentOverrides[pats[n].id] = { application_number: `SYN-US-2025-${String(42+n).padStart(4,"0")}`, ...(slug === "long-title" && n===0 ? {title:"Self-tensioning cable harness with load-responsive adjustment and independent reference settings for articulated robot joints across distributed mounting points in variable operating conditions"} : {}) };
+    data.dueDates.push({id,patent_id:pats[n].id,client_id:NORTHWIND.id,event_type,title,due_at:clock.daysAhead(n===0 && slug==="overdue"?-3:2+n*7),status:slug==="completed"&&n===0?"COMPLETED":"PENDING",created_at:clock.daysAgo(30),updated_at:clock.iso()});
+    if ((n===0 && (states[slug] || slug==="saved-draft")) || slug==="many") {
+      const template = data.actionTemplates.find(t=>t.event_types.includes(event_type))!;
+      data.actionRequests.push({id:uuid(rng),client_id:NORTHWIND.id,due_date_id:id,template_id:template.id,instruction:template.label,selected_countries:[],note:"Please use the revised supporting information supplied with the record.",response_note:slug==="declined"?"The supplied record is missing the information needed to proceed. Please confirm the intended response with the Case Owner.":null,status:(states[slug] || "NO_ACTION") as any,submission_state:slug==="saved-draft"?"DRAFT":slug==="updated"?"UPDATED":"SUBMITTED",version:slug==="updated"?2:1,requested_by_id:U.admin.id,requested_at:clock.daysAgo(2),updated_at:clock.iso()});
+    }
+  }
+  if (slug === "missing-template") data.actionTemplates = data.actionTemplates.filter(t=>!t.event_types.includes("Office Action Response Due"));
+  return data;
+}));
+
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...actionsStates, ...patentDetailStates, portfolioLongTitles, portfolioImportResult, reviewMissingDetail, ...ideasListStates, ...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

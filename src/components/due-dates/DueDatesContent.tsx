@@ -1,3 +1,4 @@
+import ActionsWorkspace from "@/components/actions/ActionsWorkspace";
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { track } from "@/lib/analytics";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -220,6 +221,8 @@ const DueDatesContent: React.FC<DueDatesContentProps> = ({
 
   const {
     isLoading: isFetchingDueDates,
+    isError: actionsLoadError,
+    refetch: reloadActions,
     data: dueDatesData,
   } = useQuery({
     queryKey: [
@@ -971,6 +974,14 @@ const DueDatesContent: React.FC<DueDatesContentProps> = ({
     );
   };
 
+  // Workspace Admin Actions retain this route and its scoped due-date query.
+  if (!isOC) return <ActionsWorkspace header={false}
+    rows={(dueDatesData?.data || []).map((row: any) => ({ ...row, title: row.event_name, due_at: row.event_date, action: row.action || null }))}
+    loading={isFetchingDueDates} error={actionsLoadError} retry={() => reloadActions()}
+    search={searchQuery} onSearch={(value) => { setSearchQuery(value); setCurrentPage(1); }}
+    filter={filterOption} onFilter={(value) => handleFilterChange(value as FilterOption)}
+    pagination={dueDatesData?.pagination} onPage={setCurrentPage}/>;
+
   return (
     <div className="pulse-product-page pulse-table-page relative mx-auto flex min-h-0 flex-1 w-full max-w-[1680px] flex-1 flex-col overflow-hidden px-6 py-6 lg:px-8">
       <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -1549,7 +1560,7 @@ const DueDatesContent: React.FC<DueDatesContentProps> = ({
                               const checked = selectedClientIds.includes(
                                 client.id,
                               );
-                              return (
+                                return (
                                 <div
                                   key={client.id}
                                   className={`flex items-center gap-2 p-1.5 rounded-sm ${

@@ -42,6 +42,10 @@ const timing = (item: Exception) => {
   const days = Math.max(0, Math.floor((Date.now() - Date.parse(item.occurred_at)) / 86400000));
   return `${item.timing_label} · ${days === 0 ? "Today" : days === 1 ? "1 day ago" : `${days} days ago`}`;
 };
+const previousFilingsHref = (from: string) => {
+  const day = 86_400_000, start = Date.parse(from);
+  return `/patents?date=custom&date_from=${new Date(start - 30 * day).toISOString().slice(0, 10)}&date_to=${new Date(start - day).toISOString().slice(0, 10)}`;
+};
 const owner = (item: Exception) => item.owners.length ? `Case Owner · ${item.owners.join(", ")}` : "Case Owner not assigned";
 
 /** Read from the existing scoped dashboard query; every action opens its existing operational record. */
@@ -134,7 +138,7 @@ export default function PhotonAdminDashboard({ data, loading, error, retry }: { 
         <nav aria-label="Firm context" className="mt-8 grid gap-5 border-t border-pl-border pt-5 text-sm sm:grid-cols-3">
           <div><Link to="/clients" className="underline underline-offset-4">{data.context.clients} client workspaces →</Link></div>
           <div>{data.context.active_patents === null ? <p>Active patents not available</p> : <Link to="/patents?status=ACTIVE_GRANTED,ACTIVE_APPLIED,ACTIVE_EXAMINATION" className="underline underline-offset-4">{data.context.active_patents} active patents →</Link>}</div>
-          <div>{data.context.filings ? <><Link to={`/patents?date=custom&date_from=${data.context.filings.from}&date_to=${data.context.filings.to}`} className="underline underline-offset-4">{data.context.filings.count} patents filed · last 30 days →</Link><p className="mt-2 text-xs text-pl-text-2">{data.context.filings.previous_count} in the previous 30 days</p></> : <p>Recent filings not available</p>}</div>
+          <div>{data.context.filings ? <><Link to={`/patents?date=custom&date_from=${data.context.filings.from}&date_to=${data.context.filings.to}`} className="underline underline-offset-4">{data.context.filings.count} patents filed · last 30 days →</Link><p className="mt-2 text-xs text-pl-text-2"><Link to={previousFilingsHref(data.context.filings.from)} className="underline underline-offset-4">{data.context.filings.previous_count} in the previous 30 days →</Link></p></> : <p>Recent filings not available</p>}</div>
         </nav>
         {data.map && <section aria-label="Firm-wide portfolio" className="mt-8 border-t border-pl-border pt-5">
           <PatentWorldMap jurisdictionStats={data.map.jurisdictions} isPatentDialogOpen={false} setIsPatentDialogOpen={() => setMapOpen(true)} v0={{ title: "Patent geography", subtitle: "Active patents · all client workspaces", heading: "h2" }} />

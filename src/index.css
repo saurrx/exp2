@@ -87,11 +87,11 @@
   }
 
   /* DSN-0005 reflows at desktop zoom; the device access gate is unchanged. */
-  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]) {
+  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]) {
     min-width: 0;
   }
 
-  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh {
+  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh {
     min-height: 0;
   }
 

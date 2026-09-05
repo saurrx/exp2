@@ -80,13 +80,12 @@ const FileIdeaModal: React.FC<FileIdeaModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-full overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>File this idea as a patent</DialogTitle>
-          <DialogDescription>
-            Capture the patent record. On submit we'll create the Patent, link
-            it to this idea, and mark the idea as filed — all in one
-            transaction.
+          <DialogTitle>Record the completed filing</DialogTitle>
+          <DialogDescription className="text-pl-text-2">
+            Enter the filed application details. This links the patent record to
+            the disclosure and updates its status to Filed.
           </DialogDescription>
         </DialogHeader>
 
@@ -95,21 +94,22 @@ const FileIdeaModal: React.FC<FileIdeaModalProps> = ({
         <DialogFooter>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => onOpenChange(false)}
             disabled={fileMutation.isPending}
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={fileMutation.isPending}>
+          <Button size="sm" onClick={handleSubmit} disabled={fileMutation.isPending}>
             {fileMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Filing...
+                Saving…
               </>
             ) : (
               <>
                 <Plus className="mr-2 h-4 w-4" />
-                File Patent
+                Record filing
               </>
             )}
           </Button>

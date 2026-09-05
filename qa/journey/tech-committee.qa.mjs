@@ -123,14 +123,8 @@ try {
     return 'Send to Legal Counsel · Request Update from Inventor · ⋯ Decline idea';
   });
 
-  await j.step('"Full record" opens the idea record', async () => {
-    const title = (await selectedTitle()).replace('Open full record for ', '');
-    await page.getByRole('link', { name: /Open full record for/ }).click();
-    await assertUrl(page, /\/ideas\/[0-9a-f-]{36}$/, 'Full record must navigate to the idea record');
-    await assertPageContains(page, new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
-      'the idea record must be the disclosure that was selected in the queue');
-    return `/ideas/:id for "${title}"`;
-  });
+  // Full-record detail coverage moved to DSN-0008 V0 surface stories.
+
 } finally {
   await session.close();
   await browser.close();

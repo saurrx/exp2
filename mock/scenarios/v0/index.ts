@@ -5,6 +5,7 @@ import { buildIdeas, emptyData, portfolio, rngFor, seedOperations, type Data, ty
 import { generatePortfolio } from "../portfolio";
 import { BEACON, NORTHWIND, ORBITAL, V0_ACCESS, V0_ALL_USERS, V0_CLIENTS, V0_USERS as U } from "./personas";
 import { disclosureSections, storedDisclosure } from "../../../src/components/ideas/disclosureMaterial";
+import { disclosureFingerprint } from "../../runtime/disclosureFingerprint";
 import { outboxFor } from "./emails";
 
 /**
@@ -148,7 +149,7 @@ function northwindBuild(name: string, portfolios: Record<string, ReturnType<type
 
 const v0 = (name: string, title: string, description: string, defaultPersona: string, personas: string[], build: () => Data): ScenarioDef => ({
   name, title, description, clock: NOW, defaultPersona, personas,
-  build: () => { const d = build(); d.emails = outboxFor(rngFor(`${name}.emails`), d); return d; },
+  build: () => { const d = build(); for (const evaluation of d.evaluations) { const draft = d.drafts.find((draft) => draft.id === evaluation.draft_id); if (draft) { evaluation.input_fingerprint = disclosureFingerprint(draft.answers); evaluation.input_revision = d.ideas.find((idea) => idea.id === draft.idea_id)?.revision; } } d.emails = outboxFor(rngFor(`${name}.emails`), d); return d; },
 });
 
 const inventorFirstRun = v0("v0/inventor/first-run", "New inventor at Northwind, nothing yet",
@@ -193,15 +194,8 @@ const disclosureScenario = (slug: string, completion: number, evaluation?: IdeaS
   });
 const disclosureStates = [disclosureScenario("empty", 0), disclosureScenario("partially-prefilled", 40), disclosureScenario("unsupported-gaps", 80), disclosureScenario("complete", 100), disclosureScenario("evaluation-running", 100, { state: "RUNNING" }), disclosureScenario("evaluation-result", 100, { state: "SUCCEEDED", score: 23 }), disclosureScenario("evaluation-stale", 100, { state: "SUCCEEDED", score: 62 }), disclosureScenario("requested-changes", 100, undefined, true)];
 
-const evaluationStates = ["not-run", "queued", "running", "succeeded", "partial", "no-close-prior-art", "failed", "timed-out", "stale-after-edits", "re-evaluating", "workspace-admin"].map((slug) => v0(`v0/evaluation/${slug}`, `Evaluation: ${slug}`,
-  "Synthetic advisory evaluation with submission available at every score.", slug === "workspace-admin" ? U.admin.email : U.inventor.email, [U.inventor.email, U.admin.email], () => {
-    const state = slug === "queued" ? "QUEUED" : slug === "running" ? "RUNNING" : slug === "failed" ? "FAILED" : slug === "timed-out" ? "TIMED_OUT" : slug === "partial" ? "PARTIAL" : "SUCCEEDED";
-    const db = northwindBuild(`v0/evaluation/${slug}`, SMALL, [{ invention: 0, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 2, ...(slug === "workspace-admin" ? { submittedBy: U.admin } : {}), ...(slug === "not-run" ? {} : { evaluation: { state, score: slug === "no-close-prior-art" ? 81 : 23 } }) }]);
+function alignCableEvidence(db: Data) {
     const draft = db.drafts[0];
-    const meta = disclosureSections(draft.answers.__meta_data as any[]);
-    meta.find((section) => section.id === "advantages")!.questions[0].answer = "The synthetic fixture combines the passive element with closed-loop correction without an external reference signal.";
-    draft.answers.__meta_data = meta;
-    // Keep this surface's synthetic evidence internally coherent with the cable disclosure.
     const evaluationReport = db.evaluations[0]?.report as any;
     if (evaluationReport) {
       const examples = [
@@ -211,9 +205,21 @@ const evaluationStates = ["not-run", "queued", "running", "succeeded", "partial"
       ];
       evaluationReport.scoringResult.closestMatches.forEach((match: any, index: number) => { match.title = examples[index][0]; match.abstract = examples[index][1]; });
       evaluationReport.priorArt.forEach((art: any, index: number) => { art.title = examples[index][0]; art.abstract = examples[index][1]; });
-      if (state !== "PARTIAL") evaluationReport.scoringResult.summary = "The closest references share the cable arrangement and external reference setting. None of these returned references describes the self-correcting loop in the disclosure. Search coverage is limited to the references returned.";
+      if (db.evaluations[0]?.state === "PARTIAL") evaluationReport.scoringResult.summary = "The prior-art search completed, but the obviousness analysis timed out. The returned references share the cable arrangement and do not describe the correction loop.";
+      else evaluationReport.scoringResult.summary = "The closest references share the cable arrangement and external reference setting. None of these returned references describes the self-correcting loop in the disclosure. Search coverage is limited to the references returned.";
       draft.report = evaluationReport;
     }
+}
+
+const evaluationStates = ["not-run", "queued", "running", "succeeded", "partial", "no-close-prior-art", "failed", "timed-out", "stale-after-edits", "re-evaluating", "workspace-admin"].map((slug) => v0(`v0/evaluation/${slug}`, `Evaluation: ${slug}`,
+  "Synthetic advisory evaluation with submission available at every score.", slug === "workspace-admin" ? U.admin.email : U.inventor.email, [U.inventor.email, U.admin.email], () => {
+    const state = slug === "queued" ? "QUEUED" : slug === "running" ? "RUNNING" : slug === "failed" ? "FAILED" : slug === "timed-out" ? "TIMED_OUT" : slug === "partial" ? "PARTIAL" : "SUCCEEDED";
+    const db = northwindBuild(`v0/evaluation/${slug}`, SMALL, [{ invention: 0, author: U.inventor, state: "DRAFT", completion: 100, ageDays: 2, ...(slug === "workspace-admin" ? { submittedBy: U.admin } : {}), ...(slug === "not-run" ? {} : { evaluation: { state, score: slug === "no-close-prior-art" ? 81 : 23 } }) }]);
+    const draft = db.drafts[0];
+    const meta = disclosureSections(draft.answers.__meta_data as any[]);
+    meta.find((section) => section.id === "advantages")!.questions[0].answer = "The synthetic fixture combines the passive element with closed-loop correction without an external reference signal.";
+    draft.answers.__meta_data = meta;
+    alignCableEvidence(db);
     if (slug === "no-close-prior-art") {
       const report = db.evaluations[0].report as any;
       report.priorArt = []; report.scoringResult.closestMatches = []; report.scoringResult.distinctDifferences = [];
@@ -222,6 +228,25 @@ const evaluationStates = ["not-run", "queued", "running", "succeeded", "partial"
       report.scoringResult.evaluationMetrics = { evaluationCount: 0, maxSimilarity: null, avgSimilarity: null };
       draft.report = report;
     }
+    return db;
+  }));
+
+// DSN-0008: disclosure status, ownership, filing links and supporting files.
+const ideaDetailStates = ["draft", "evaluated", "submitted", "under-review", "changes-requested", "rejected", "resubmitted", "sent-to-photon", "filed", "granted", "closed", "missing-evaluation", "partial-evaluation", "on-behalf-attribution", "long-content"].map((slug) => v0(`v0/idea-detail/${slug}`, `Idea detail: ${slug}`,
+  "Synthetic invention disclosure with one review stage, distinct attribution and recorded next steps.", U.inventor.email, [U.inventor.email, U.admin.email, U.caseOwner.email, U.photonAdmin.email], () => {
+    const state = slug === "draft" || slug === "evaluated" ? "DRAFT" : slug === "changes-requested" ? "CHANGES_REQUESTED" : slug === "rejected" ? "REJECTED" : slug === "sent-to-photon" ? "SENT_TO_PHOTON" : ["filed", "granted", "closed"].includes(slug) ? "FILED" : "LEGAL_REVIEW";
+    const db = northwindBuild(`v0/idea-detail/${slug}`, SMALL, [{ invention: 0, author: U.inventor, coInventors: [U.coinventor], state, completion: slug === "draft" ? 0 : 100, ageDays: 6, reviewer: U.admin,
+      comment: slug === "rejected" ? "The submitted material does not yet explain how the correction loop differs from the external-reference mechanism. You may revise and resubmit with that distinction." : "Please explain how the correction loop responds to a change in load and include the repeatability observations.",
+      ...(slug === "on-behalf-attribution" ? { submittedBy: U.admin } : {}), ...(slug === "long-content" ? { title: "Self-tensioning cable harness with passive tension control and a self-correcting feedback loop for articulated robot joints under variable load" } : {}),
+      ...(["draft", "missing-evaluation"].includes(slug) ? {} : { evaluation: { state: slug === "partial-evaluation" ? "PARTIAL" : "SUCCEEDED", score: 62 } }) }]);
+    alignCableEvidence(db);
+    const idea = db.ideas[0], draft = db.drafts[0];
+    if (slug !== "draft") { const meta = disclosureSections(draft.answers.__meta_data as any[]); meta.find((section) => section.id === "advantages")!.questions[0].answer = "The cable loop corrects tension during movement without an external reference signal."; draft.answers.__meta_data = meta; }
+    draft.answers.__source = { text: "Synthetic workshop notes: the cable loop self-corrects tension as the articulated joint moves. Confirm load-response measurements before asserting repeatability.", kind: "text" };
+    if (slug === "resubmitted") resubmitted(`v0/idea-detail/${slug}`, db, 0);
+    const rng = rngFor(`v0/idea-detail/${slug}.files`);
+    if (slug !== "missing-evaluation" && slug !== "draft") db.files.push({ id: uuid(rng), idea_id: idea.id, client_id: idea.client_id, original_name: "cable-loop-observations.json", file_name: "cable-loop-observations.json", content_type: "application/json", size_bytes: 184, status: "STORED", category: "idea", uploaded_by_id: U.inventor.id, created_at: idea.created_at });
+    if (state === "FILED") { const patent = generatePortfolio(NORTHWIND, SMALL[NORTHWIND.id]).patents[0]; db.patentOverrides[patent.id] = { ...db.patentOverrides[patent.id], title: idea.title, status: slug === "granted" ? "GRANTED" : slug === "closed" ? "EXPIRED" : "PUBLISHED" }; (db as Data & { links: Array<{ idea_id: string; patent_id: string }> }).links = [{ idea_id: idea.id, patent_id: patent.id }]; }
     return db;
   }));
 
@@ -286,6 +311,6 @@ const authFailures = v0("v0/auth/failures", "Authentication failures",
   "The only V0 scenario that returns 401 on purpose: invalid login, expired session with a failed refresh, revoked access, SSO failure, unknown domain at signup.",
   U.admin.email, [U.admin.email], () => { const d = emptyDataV0({ authFails: true }); d.portfolios = SMALL; return d; });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, ...evaluationStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([...disclosureStates, ...evaluationStates, ...ideaDetailStates, inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

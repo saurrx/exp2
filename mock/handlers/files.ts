@@ -2,7 +2,7 @@ import { route } from "../runtime/registry";
 import { getDb, touched } from "../runtime/db";
 import { clock } from "../runtime/clock";
 import { mulberry32, seedFrom, uuid } from "../runtime/prng";
-import { currentUser } from "./scope";
+import { currentUser, visibleIdeas } from "./scope";
 
 /** Uploads are same-origin, exactly as production: presign, then PUT the bytes to /v1/files/:id/content. */
 const svgLogo = (text: string) => `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect width="96" height="96" fill="#11103c"/><text x="48" y="58" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#f9b418" text-anchor="middle">${text}</text></svg>`;
@@ -35,6 +35,7 @@ export const fileHandlers = [
     const db = getDb();
     const client = db.clients.find((c) => c.logo_file_id === params.id);
     const f = db.files.find((x) => x.id === params.id);
+    if (db.flags.v0 && f?.idea_id && !visibleIdeas(db, currentUser()).some((idea) => idea.id === f.idea_id)) return { status: 403, body: { message: "This attachment is outside your workspace." } };
     const label = client ? client.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase() : "PL";
     if (f && !f.content_type.startsWith("image/")) return { status: 200, body: { note: `mock file ${f.original_name}` } };
     return new Response(svgLogo(label), { status: 200, headers: { "content-type": "image/svg+xml" } }) as unknown as { status: number };

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/DashboardChrome";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import useUserCookie from "@/hooks/use-auth";
-import API_CONFIG, { assetUrl } from "@/lib/apiConfig";
+import API_CONFIG, { assetUrl, rawApi } from "@/lib/apiConfig";
 import appConfig from "@/lib/appConfig";
 import ideaDraftQuestions from "@/lib/IdeaDraftQuestion";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -246,7 +247,7 @@ const IdeaDetailsContent: React.FC<IdeaDetailsContentProps> = ({
     );
   };
 
-  const { data: mainIdeaData, isPending: isFetchingIdea } = useQuery({
+  const { data: mainIdeaData, isPending: isFetchingIdea, refetch: reloadIdea, error: ideaLoadError } = useQuery({
     queryKey: ["ideaDetails", ideaId],
     queryFn: async () => {
       try {
@@ -256,7 +257,7 @@ const IdeaDetailsContent: React.FC<IdeaDetailsContentProps> = ({
           return response?.data?.data;
         }
       } catch (error) {
-        console.error("Error fetching idea details:", error);
+        throw error;
       }
     },
     enabled: !!ideaId, // Only run query when ideaId is available
@@ -377,7 +378,7 @@ const IdeaDetailsContent: React.FC<IdeaDetailsContentProps> = ({
         );
       }
     },
-    enabled: !!ideaId, // Only run query when ideaId is available
+    enabled: !!mainIdeaData?.id, // Read the disclosure only after access to the idea is confirmed.
     refetchOnMount: true, // Refetch when navigating back to this page
     refetchOnWindowFocus: true, // Refetch on window focus
     staleTime: 0, // Always consider data stale to ensure fresh fetch on navigation
@@ -1820,7 +1821,7 @@ const IdeaDetailsContent: React.FC<IdeaDetailsContentProps> = ({
     isOutsideCounselRole(user?.role) &&
     mainIdeaData?.status?.toUpperCase() !== "IN_DRAFT";
   const isInventorDraftWorkspace =
-    user?.role === "INVENTOR" &&
+    (user?.role === "INVENTOR" || mainIdeaData?.submitted_by_id === user?.id) &&
     mainIdeaData?.status?.toUpperCase() === "IN_DRAFT";
   const isInventorOverview =
     user?.role === "INVENTOR" && !isInventorDraftWorkspace;
@@ -1939,927 +1940,75 @@ const IdeaDetailsContent: React.FC<IdeaDetailsContentProps> = ({
     toast.info("Status moves on its own as the idea progresses — the one action here is filing it.");
   };
 
-  return (
-    /* h-screen is the full viewport, but this sits 64px below the top of it —
-       so the page overhung by exactly that, and overflow-hidden meant the tail
-       of a long disclosure was unreachable rather than merely below the fold.
-       h-full + min-h-0 fills the space the layout actually gives it. */
-    <div className="pulse-product-page relative flex min-h-0 flex-1 flex-col overflow-hidden">
+  const [disclosureOpen, setDisclosureOpen] = useState(false);
+  const disclosureRef = useRef<HTMLDetailsElement>(null);
+  const [decisionOpen, setDecisionOpen] = useState<"APPROVED" | "CHANGES_REQUESTED" | "REJECTED" | null>(null);
+  const [decisionNote, setDecisionNote] = useState("");
+  const [downloadError, setDownloadError] = useState("");
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const activity = useQuery({ queryKey: ["idea_activity", ideaId], staleTime: 0, refetchOnMount: "always", enabled: !!mainIdeaData?.id, queryFn: async () => (await rawApi.get(`/v1/ideas/${ideaId}/transitions`)).data });
+  const events: any[] = Array.isArray(activity.data) ? activity.data : [];
+  const decisionMutation = useMutation({
+    mutationFn: async () => rawApi.post(`/v1/ideas/${ideaId}/review`, { decision: decisionOpen, comment: decisionNote.trim() || undefined }),
+    onSuccess: () => { setDecisionOpen(null); setDecisionNote(""); for (const key of [["ideaDetails", ideaId], ["idea_draft", ideaId], ["idea_activity", ideaId], ["fetch_ideas"], ["pulse-review-workspace"]]) queryClient.invalidateQueries({ queryKey: key }); },
+  });
+  const downloadFile = async (file: any) => {
+    setDownloading(file.id); setDownloadError("");
+    try { const response = await rawApi.get(`/v1/files/${file.id}/raw`, { responseType: "blob" }); const url = URL.createObjectURL(response.data); const anchor = document.createElement("a"); anchor.href = url; anchor.download = file.original_name || "Supporting document"; anchor.click(); URL.revokeObjectURL(url); }
+    catch { setDownloadError("Could not download this attachment. Try downloading it again."); }
+    finally { setDownloading(null); }
+  };
+  const state = mainIdeaData?.state ?? ({ IN_DRAFT: "DRAFT", SENT_TO_IHC: "LEGAL_REVIEW", UNDER_REVIEW: "LEGAL_REVIEW", UPDATE_REQUEST: "CHANGES_REQUESTED", SEND_TO_OC: "SENT_TO_PHOTON", REJECT_BY_IHC: "REJECTED" } as Record<string, string>)[mainIdeaData?.status] ?? mainIdeaData?.status;
+  const linkedPatent = mainIdeaData?.patent_link?.patent ?? mainIdeaData?.IdeaPatentLink?.[0]?.patent;
+  const closed = ["EXPIRED", "WITHDRAWN", "REJECTED", "ABANDONED", "NONPAYMENT"].includes(linkedPatent?.status);
+  const statusLabel = linkedPatent?.status === "GRANTED" ? "Granted" : closed ? "Closed" : ({ DRAFT: "In draft", LEGAL_REVIEW: "Awaiting Workspace Admin review", CHANGES_REQUESTED: "Changes requested", REJECTED: "Rejected", SENT_TO_PHOTON: "Sent to Photon Legal", FILED: "Filed" } as Record<string, string>)[state] ?? "Status unavailable";
+  const authorCanEdit = mainIdeaData && (mainIdeaData.author_id === user?.id || (user?.role === "LEGAL_COUNSEL" && mainIdeaData.submitted_by_id === user?.id));
+  const canRevise = authorCanEdit && ["DRAFT", "CHANGES_REQUESTED", "REJECTED"].includes(state);
+  const canDecide = user?.role === "LEGAL_COUNSEL" && mainIdeaData?.client_id === user.client_id && state === "LEGAL_REVIEW";
+  const photon = isOutsideCounselRole(user?.role);
+  const canFile = photon && state === "SENT_TO_PHOTON";
+  const selectedDisclosure = reviewDraft ?? latestInventorDraft;
+  const report = selectedDisclosure?.CheckDraftSoreLog?.[0]?.score_meta_data;
+  const evaluationContext = selectedDisclosure?.evaluation_context;
+  const score = typeof report?.scoringResult?.score === "number" ? report.scoringResult.score / 10 : null;
+  const scoreBand = score === null ? "Not evaluated" : score >= 8 ? "Highly novel" : score >= 6 ? "Moderately novel" : score >= 4 ? "Marginally novel" : "Closely matched";
+  const files = mainIdeaData?.files ?? mainIdeaData?.IdeaFiles ?? [];
+  const fullBrief = selectedDisclosure?.brief_summary || mainIdeaData?.summary || "No brief is available. Read the disclosure sections below.";
+  const briefWithoutTitle = mainIdeaData?.title && fullBrief.startsWith(`${mainIdeaData.title}: `) ? fullBrief.slice(mainIdeaData.title.length + 2) : fullBrief;
+  const brief = briefWithoutTitle.charAt(0).toUpperCase() + briefWithoutTitle.slice(1);
+  const owner = mainIdeaData?.author?.name ?? mainIdeaData?.created_by?.name;
+  const coInventors = (mainIdeaData?.IdeaInventor ?? []).filter((credit: any) => credit.role !== "PRIMARY" && credit.inventor?.id !== mainIdeaData?.author_id);
+  const feedback = events.find((event) => event.decision && event.comment);
+  const nextStep = canRevise ? state === "REJECTED" ? "You can revise this disclosure and resubmit with a note explaining what changed." : "Update your answers, then submit this revision for Workspace Admin review." : canDecide ? "Review this disclosure and decide whether to send it to Photon Legal for filing." : canFile ? "Photon Legal handles drafting and filing outside Pulse. Record the filing here once it is complete." : linkedPatent ? closed ? "The linked patent is no longer active. Open the patent record for its recorded status." : "Open the linked patent to follow its recorded progress." : state === "LEGAL_REVIEW" ? "Your Workspace Admin owns the next decision. You will receive an email when they respond." : state === "SENT_TO_PHOTON" ? "Photon Legal owns the next step and will update the record after filing." : "Read the disclosure and review history for the recorded decision and next step.";
+  const actionLabel = canRevise ? state === "REJECTED" ? "Revise and resubmit" : "Update disclosure" : canDecide ? "Send to Photon Legal" : canFile ? "Record filing" : linkedPatent ? "View patent" : "Read disclosure";
+  const primaryAction = () => { if (canRevise) navigate(`/ideas/${ideaId}/draft?draftId=${selectedDisclosure?.id}`); else if (canDecide) { decisionMutation.reset(); setDecisionOpen("APPROVED"); } else if (canFile) setShowFileIdeaModal(true); else if (linkedPatent) navigate(`/patents/${linkedPatent.id}`); else { setDisclosureOpen(true); requestAnimationFrame(() => disclosureRef.current?.scrollIntoView({ block: "start" })); } };
+  const eventLabel = (event: any) => event.decision === "CHANGES_REQUESTED" ? "Changes requested" : event.decision === "REJECTED" ? "Idea rejected" : event.decision === "APPROVED" ? "Sent to Photon Legal" : event.to_state === "FILED" ? "Filing recorded" : event.is_appeal ? "Resubmitted for reconsideration" : event.from_state === "CHANGES_REQUESTED" ? "Revised disclosure submitted" : "Submitted for review";
+  const dateLabel = (date: string) => new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-      {/* Header Section with Gradient */}
-      <motion.div
-        className={`w-full px-6 py-6 border-b backdrop-blur-sm ${theme === "dark"
-          ? "bg-[#0c0c0c]/80 border-[#cccccc20]"
-          : "bg-white/80 border-photon-gray-300"
-          } sticky top-0 z-10`}
-      >
-        <div className="flex items-center gap-3">
-          <span
-            className={`${theme === "dark" ? "text-zinc-500" : "text-gray-600"
-              } text-sm font-sans tracking-wide`}
-          >
-            {/* The reference, not the uuid. A uuid is not an identity anyone
-                can read down a phone or spot twice in a list; the workspace's
-                own reference is. Older ideas are backfilled server-side, so
-                the fallback is the title rather than the raw id. */}
-            Ideas <span className="mx-1 text-gray-500">/</span>{" "}
-            {mainIdeaData?.reference_number || mainIdeaData?.title || ""}
-          </span>
-        </div>
-        <div className="mt-5 flex items-center gap-7">
-          <div>
-            <motion.span
-              className={`text-2xl font-bold ${theme === "dark" ? "text-zinc-200" : "text-zinc-900"
-                }`}
-            >
-              {mainIdeaData?.title || "-"}
-            </motion.span>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13px] text-[#444444] dark:text-neutral-400">
-              <StatusChip
-                status={mainIdeaData?.status?.toUpperCase()}
-                label={mapStatusCodeToLabel(mainIdeaData?.status?.toUpperCase())}
-              />
-              {user?.role !== "INVENTOR" &&
-                mainIdeaData?.IdeaInventor?.[0]?.inventor?.name && (
-                <>
-                  <span className="text-[#C8C8C8]">·</span>
-                  <span>
-                    {mainIdeaData.IdeaInventor[0].inventor.name}{" "}
-                    <span className="text-[#727272]">(primary)</span>
-                  </span>
-                </>
-              )}
-              {mainIdeaData?.submission_date && (
-                <>
-                  <span className="text-[#C8C8C8]">·</span>
-                  <span>
-                    Submitted{" "}
-                    {moment(mainIdeaData.submission_date).format("MMM D, YYYY")}
-                  </span>
-                </>
-              )}
-              {(mainIdeaData?.IdeaFiles?.length || 0) > 0 && (
-                <>
-                  <span className="text-[#C8C8C8]">·</span>
-                  <button
-                    onClick={handleDownloadFiles}
-                    disabled={!selectedDraftId && !ideaDraft?.[0]?.id}
-                    className="inline-flex items-center gap-1 text-[#444444] transition-colors hover:text-[#0C0C0C] disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400"
-                  >
-                    {mainIdeaData.IdeaFiles.length} file
-                    {mainIdeaData.IdeaFiles.length === 1 ? "" : "s"}
-                    <Download className="h-3.5 w-3.5" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {isOCReadOnlyWorkspace && (
-            <div className="ml-auto self-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    disabled={isUpdatingOCStatus}
-                    className="inline-flex h-10 min-w-[190px] items-center justify-between gap-3 rounded-sm border border-[#E8E8E8] bg-white px-3.5 text-[13px] font-medium text-[#444444] transition-colors hover:border-[#C8C8C8] hover:text-[#0C0C0C] disabled:cursor-wait disabled:opacity-60"
-                    aria-label={`OC workflow status: ${ocWorkflowLabel}`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <CircleCheck className="h-4 w-4 text-[#727272]" />
-                      <span>Status: {ocWorkflowLabel}</span>
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-[#727272]" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-60">
-                  <DropdownMenuLabel>Update status</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuRadioGroup
-                    value={ocWorkflowStatus}
-                    onValueChange={handleOCWorkflowChange}
-                  >
-                    {/* Filing is the only transition this side owns; the
-                        other three describe where the idea already is. They
-                        used to be selectable and answered with a toast, which
-                        is a menu that argues with you — they are disabled now,
-                        and the note below says who moves them. */}
-                    {OC_WORKFLOW_OPTIONS.map((option) => (
-                      <DropdownMenuRadioItem
-                        key={option.value}
-                        value={option.value}
-                        disabled={
-                          option.value !== "FILED" &&
-                          option.value !== ocWorkflowStatus
-                        }
-                        className={
-                          option.value === "FILED" ||
-                          option.value === ocWorkflowStatus
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed opacity-60"
-                        }
-                      >
-                        {option.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                    <p className="border-t border-[var(--pulse-line)] px-2 py-2 text-xs text-[var(--pulse-ink-muted)]">
-                      Stages advance on their own as the idea progresses. Filing
-                      is the one action taken here.
-                    </p>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
-          {isReviewWorkspace && user?.role !== "TECH_COMMITTEE" && isUnderCommitteeReview && (
-            <p className="ml-auto self-center rounded-md border border-dashed border-[var(--pulse-line-strong)] bg-[var(--pulse-surface-subtle)] px-4 py-2.5 text-sm text-[var(--pulse-ink-muted)]">
-              Under Tech Committee review — it reaches your queue once the committee sends it on.
-            </p>
-          )}
-
-          {isReviewWorkspace && isReviewPending && (
-            <div className="ml-auto flex items-center gap-3 self-center">
-              {isReviewWorkspace && isReviewPending && (
-                <button
-                  type="button"
-                  disabled={isLoadingToOC}
-                  onClick={() => setOpenSendToOCModal(true)}
-                  className="flex h-9 items-center gap-2 rounded-sm bg-[#F9B418] px-5 text-sm font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {user?.role === "TECH_COMMITTEE" ? "Send to Legal Counsel" : "Send to Photon Legal"}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              )}
-
-              <Button
-                className={`h-9 gap-2 !bg-transparent hover:!bg-transparent transition-colors border ${theme === "light"
-                  ? "!border-gray-200 hover:!border-[#F9B418] text-gray-600 hover:text-[#F9B418]"
-                  : "!border-neutral-800 hover:!border-[#F9B418]/50 text-neutral-400 hover:text-[#F9B418]"
-                  }`}
-                size="sm"
-                onClick={() => setShowRequestUpdateModal(true)}
-                disabled={
-                  isOutsideCounselRole(user?.role)
-                    ? [
-                      "REJECT_BY_OC",
-                      "REJECT_BY_IHC",
-                      "UNDER_REVIEW",
-                      "UPDATE_REQUEST",
-                      "UPDATE_REQUEST_BY_OC",
-                    ].includes(mainIdeaData?.status)
-                    : [
-                      "REJECT_BY_OC",
-                      "REJECT_BY_IHC",
-                      "UPDATE_REQUEST",
-                      "SEND_TO_OC",
-                      "UPDATE_REQUEST_BY_OC",
-                    ].includes(mainIdeaData?.status)
-                }
-              >
-                <MessageSquare size={14} /> Request Update
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className={`flex h-9 w-9 items-center justify-center rounded-sm border transition-colors ${theme === "light"
-                      ? "border-gray-200 text-gray-600 hover:bg-[#F5F5F5]"
-                      : "border-neutral-800 text-neutral-400 hover:bg-white/5"
-                      }`}
-                    aria-label="More actions"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="text-[#8E2B25] focus:text-[#8E2B25]"
-                    disabled={
-                      isOutsideCounselRole(user?.role)
-                        ? [
-                          "REJECT_BY_OC",
-                          "REJECT_BY_IHC",
-                          "UPDATE_REQUEST",
-                          "UNDER_REVIEW",
-                          "UPDATE_REQUEST_BY_OC",
-                        ].includes(mainIdeaData?.status)
-                        : [
-                          "REJECT_BY_OC",
-                          "REJECT_BY_IHC",
-                          "UPDATE_REQUEST",
-                          "SEND_TO_OC",
-                          "UPDATE_REQUEST_BY_OC",
-                        ].includes(mainIdeaData?.status)
-                    }
-                    onClick={() => setOpenRejectIdeaModal(true)}
-                  >
-                    <TriangleAlert className="mr-2 h-4 w-4" />
-                    {isRejectingIdeaByIHC ? "Rejecting..." : "Reject idea"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Status timeline — inventor view only for now; directly under the
-          title, above the disclosure. Admin gets the same component later
-          with the review action attached to the current node. */}
-      {user?.role === "INVENTOR" && !isFetchingIdea && mainIdeaData && (
-        <StatusTimeline
-          idea={mainIdeaData}
-          onAction={() => setShowViewContentsModal(true)}
-          showStatusLine={false}
-        />
-      )}
-
-      {isFetchingIdea ? (
-        <Loader />
-      ) : isInventorOverview ? (
-        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto bg-[var(--pulse-canvas)] pb-10">
-          <div className="mx-auto w-full max-w-[1160px] px-6 py-8">
-            <section className="overflow-hidden rounded-md border border-[var(--pulse-line)] bg-[var(--pulse-surface)] [box-shadow:var(--pulse-shadow-card)]">
-              <div className="flex items-start gap-4 border-l-4 border-l-[#F9B418] px-6 py-5">
-                <span
-                  className={`mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full ${
-                    inventorStatus.needsAction
-                      ? "bg-[#FAF1DA] text-[#7E5A00]"
-                      : "bg-[#E9F1EC] text-[#1E7B4D]"
-                  }`}
-                >
-                  {inventorStatus.needsAction ? (
-                    <Info className="h-4 w-4" />
-                  ) : (
-                    <CircleCheck className="h-4 w-4" />
-                  )}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p
-                    className={`text-xs font-semibold uppercase tracking-[0.08em] ${
-                      inventorStatus.needsAction
-                        ? "text-[#7E5A00]"
-                        : "text-[#1E7B4D]"
-                    }`}
-                  >
-                    {inventorStatus.eyebrow}
-                  </p>
-                  <h2 className="mt-1 text-lg font-semibold tracking-[-0.015em] text-[var(--pulse-ink)]">
-                    {inventorStatus.title}
-                  </h2>
-                  <p className="mt-1 max-w-[720px] text-sm text-[var(--pulse-ink-secondary)]">
-                    {inventorStatus.description}
-                  </p>
-                </div>
-                {inventorStatus.needsAction && (
-                  <button
-                    type="button"
-                    onClick={() => setShowViewContentsModal(true)}
-                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-sm bg-[#F9B418] px-4 text-sm font-semibold text-[#0C0C0C] transition-colors hover:bg-[#DA9700]"
-                  >
-                    View request <ArrowRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </section>
-
-            {isFechingIdeaDraft ? (
-              <div className="py-20">
-                <Loader />
-              </div>
-            ) : latestInventorDraft ? (
-              <>
-                <div className="mt-6 flex w-full flex-col items-start gap-6 lg:flex-row">
-                  <main className="w-full lg:w-[60%]">
-                    <PatentPaperView
-                      title={mainIdeaData?.title}
-                      irn={mainIdeaData?.reference_number}
-                      submissionDate={
-                        mainIdeaData?.submission_date
-                          ? moment(mainIdeaData.submission_date).format(
-                              "MMM D, YYYY",
-                            )
-                          : undefined
-                      }
-                      sections={sections}
-                      panelLabel="Your submission"
-                    />
-                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-xs text-[var(--pulse-ink-muted)]">
-                      <span className="inline-flex items-center gap-1.5">
-                        <CircleCheck className="h-3.5 w-3.5 text-[#1E7B4D]" />
-                        Submitted version
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
-                        Updated {moment(latestInventorDraft.updatedAt).format("MMM D, YYYY")}
-                      </span>
-                    </div>
-                  </main>
-
-                  <aside className="w-full lg:sticky lg:top-4 lg:w-[40%]">
-                    {latestScoreReport ? (
-                      <div className="overflow-hidden rounded-md border border-[var(--pulse-line)] bg-[var(--pulse-surface)]">
-                        <div className="border-b border-[var(--pulse-line)] bg-[var(--pulse-surface-subtle)] px-5 py-4 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--pulse-ink-muted)]">
-                          AI evaluation
-                        </div>
-                        <div className="px-5 py-5">
-                          <PatentNoveltyReport
-                            reference={mainIdeaData?.reference_number}
-                            embedded
-                            expandFirstReference={false}
-                            title={mainIdeaData?.title}
-                            api_evaluation_id={latestScoreReport?.id}
-                            scoringResult={latestScoreReport?.scoringResult}
-                            priorArt={latestScoreReport?.priorArt || []}
-                            report={latestScoreReport}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <section className="pulse-content-card p-6">
-                        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--pulse-ink-muted)]">
-                          AI evaluation
-                        </p>
-                        <p className="mt-3 text-sm text-[var(--pulse-ink-secondary)]">
-                          No evaluation is available for this submission yet.
-                        </p>
-                      </section>
-                    )}
-                  </aside>
-                </div>
-
-                {(mainIdeaData?.IdeaFiles?.length || 0) > 0 && (
-                  <section className="pulse-content-card mt-6 flex items-center justify-between gap-5 px-6 py-5">
-                    <div>
-                      <h2 className="text-sm font-semibold text-[var(--pulse-ink)]">
-                        Attachments
-                      </h2>
-                      <p className="mt-1 text-xs text-[var(--pulse-ink-muted)]">
-                        {mainIdeaData.IdeaFiles.length} supporting file
-                        {mainIdeaData.IdeaFiles.length === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleDownloadFiles}
-                      className="inline-flex h-9 items-center gap-2 rounded-sm border border-[var(--pulse-line)] px-3.5 text-sm font-medium text-[var(--pulse-ink-secondary)] hover:border-[var(--pulse-line-strong)] hover:text-[var(--pulse-ink)]"
-                    >
-                      <Download className="h-4 w-4" /> Download files
-                    </button>
-                  </section>
-                )}
-
-                {inventorDrafts.length > 1 && (
-                  <details className="pulse-content-card mt-6 overflow-hidden">
-                    <summary className="cursor-pointer list-none px-6 py-5 text-sm font-semibold text-[var(--pulse-ink)]">
-                      Version history · {inventorDrafts.length} versions
-                    </summary>
-                    <div className="border-t border-[var(--pulse-line)] px-6 py-2">
-                      {inventorDrafts.slice(1).map((draft: any, index: number) => (
-                        <button
-                          key={draft.id}
-                          type="button"
-                          onClick={() => handleEditDraft(draft.id)}
-                          className="flex w-full items-center justify-between border-b border-[var(--pulse-line)] py-3 text-left text-sm last:border-0"
-                        >
-                          <span className="font-medium text-[var(--pulse-ink)]">
-                            Version {inventorDrafts.length - index - 1}
-                          </span>
-                          <span className="text-xs text-[var(--pulse-ink-muted)]">
-                            {moment(draft.updatedAt).format("MMM D, YYYY")}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </details>
-                )}
-              </>
-            ) : (
-              <section className="pulse-content-card mt-6 px-6 py-12 text-center">
-                <FileText className="mx-auto h-6 w-6 text-[var(--pulse-ink-muted)]" />
-                <h2 className="mt-3 text-base font-semibold text-[var(--pulse-ink)]">
-                  No submission is available
-                </h2>
-                <p className="mt-1 text-sm text-[var(--pulse-ink-secondary)]">
-                  The submitted record will appear here when it is ready.
-                </p>
-              </section>
-            )}
-          </div>
-        </div>
-      ) : useDisclosureWorkspace ? (
-        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto pb-10">
-          <div className="mx-auto flex w-full max-w-[1200px] flex-col items-start gap-8 px-6 py-8 lg:flex-row">
-            {/* Disclosure — primary reading pane */}
-            <div className="w-full lg:w-[60%]">
-              {isFechingIdeaDraft ? (
-                <Loader />
-              ) : (
-                <PatentPaperView
-                  title={mainIdeaData?.title}
-                  irn={mainIdeaData?.reference_number}
-                  inventors={(mainIdeaData?.IdeaInventor || [])
-                    .map((x: any) => x?.inventor?.name)
-                    .filter(Boolean)}
-                  submissionDate={
-                    mainIdeaData?.submission_date
-                      ? moment(mainIdeaData.submission_date).format(
-                          "MMM D, YYYY",
-                        )
-                      : undefined
-                  }
-                  sections={sections}
-                />
-              )}
-            </div>
-
-            {/* Evidence rail */}
-            <div className="w-full lg:sticky lg:top-4 lg:w-[40%]">
-              {/* Review checklist: co-inventors are collected from the
-                  inventor without blocking — surfaced here for IHC. */}
-              {(() => {
-                const coInvs = (mainIdeaData?.IdeaInventor || []).filter(
-                  (x: any) => x?.inventor?.id !== mainIdeaData?.created_by_id,
-                );
-                return (
-                  <div className="mb-4 flex items-center justify-between rounded-md border border-[#E8E8E8] bg-white px-4 py-3">
-                    <span className="text-[13px] font-medium text-[#0C0C0C]">
-                      Co-inventors
-                    </span>
-                    <span className="text-xs text-[#727272]">
-                      {coInvs.length > 0
-                        ? coInvs
-                            .map((x: any) => x?.inventor?.name)
-                            .filter(Boolean)
-                            .join(", ")
-                        : "None listed — confirm with inventor"}
-                    </span>
-                  </div>
-                );
-              })()}
-              {ideaDraft?.[0]?.api_evaluation_id &&
-                !ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data && (
-                <div className="mb-4 overflow-hidden rounded-md border border-[#E8E8E8] bg-white">
-                  <div className="border-b border-[#E8E8E8] bg-[#FAFAFA] px-4 py-3 font-mono text-xs font-semibold uppercase tracking-[1px] text-[#444444]">
-                    Patent Analysis Report
-                  </div>
-                  <div className="flex items-center gap-3 px-4 py-5">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-[#F9B418]" />
-                    <div>
-                      <p className="text-sm font-medium text-[#0C0C0C]">Evaluation in progress…</p>
-                      <p className="mt-0.5 font-mono text-[11px] text-[#727272]">
-                        {mainIdeaData?.reference_number ? `${mainIdeaData.reference_number} · ` : ""}prior-art search and scoring usually take a few minutes
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data && (
-                <div className="overflow-hidden rounded-md border border-[#E8E8E8] bg-white">
-                  <div className="border-b border-[#E8E8E8] bg-[#FAFAFA] px-4 py-3 font-mono text-xs font-semibold uppercase tracking-[1px] text-[#444444]">
-                    Patent Analysis Report
-                  </div>
-                  <PatentNoveltyReport
-                    reference={mainIdeaData?.reference_number}
-                    title={mainIdeaData?.title}
-                    api_evaluation_id={
-                      ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                        ?.id
-                    }
-                    scoringResult={
-                      ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                        ?.scoringResult
-                    }
-                    priorArt={
-                      ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                        ?.priorArt
-                    }
-                    report={
-                      ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="w-full flex flex-1 h-[calc(100vh-2.5rem)]">
-          <motion.div
-            className={`${isInventorDraftWorkspace ? "hidden" : "w-[48%]"} h-[calc(100vh)] border-r backdrop-blur-sm ${theme === "dark"
-              ? "bg-#f9f7f8 border-[#cccccc20]"
-              : "bg-neutral-50 border-photon-gray-300"
-              } flex flex-col sticky left-0`}
-          >
-            <div className="p-6 pt-8 pb-44 flex-1 overflow-auto">
-              {ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data &&
-                mainIdeaData?.status?.toUpperCase() !== "IN_DRAFT" &&
-                (user?.role === "LEGAL_COUNSEL" || isOutsideCounselRole(user?.role)) && (
-                  <div className="mb-8 overflow-hidden rounded-md border border-[#E8E8E8] bg-white">
-                    <div className="border-b border-[#E8E8E8] bg-[#FAFAFA] px-4 py-3 font-mono text-xs font-semibold uppercase tracking-[1px] text-[#444444]">
-                      Patent Analysis Report
-                    </div>
-                    <PatentNoveltyReport
-                    reference={mainIdeaData?.reference_number}
-                      title={mainIdeaData?.title}
-                      api_evaluation_id={
-                        ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                          ?.id
-                      }
-                      scoringResult={
-                        ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                          ?.scoringResult
-                      }
-                      priorArt={
-                        ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                          ?.priorArt
-                      }
-                      report={
-                        ideaDraft?.[0]?.CheckDraftSoreLog?.[0]?.score_meta_data
-                      }
-                    />
-                  </div>
-                )}
-            </div>
-
-          </motion.div>
-
-
-          <motion.div
-            className={`${isInventorDraftWorkspace ? "w-full max-w-[960px]" : "w-[70%]"} mx-auto flex flex-col h-full backdrop-blur-sm ${theme === "dark" ? "bg-black/40" : "bg-neutral-50"
-              }`}
-          >
-            <div className=" flex flex-col h-full overflow-y-auto mb-20">
-              <div
-                className={`${theme === "dark" ? "bg-black" : "bg-neutral-50"
-                  } flex items-center justify-between sticky top-0 z-10 h-20 px-6 mt-1`}
-              >
-                <div />
-                <div className="flex flex-row gap-2 items-center">
-                  <div
-                    className={`${theme === "dark" ? "bg-transparent" : "bg-transparent"
-                      } py-4 flex justify-center sticky bottom-0 gap-4 `}
-                  >
-                    {(user?.role === "INVENTOR" ||
-                      (user?.role !== "INVENTOR" &&
-                        mainIdeaData?.status?.toUpperCase() ===
-                        "IN_DRAFT")) && (
-                        <Button
-                          className={`flex items-center gap-2 px-4 py-2 rounded-sm h-9 border transition-colors bg-transparent hover:bg-transparent ${theme === "dark"
-                            ? "border-neutral-800 hover:border-[#F5A623]/50 text-neutral-400"
-                            : "border-gray-200 hover:border-[#F5A623] text-neutral-600"
-                            } hover:text-[#F5A623]`}
-                          type="button"
-                          disabled={isAddingDraft}
-                          onClick={handleCreateDraft}
-                        >
-                          <Plus className="h-4 w-4" />
-                          <span className="text-sm font-sans">
-                            {isAddingDraft ? "Creating..." : "Create New Draft"}
-                          </span>
-                        </Button>
-                      )}
-
-                    {/* Same stage gate as the header action: this second
-                        "Send To OC" had none at all, so it stayed clickable on
-                        a committee-stage idea and 403'd exactly like the
-                        first one. */}
-                    {selectedDraftId && user?.role === "LEGAL_COUNSEL" && isReviewPending && (
-                      <Button
-                        className={` bg-[#F9B418] font-semibold h-9 font-sans ${theme === "dark"
-                          ? "text-neutral-900 hover:bg-[#F9B418]"
-                          : "text-gray-900 hover:bg-[#F9B418]"
-                          } gap-2 rounded-sm`}
-                        type="button"
-                        disabled={!selectedDraftId}
-                        onClick={() => setOpenSendToOCModal(true)}
-                      >
-                        Send To OC
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* {mainIdeaData?.IdeaInventor?.find(
-                    (inv: any) => inv?.inventor?.id === user?.id
-                  ) &&
-                    !["IN_DRAFT"]?.includes(mainIdeaData?.status) && (
-                      <span className="text-sm text-blue-500 flex items-center gap-1">
-                        <Info className="h-4 w-4" />
-                        Request Update from Inventor
-                      </span>
-                    )} */}
-                </div>
-              </div>
-
-
-              {isFechingIdeaDraft ? (
-                <Loader />
-              ) : ideaDraft?.length === 0 ? (
-                <EmptyDraftsView onCreateDraft={handleCreateDraft} />
-              ) : ideaDraft?.length === 1 &&
-                ideaDraft?.[0]?.idea?.send_to_oc_id === user?.client_id &&
-                isOutsideCounselRole(user?.role) ? (
-                <OCDraftView theme={theme} ideaDraft={ideaDraft} />
-              ) : (
-                <DraftListView
-                  inventorIdeas={inventorIdeas}
-                  selectedDraftId={selectedDraftId}
-                  submittedDraftId={submittedDraftId}
-                  mainIdeaData={mainIdeaData}
-                  handleDraftSelection={handleDraftSelection}
-                  handleEditDraft={handleEditDraft}
-                  handleCopyDraft={handleCopyDraft}
-                  setDraftReport={setDraftReport}
-                  setShowPatentReportModal={setShowPatentReportModal}
-                  mapStatusCodeToLabel={mapStatusCodeToLabel}
-                  handleCreateDraft={handleCreateDraft}
-                  isAddingDraft={isAddingDraft}
-                  setDraftApiEvaluationId={setDraftApiEvaluationId}
-                  setDraftId={setSelectedDraftId}
-                  setSelectedDraftForReport={setSelectedDraftForReport}
-                  draftIdBeingCalculated={
-                    isCalculatingScore || enableScorePolling
-                      ? selectedDraftId
-                      : null
-                  }
-                  userRole={user?.role}
-                  onSendToIHC={handleSendToIHC}
-                  isSendingToIHC={isSendingToIHC}
-                  draftIdBeingSentToIHC={sendToIHCVariables?.draft_id ?? null}
-                />
-              )}
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Non-blocking co-inventor prompt at submission */}
-      <AlertDialog
-        open={!!coInventorPromptDraftId}
-        onOpenChange={(o) => !o && setCoInventorPromptDraftId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Anyone else contribute to this idea?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Add co-inventors so they're credited from the start. You can also
-              skip this — co-inventors can be added later in the draft
-              workspace.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                const draftId = coInventorPromptDraftId!;
-                setCoInventorPromptDraftId(null);
-                submitDraftToIHC(draftId);
-              }}
-            >
-              Skip & submit
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-[#F9B418] font-semibold text-[#0C0C0C] hover:bg-[#DA9700]"
-              onClick={() => {
-                const draftId = coInventorPromptDraftId!;
-                setCoInventorPromptDraftId(null);
-                navigate(`/ideas/${ideaId}/draft?draftId=${draftId}`);
-              }}
-            >
-              Add co-inventors
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {showRequestUpdateModal && (
-        <RequestUpdate
-          open={showRequestUpdateModal}
-          onOpenChange={setShowRequestUpdateModal}
-          ideaId={ideaId}
-          mainIdeaData={mainIdeaData}
-        />
-      )}
-
-      {showFileIdeaModal && (
-        <FileIdeaModal
-          open={showFileIdeaModal}
-          onOpenChange={setShowFileIdeaModal}
-          ideaId={ideaId ?? ""}
-          defaultTitle={mainIdeaData?.title}
-          defaultInventors={
-            mainIdeaData?.IdeaInventor?.map(
-              (i: any) => i?.inventor?.name || i?.inventor?.email,
-            ).filter(Boolean) ?? []
-          }
-          onFiled={() => {
-            queryClient.invalidateQueries({
-              queryKey: ["ideaDetails", ideaId],
-            });
-            queryClient.invalidateQueries({ queryKey: ["fetch_ideas"] });
-            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-            queryClient.invalidateQueries({ queryKey: ["patents"] });
-            queryClient.invalidateQueries({ queryKey: ["fetch_clients"] });
-            if (mainIdeaData?.clientId) {
-              queryClient.invalidateQueries({
-                queryKey: ["client", mainIdeaData.clientId],
-              });
-              queryClient.invalidateQueries({
-                queryKey: ["client_metrics", mainIdeaData.clientId],
-              });
-            }
-          }}
-        />
-      )}
-
-      <ViewRequestUpdate
-        open={showViewContentsModal}
-        onOpenChange={setShowViewContentsModal}
-        ideaId={ideaId ?? ""}
-      />
-
-      <SendToOCModal
-        isOpen={openSendToOCModal}
-        onClose={() => setOpenSendToOCModal(false)}
-        onSubmit={() => sendToOC()}
-        ideaName={mainIdeaData?.title || "-"}
-        instructions={instructions}
-        setInstructions={setInstructions}
-        recipient={user?.role === "TECH_COMMITTEE" ? "LEGAL_COUNSEL" : "PHOTON_LEGAL"}
-      />
-
-      <RejectIdeaModal
-        isOpen={openRejectIdeaModal}
-        onClose={() => setOpenRejectIdeaModal(false)}
-        onSubmit={(reject_reason) => rejectIdeaByIHC({ reject_reason })}
-        ideaName={mainIdeaData?.title || "-"}
-        reason={reason}
-        setReason={setReason}
-      />
-
-      {showPatentReportModal && (
-        <AlertDialog open={showPatentReportModal}>
-          <AlertDialogContent
-            className={`${theme === "dark"
-              ? "bg-neutral-950 border-white/10"
-              : "border-gray-200"
-              } !rounded-lg sm:max-w-lg !max-w-[80vw] !bg-transparent w-full p-0 h-[96vh] overflow-none border`}
-          >
-            <div className="flex rounded-t-lg border-b-[thick] items-center justify-between px-8 py-5 shrink-0 border-neutral-200 bg-neutral-50 dark:border-white/10 dark:bg-neutral-900">
-              <div>
-                <h2 className="text-xl font-semibold font-sans text-neutral-900 dark:text-neutral-100">
-                  Patent Analysis Report
-                </h2>
-                <p className="text-sm mt-1 font-sans leading-[calc(1.25 / .875)] text-neutral-600 dark:text-neutral-400">
-                  Generated on{" "}
-                  {draftReport?.created_at || draftReport?.createdAt
-                    ? new Date(
-                        draftReport?.created_at || draftReport?.createdAt,
-                      ).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : new Date().toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  className={`flex rounded-sm items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all border border-neutral-300 text-neutral-700 hover:bg-neutral-100 dark:border-white/10 dark:text-neutral-300 dark:hover:text-neutral-300 bg-transparent dark:hover:bg-white/5 dark:hover:border-white/20`}
-                  onClick={() => setOpenEvaluatePopup(true)}
-                >
-                  <RefreshCcw className="h-4 w-4" /> Re-run Analysis
-                </Button>
-                <ConciseEvaluationReport
-                  result={draftReport}
-                  priorArt={draftReport?.priorArt}
-                />
-                <Button
-                  className={`p-2.5 rounded-sm transition-all bg-transparent hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 dark:hover:bg-white/10 dark:text-neutral-400 dark:hover:text-neutral-300`}
-                  onClick={() => setShowPatentReportModal(false)}
-                >
-                  <X className="h-5 w-5" size={20} />
-                </Button>
-              </div>
-            </div>
-
-            <div
-              className={`${theme === "dark" ? "bg-[#0e0e0e]" : "bg-white"
-                } overflow-y-auto max-h-[80vh] -mt-5`}
-            >
-              {/* <PatentAnalysisContent data={draftReport} /> */}
-              <PatentNoveltyReport
-                    reference={mainIdeaData?.reference_number}
-                title={mainIdeaData?.title ?? ""}
-                api_evaluation_id={draftApiEvaluationId ?? ""}
-                scoringResult={draftReport?.scoringResult}
-                priorArt={draftReport?.priorArt}
-                report={draftReport}
-              />
-            </div>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-
-      <AlertDialog open={openEvaluatePopup} onOpenChange={setOpenEvaluatePopup}>
-        <AlertDialogContent
-          className={`${theme === "dark" ? "bg-[#0a0a0a] border-[#cccccc20]" : "bg-white"
-            } rounded-lg`}
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle
-              className={`font-sans ${theme === "dark" ? "text-zinc-200" : "text-zinc-900"
-                }`}
-            >
-              Re-evaluate with New Patent Numbers
-            </AlertDialogTitle>
-            <AlertDialogDescription
-              className={`font-sans ${theme === "dark" ? "text-zinc-400" : "text-zinc-500"
-                }`}
-            >
-              Enter patent numbers (comma or newline separated):
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Textarea
-            onChange={(e) => setPatentInput(e.target.value)}
-            className="h-10 bg-transparent uppercase font-sans text-neutral-900 dark:text-neutral-300 dark:bg-neutral-900 border dark:border-[#cccccc20] rounded-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
-            placeholder="US1234567A1, US342567B1..."
-          />
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={isReEvalLoading}
-              className={`bg-transparent border rounded-sm font-sans ${theme === "dark"
-                ? "border-[#cccccc20] text-zinc-300 hover:bg-transparent hover:text-zinc-300 bg-input/30 border-white"
-                : ""
-                }`}
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleReEvalSubmit}
-              //disabled={isDeleting}
-              className={`text-zinc-900 font-semibold rounded-sm font-sans bg-[#F9B418] hover:bg-[#F9B41890]`}
-            >
-              {isReEvalLoading ? "Submitting..." : "Submit"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {scoreDialogOpen && (
-        <Dialog open={scoreDialogOpen} onOpenChange={setScoreDialogOpen}>
-          <DialogContent className="max-w-md bg-white">
-            <DialogHeader>
-              <DialogTitle className="text-xl text-center mb-2 text-gray-800">
-                Analyzing your patent idea...
-              </DialogTitle>
-              <DialogDescription className="text-center text-sm text-gray-500">
-                This process takes a few minutes. You can continue working while
-                we analyze your idea.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="py-8">
-              {isCalculatingScore && (
-                <div className="flex justify-center mb-8">
-                  <div className="relative h-20 w-20">
-                    <div className="absolute inset-0 rounded-full border-4 border-primary-100"></div>
-                    <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-1 bg-gray-100 rounded-md p-2">
-                {analysisSteps.map((step, index) =>
-                  renderAnalysisStep(step, index),
-                )}
-              </div>
-            </div>
-
-            <DialogFooter className="sm:justify-center">
-              <Button
-                variant="outline"
-                onClick={handleRunInBackground}
-                className="rounded-sm"
-                disabled={analysisSteps.every(
-                  (step) => step.status === "completed",
-                )}
-              >
-                Run in background
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+  if (isFetchingIdea) return <div data-idea-detail className="flex min-h-0 flex-1 flex-col"><PageHeader title="Idea detail" /><p role="status" className="p-6 text-sm text-pl-text-3">Loading idea…</p></div>;
+  const accessDenied = (ideaLoadError as any)?.response?.status === 403;
+  if (!mainIdeaData) return <div data-idea-detail className="flex min-h-0 flex-1 flex-col"><PageHeader title="Idea detail" /><div className="p-6"><h1 className="text-xl font-semibold">{accessDenied ? "You do not have access to this idea" : "This idea is unavailable"}</h1><p role="alert" className="mt-2 text-sm text-pl-text-2">{accessDenied ? "Return to ideas to choose a record within your workspace and permissions." : "The record could not be loaded. Try again, or return to ideas."}</p><div className="mt-4 flex gap-2">{!accessDenied && <Button size="sm" onClick={() => reloadIdea()}>Reload idea</Button>}<Button size="sm" variant={accessDenied ? "default" : "outline"} onClick={() => navigate("/ideas")}>Back to ideas</Button></div></div></div>;
+  return <div data-idea-detail className="pulse-product-page flex min-h-0 flex-1 flex-col bg-background text-foreground">
+    <PageHeader title={photon && mainIdeaData.client?.name ? mainIdeaData.client.name : "Idea detail"} />
+    <div className="min-h-0 flex-1 overflow-y-auto">
+    <header className="shrink-0 border-b border-pl-border px-6 py-4"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><p className="text-xs text-pl-text-3">{mainIdeaData.reference_number}</p><h1 className="mt-1 break-words text-xl font-semibold">{mainIdeaData.title}</h1></div><Button size="sm" variant="ghost" onClick={() => navigate("/ideas")}>Back to ideas</Button></div></header>
+    <div className="px-6 py-5">
+      <div className="mx-auto max-w-5xl space-y-5">
+        <section className="border-b border-pl-border pb-5"><div className="flex flex-wrap items-start justify-between gap-4"><div className="min-w-0 flex-1"><h2 className="text-lg font-semibold">{statusLabel}</h2><p className="mt-2 max-w-3xl text-sm text-pl-text-2">{nextStep}</p></div></div></section>
+        <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm"><p><span className="text-pl-text-3">Inventor</span> · {owner || "Not recorded"}</p>{mainIdeaData.submitted_by && <p><span className="text-pl-text-3">Submitted by</span> · {mainIdeaData.submitted_by.name}</p>}{coInventors.length > 0 && <p><span className="text-pl-text-3">Co-inventors</span> · {coInventors.map((credit: any) => credit.inventor?.name).filter(Boolean).join(", ")}</p>}</div>
+        {feedback && ["CHANGES_REQUESTED", "REJECTED"].includes(state) && <section className="border-l-2 border-pl-blue pl-4"><h2 className="text-sm font-semibold">Review feedback</h2><p className="mt-2 whitespace-pre-wrap text-sm text-pl-text-2">{feedback.comment}</p><p className="mt-2 text-xs text-pl-text-3">{feedback.actor?.name || "Workspace Admin"} · {dateLabel(feedback.created_at)}</p></section>}
+        <section><h2 className="text-sm font-semibold">Invention brief</h2><p className="mt-2 text-sm text-pl-text-2">{brief}</p></section>
+        <details ref={disclosureRef} open={disclosureOpen} onToggle={(event) => setDisclosureOpen(event.currentTarget.open)} className="scroll-mt-4 border-t border-pl-border pt-4"><summary className="cursor-pointer text-sm font-medium">Full disclosure · revision {mainIdeaData.revision || 1}</summary>{isFechingIdeaDraft ? <p role="status" className="mt-3 text-sm">Loading disclosure…</p> : <div className="mt-3 divide-y divide-pl-border">{(selectedDisclosure?.meta_data ?? sections).map((section: any) => <details key={section.id} className="py-3"><summary className="cursor-pointer text-sm font-medium">{section.id === "advantages" ? "Novelty" : section.id === "implementation" ? "Application" : section.title}</summary><dl className="mt-3 space-y-4">{section.questions?.map((question: any) => <div key={question.id}><dt className="text-xs font-medium text-pl-text-3">{question.text || question.question}</dt><dd className="mt-1 whitespace-pre-wrap break-words text-sm text-pl-text-2">{question.answer || "No answer recorded."}</dd></div>)}</dl></details>)}</div>}</details>
+        <section className="border-t border-pl-border pt-4"><h2 className="text-sm font-semibold">Evaluation</h2>{report?.scoringResult ? <><p className="mt-2 text-xl font-semibold tabular-nums">{score?.toFixed(1) ?? "—"}<span className="text-sm font-normal text-pl-text-3"> /10 · {scoreBand}</span></p>{report.raw?.state === "PARTIAL" && <p className="mt-2 text-sm text-pl-amber-text">Partial result · the score is provisional</p>}<p className={`mt-2 text-xs ${evaluationContext?.is_current === false ? "text-pl-amber-text" : "text-pl-text-3"}`}>{evaluationContext ? `Evaluation from revision ${evaluationContext.revision} · ${dateLabel(evaluationContext.evaluated_at)} · ${evaluationContext.is_current ? "matches the saved disclosure" : "predates the latest edits"}` : "Evaluation revision is not recorded."}</p><p className="mt-2 text-sm text-pl-text-2">{report.scoringResult.summary || (score !== null && score < 4 ? "The search found close overlap with the disclosed mechanism." : "The search found potentially distinct features in the disclosed mechanism.")}</p><p className="mt-2 text-xs text-pl-text-3">AI-assisted and advisory. No score is required to submit for review.</p><details className="mt-3"><summary className="cursor-pointer text-sm font-medium">What differs and supporting evidence</summary><div className="mt-3"><PatentNoveltyReport embedded hideAssessment title={mainIdeaData.title} api_evaluation_id={report.id} scoringResult={report.scoringResult} priorArt={report.priorArt ?? []} report={report} reference={mainIdeaData.reference_number} /></div></details></> : <p className="mt-2 text-sm text-pl-text-2">No evaluation is available. This disclosure can be reviewed on its own merits.</p>}</section>
+        <details className="border-t border-pl-border pt-4"><summary className="cursor-pointer text-sm font-medium">Source material and attachments · {files.length}</summary>{selectedDisclosure?.answers?.__source?.text && <details className="mt-3"><summary className="cursor-pointer text-sm">Original source text</summary><p className="mt-2 whitespace-pre-wrap text-sm text-pl-text-2">{selectedDisclosure.answers.__source.text}</p></details>}<div className="mt-3 divide-y divide-pl-border">{files.length ? files.map((file: any) => <div key={file.id} className="flex items-center justify-between gap-3 py-3"><p className="min-w-0 break-words text-sm">{file.original_name}</p><Button size="sm" variant="outline" disabled={downloading === file.id} onClick={() => downloadFile(file)}>{downloading === file.id ? "Downloading…" : "Download"}</Button></div>) : <p className="text-sm text-pl-text-3">No attachments were provided.</p>}</div>{downloadError && <p role="alert" className="mt-2 text-sm text-pl-red-text">{downloadError}</p>}</details>
+        <details className="border-t border-pl-border pt-4"><summary className="cursor-pointer text-sm font-medium">Review history and activity</summary>{activity.isLoading ? <p role="status" className="mt-3 text-sm">Loading history…</p> : activity.isError ? <div role="alert" className="mt-3"><p className="text-sm">Could not load history.</p><Button size="sm" variant="outline" onClick={() => activity.refetch()}>Reload history</Button></div> : events.length ? <ol className="mt-3 divide-y divide-pl-border">{events.map((event) => <li key={event.id} className="py-3"><p className="text-sm font-medium">{eventLabel(event)}</p><p className="mt-1 text-xs text-pl-text-3">{event.actor?.name || "Recorded activity"} · revision {event.revision} · {dateLabel(event.created_at)}</p>{event.comment && <p className="mt-2 whitespace-pre-wrap text-sm text-pl-text-2">{event.comment}</p>}</li>)}</ol> : <p className="mt-3 text-sm text-pl-text-3">No review activity has been recorded.</p>}</details>
+        {linkedPatent && <section className="border-t border-pl-border pt-4"><h2 className="text-sm font-semibold">Related patent</h2><p className="mt-2 text-sm text-pl-text-2">{linkedPatent.application_number || "Application number not recorded"} · {linkedPatent.jurisdiction}</p></section>}
+      </div>
     </div>
-  );
+    </div>
+    <footer className="shrink-0 border-t border-pl-border bg-background px-6 py-3"><div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">{canDecide && <div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { decisionMutation.reset(); setDecisionOpen("CHANGES_REQUESTED"); }}>Request changes</Button><DropdownMenu><DropdownMenuTrigger asChild><Button size="sm" variant="ghost" aria-label="More decision options"><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem onSelect={() => { decisionMutation.reset(); setDecisionOpen("REJECTED"); }}>Reject idea</DropdownMenuItem></DropdownMenuContent></DropdownMenu></div>}<Button className="ml-auto" size="sm" onClick={primaryAction} disabled={isFechingIdeaDraft}>{actionLabel}</Button></div></footer>
+    <Dialog open={!!decisionOpen} onOpenChange={(open) => { if (!open) setDecisionOpen(null); }}><DialogContent><DialogHeader><DialogTitle>{decisionOpen === "APPROVED" ? "Send to Photon Legal for filing?" : decisionOpen === "CHANGES_REQUESTED" ? "Request changes to this disclosure" : "Reject this idea?"}</DialogTitle><DialogDescription className="text-pl-text-2">{decisionOpen === "APPROVED" ? "Photon Legal will receive this disclosure and its supporting files." : decisionOpen === "CHANGES_REQUESTED" ? "The inventor will receive your feedback and can update this disclosure." : "The inventor will receive your reason and may revise and resubmit for reconsideration."}</DialogDescription></DialogHeader><label className="text-sm font-medium" htmlFor="idea-decision-note">{decisionOpen === "APPROVED" ? "Instructions for Photon Legal (optional)" : "Your reason (required)"}</label><Textarea id="idea-decision-note" value={decisionNote} onChange={(event) => setDecisionNote(event.target.value)} />{decisionMutation.isError && <p role="alert" className="text-sm text-pl-red-text">Could not save this decision. Your note remains here; try again.</p>}<DialogFooter><Button size="sm" variant="outline" onClick={() => setDecisionOpen(null)}>Keep reviewing</Button><Button size="sm" disabled={decisionMutation.isPending || !canDecide || (decisionOpen !== "APPROVED" && !decisionNote.trim())} onClick={() => decisionMutation.mutate()}>{decisionMutation.isPending ? "Saving decision…" : decisionOpen === "APPROVED" ? "Send to Photon Legal" : decisionOpen === "CHANGES_REQUESTED" ? "Request changes" : "Reject idea"}</Button></DialogFooter></DialogContent></Dialog>
+    {showFileIdeaModal && <FileIdeaModal open={showFileIdeaModal} onOpenChange={setShowFileIdeaModal} ideaId={ideaId ?? ""} defaultTitle={mainIdeaData.title} defaultInventors={(mainIdeaData.IdeaInventor ?? []).map((credit: any) => credit.inventor?.name).filter(Boolean)} onFiled={() => { for (const key of [["ideaDetails", ideaId], ["idea_activity", ideaId], ["fetch_ideas"], ["dashboard"], ["patents"], ["fetch_clients"]]) queryClient.invalidateQueries({ queryKey: key }); }} />}
+  </div>;
 };
 export default IdeaDetailsContent;

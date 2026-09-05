@@ -60,4 +60,31 @@ The required selected gate run passes 7/7 (typecheck, tokens, V0 semantics, curr
 
 `functional2.log` verifies two persisted drafts, selective submission, reload, updated instruction version/state, operator acknowledgment/start/completion and unsent-draft exclusion. `functional-extra.log` verifies local edit retention, country requirements/persistence, decline response preservation and 20/15 pagination plus filter recovery. Initial zoom review caught the inherited desktop width floor; scoped reflow fixes it. The accessibility/overflow pass over all Actions content states at 1440 and 640 has no findings; final verification also includes the real redirected home. Error and confirmation screenshots show retained controls with explicit consequences. Full repository gates are running; unrelated failures will be recorded without claiming a fully green suite.
 
-The reproducible local UI probes are in `checks/`: run from the repository root against `npm run dev:design -- --port 3740` for workflow and retention/countries/decline/pagination; the accessibility script serves the completed static Storybook build itself on 6049. They block external egress and use only named synthetic V0 scenarios.
+Verification probes ran locally against the mock app and static Storybook, blocked external egress, and selected named synthetic V0 scenarios. Their logs preserve the results; no additional repository test suite was added.
+
+## Independent review round 1 and corrections
+The independent review found five task-level issues in the first captures: the complete client choice set did not fit at laptop size, compact confirmation lost event identity, unavailable configuration still used the generic client ownership sentence, zoom was dominated by introductory/filter UI, and sticky operator controls covered attribution. The revised layout removes redundant introductory copy, reduces vertical spacing, labels the number of available instructions, puts secondary filters behind disclosure at zoom, keeps event identity/date/reference sticky during a send or decline decision, states the configuration dependency truthfully, and returns operator controls to normal flow so they cannot cover instruction or submitter content.
+
+Round 1 verdict, verbatim:
+
+```text
+VERDICT: NEEDS_WORK
+SURFACE: actions  PERSONA: Workspace Admin, Case Owner, Photon Admin; Inventor refusal
+SCORECARD: product-fit 4 · hierarchy 3 · usability 3 · trust 3 · craft 4 · accessibility 3 · business 4
+COGNITIVE LOAD: fail — Unlike the record’s roleplay, the rendered layouts require discovering hidden choices and remembering event identity while acting.
+
+FINDINGS (most severe first, max 7):
+
+1. Instruction choices at 1280×720 — Workspace Admin sees only “Respond to the office action” above the sticky controls; extension and abandonment choices lack a visible continuation cue, making one option appear exhaustive — Reduce introductory spacing and keep the complete choice group visible or clearly indicate its continuation.
+2. Confirmation and decline at 200% zoom — The patent reference, event and deadline are absent beside the final action, forcing Workspace Admin and operators to remember which request they are sending or declining — Keep a compact event identity and deadline with the confirmation.
+3. Missing-template ownership — Workspace Admin is told to send an instruction while another sentence says Photon Legal must first configure unavailable options — Replace the generic ownership sentence with the actual configuration dependency and immediate contact step.
+4. Default state at 200% zoom — All three personas see headings, filters and “Choose another event,” but no selected event, urgency, instruction or primary task control — Compact the introductory area and move secondary filters behind disclosure so the selected task leads.
+5. Sticky operator controls — At 1280×720 the incoming request’s submitter is below the visible content; the long-title state clips “Client note,” and the 1440×900 decline form cuts through submitter text — Reserve space for the action area and keep attribution and relevant instruction context readable before processing.
+
+STATES MISSING: none; all brief-listed states and Inventor refusal are represented across the 58 images.
+REFERENCE MATCH: yes — Typography, amber controls, restrained borders and two-pane structure match the reference language; the spacing and compact-layout problems above weaken its task-first hierarchy.```
+
+The broad gate attempt passed typecheck, role lint, routes, manifest, token freshness, fidelity, V0 semantics/matrix, both builds and the full serial story suite. It reported the pre-existing documentation-host allowlist issue in earlier DSN logs (rollupjs.org/reactrouter.com). Its repository-wide screenshot phase was deliberately stopped when the evaluator required product changes; it is not reported as a passing broad gate. Final revised surface gates, targeted stable captures and accessibility checks supersede that attempt.
+
+## Revised verification
+The revised required gate set passes 8/8 (`gates-review2.log`), including role lint and the full serial story suite. Both builds pass. Accessibility has zero findings and no page overflow across all 22 states at 1440 and 640 (`axe-review2.log`). The zoom recovery probe checks actual viewport bounds for the event heading, patent reference and final decision control together, then successfully retries the failed send and completes the decline (`recovery-zoom.log`). The laptop render now shows all three allowed choices together; the operator submitter and next action are visible without overlay. At zoom, event/date/reference lead instead of generic introductory copy. Missing configuration has one truthful dependency and contact step. Confirmation suppresses the earlier summary and holds one compact identity block while the reader acts.

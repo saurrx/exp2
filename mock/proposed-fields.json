@@ -105,6 +105,13 @@
       "type": "Firm-wide ownership gaps, approved ideas, urgent events, configuration and latest-import exceptions; explicit unavailable sources; scoped context links and active-patent geography",
       "finding": "BF-15",
       "reason": "DSN-0017: prioritize ownership and incoming work using existing client, assignment, idea-transition, event, import and patent records. Missing sources remain unknown rather than zero. No route, role, permission or workflow stage added. Conceptual until backend verification."
+    },
+    {
+      "entity": "Client",
+      "field": "onboarding; onboarding_confirmed_at; onboarding_confirmed_by; confirm_onboarding on existing PATCH",
+      "type": "Derived setup steps, next responsibility, owners, people, scoped work/import summaries; attributed readiness-check timestamp",
+      "finding": "BF-16",
+      "reason": "DSN-0018: make the authorized client onboarding sequence visible and record its final readiness check using the existing client route. Readiness does not gate access or add a lifecycle status. The mock rechecks source requirements and assignment scope before confirmation. No adapter, auth or new endpoint; conceptual until backend verification."
     }
   ],
   "collections": [

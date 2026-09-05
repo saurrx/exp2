@@ -5,7 +5,9 @@ import ClientDetails, {
 } from "@/components/clients/ClientDetails";
 import ClientTabs from "@/components/clients/ClientTabs";
 import ClientLogo from "@/components/clients/ClientLogo";
-import { useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { ActionsNavigation, actionPrimary } from "@/components/actions/ActionsWorkspace";
+import { clientRelationship } from "@/components/clients/ClientBook";
 import BlockedRedirect from "@/lib/BlockedRedirect";
 import { User, Pen, X, Save, Globe2, BriefcaseBusiness } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,30 +31,21 @@ import { track, identifyUser, useTrackOnce } from "@/lib/analytics";
 const ClientDetailPage: React.FC = () => {
   const { theme } = useTheme();
   const { clientId } = useParams();
+  const [params] = useSearchParams();
+  const [saving, setSaving] = useState(false);
   const { user } = useUserCookie();
-  // A case owner's reach comes from assignment rows, and the session carries
-  // them. Off-assignment: the page is read-only and the one action is asking
-  // for access — which notifies every Photon admin through the audited flow,
-  // instead of a button that 403s.
+  // V0 limits client records to the Case Owner’s current assignments.
+  // An old direct link retains the existing request-access recovery.
   const isUnassignedCaseOwner =
     user?.role === "CASE_OWNER" &&
     !((user as any)?.assigned_client_ids ?? []).includes(clientId);
   const requestAccessMutation = useMutation({
     mutationFn: async () =>
       (await API_CONFIG.post(`/api/v1/clients/${clientId}/request-access`))?.data,
-    onSuccess: () => toast.success("Access requested — the Photon admins have been notified."),
+    onSuccess: () => toast.success("Access request sent."),
     onError: () => toast.error("Couldn't send the request. Try again."),
   });
   const isCaseOwner = user?.role === "CASE_OWNER";
-  // A case owner OPENS any client; the assignment decides what they can do
-  // there, not whether they can look (2026-09-03, F-079). The backend agrees in
-  // two places — ClientIsolationGuard passes an unassigned GET and audits it,
-  // and RLS answers it through app_can_read_client — so bouncing the page here
-  // would refuse a request the server is willing to serve.
-  //
-  // Everything downstream was already built for this: `isUnassignedCaseOwner`
-  // swaps "View as client" for "Request access", and OverviewTab renders the
-  // record read-only. The only thing missing was letting them arrive.
   const canViewClient = user?.role === "PHOTON_ADMIN" || isCaseOwner;
   const [isEditMode, setIsEditMode] = useState(false);
   // Only once the role check below has passed — a record the caller is bounced
@@ -113,7 +106,7 @@ const ClientDetailPage: React.FC = () => {
     },
   });
 
-  const { mutate: loginAsClient, isPending: isLoggingInAsClient } = useMutation(
+  const { mutate: loginAsClient, isPending: isLoggingInAsClient, error: clientViewError } = useMutation(
     {
       mutationKey: ["login_as_client", clientId],
       mutationFn: async () => {
@@ -188,266 +181,21 @@ const ClientDetailPage: React.FC = () => {
        return <BlockedRedirect from="/clients/:id" to="/clients" />;
      }
 
-  return (
-    <>
-      <MainClass className="relative" />
-      <PageHeader
-        title={!isFetching && clientData?.data?.name
-          ? clientData.data.name
-          : "Client workspace"}
-        actions={isOutsideCounselRole(user?.role) ? (
-            isEditMode ? (
-              <>
-                <button
-                  onClick={() => setIsEditMode(false)}
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-sm border border-[var(--pulse-line)] px-3 text-sm font-medium text-[var(--pulse-ink-secondary)] transition-colors hover:border-[var(--pulse-line-strong)] hover:text-[var(--pulse-ink)]"
-                >
-                  <X className="h-4 w-4" />
-                  <span className="hidden sm:inline">Cancel</span>
-                </button>
-                <button
-                  onClick={async () => {
-                    await clientDetailsRef.current?.saveChanges();
-                  }}
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-sm bg-[var(--pulse-brand)] px-3 text-sm font-semibold text-[var(--pulse-ink)] transition-colors hover:bg-[var(--pulse-brand-hover)]"
-                >
-                  <Save className="h-4 w-4" />
-                  <span className="hidden sm:inline">Save changes</span>
-                </button>
-              </>
-            ) : (
-              <>
-                {isUnassignedCaseOwner ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 rounded-sm"
-                    disabled={requestAccessMutation.isPending}
-                    onClick={() => requestAccessMutation.mutate()}
-                  >
-                    <User className="h-4 w-4" />
-                    <span className="hidden lg:inline">
-                      {requestAccessMutation.isPending ? "Requesting…" : "Request access"}
-                    </span>
-                  </Button>
-                ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 rounded-sm"
-                  onClick={() => {
-                    // The confirmation opened, not the session — the pair with
-                    // view_as_entered is what shows how often an admin thinks
-                    // better of stepping into a client's workspace.
-                    track("view_as_prompted", { client_id: clientId });
-                    setIsClientModeModalOpen(true);
-                  }}
-                >
-                  <User className="h-4 w-4" />
-                  <span className="hidden lg:inline">View as client</span>
-                </Button>
-                )}
-                {(user?.role === "PHOTON_ADMIN"
-                  || (isCaseOwner && !isUnassignedCaseOwner)) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 rounded-sm"
-                  onClick={() => setIsEditMode(true)}
-                >
-                  <Pen className="h-4 w-4" />
-                  <span className="hidden lg:inline">Edit client</span>
-                </Button>
-                )}
-              </>
-            )
-          ) : null}
-      />
-      <div className="pulse-product-page h-full dark:bg-[#0a0a0a]">
-        {/* Client identity summary */}
-        <div
-          className={`relative z-10 flex-shrink-0 ${
-            theme === "dark"
-              ? "bg-neutral-950"
-              : "bg-[var(--pulse-canvas)]"
-          }`}
-        >
-          <div className="mx-auto w-full max-w-[1440px] px-5 pt-6 md:px-8">
-            <div className="rounded-md border border-[var(--pulse-line)] bg-[var(--pulse-surface)] p-4">
-              <div className="flex min-w-0 items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--pulse-line)] bg-white p-2 text-lg font-bold text-amber-700">
-                <ClientLogo
-                  client={clientData?.data}
-                  className="max-h-11 max-w-12 object-contain"
-                  fallbackClassName="text-sm font-semibold text-amber-700"
-                />
-              </div>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className={`font-sans text-lg font-semibold tracking-[-0.015em] ${theme === "dark" ? "text-zinc-200" : "text-[var(--pulse-ink)]"}`}>{!isFetching && clientData?.data?.name}</div>
-                  <span className="rounded-xs border border-[var(--pulse-success)]/20 bg-[var(--pulse-success-soft)] px-2.5 py-1 text-xs font-medium text-[var(--pulse-success)]">Active client</span>
-                </div>
-                <p className="mt-1 max-w-2xl truncate text-sm text-neutral-500">{clientData?.data?.about}</p>
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
-                  <span className="inline-flex items-center gap-1.5"><Globe2 className="h-3.5 w-3.5" />{clientData?.data?.allowed_domain?.split("@").pop()}</span>
-                  <button onClick={() => user?.role === "PHOTON_ADMIN" && setIsOwnerDialogOpen(true)} className="inline-flex items-center gap-1.5 font-medium text-neutral-700 hover:text-amber-700"><BriefcaseBusiness className="h-3.5 w-3.5" />Case Owner: {assignedOwner?.name || "Not assigned"}{user?.role === "PHOTON_ADMIN" && <span className="text-amber-700">Change</span>}</button>
-                </div>
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className={`flex-1 !overflow-y-auto ${
-            theme === "dark" ? "bg-transparent" : "bg-neutral-50"
-          }`}
-        >
-          {isLoading && !clientData ? (
-            <Loader />
-          ) : (
-            <div className="relative z-10 mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8">
-              {isEditMode ? (
-                <div className="mx-auto max-w-3xl">
-                  <ClientDetails
-                    ref={clientDetailsRef}
-                    clientData={clientData?.data}
-                    clientId={clientId ?? ""}
-                    refetchClientData={refetchClientData}
-                    isEditMode={isEditMode}
-                    onSaveComplete={() => {
-                      setIsEditMode(false);
-                    }}
-                    onCancel={() => {
-                      setIsEditMode(false);
-                    }}
-                  />
-                </div>
-              ) : (
-                  <ClientTabs
-                    clientId={clientId ?? ""}
-                    clientData={clientData?.data}
-                    caseOwnerName={assignedOwner?.name}
-                    onChangeCaseOwner={user?.role === "PHOTON_ADMIN" ? () => setIsOwnerDialogOpen(true) : undefined}
-                    canManageTeam={user?.role === "PHOTON_ADMIN"}
-                    clientTeam={clientData?.data?.User}
-                  />
-              )}
-            </div>
-          )}
-        </div>
-
-        <Dialog open={isOwnerDialogOpen} onOpenChange={setIsOwnerDialogOpen}>
-          <DialogContent className="max-w-md bg-white">
-            <DialogHeader>
-              <DialogTitle>Change Case Owner</DialogTitle>
-              <DialogDescription>Select the Case Owner who should have access to {clientData?.data?.name}.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 pt-2">
-              {caseOwners.map((owner: any) => (
-                <button
-                  key={owner.id}
-                  onClick={() => ownerMutation.mutate(owner)}
-                  disabled={ownerMutation.isPending}
-                  className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors ${assignedOwner?.id === owner.id ? "border-[#F9B418] bg-amber-50" : "border-neutral-200 hover:border-neutral-300"}`}
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700">{owner.name?.charAt(0) || owner.email?.charAt(0)}</span>
-                  <span className="flex-1"><span className="block text-sm font-semibold text-neutral-900">{owner.name}</span><span className="block text-xs text-neutral-500">{owner.email}</span></span>
-                  {assignedOwner?.id === owner.id && <span className="text-xs font-medium text-amber-700">Current</span>}
-                </button>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Client Mode Modal */}
-        {isClientModeModalOpen && (
-          <Dialog
-            open={isClientModeModalOpen}
-            onOpenChange={setIsClientModeModalOpen}
-          >
-            <DialogContent
-              className={`sm:max-w-lg max-w-md backdrop-blur-xl border ${
-                theme === "dark"
-                  ? "bg-black/90 border-[#cccccc20]"
-                  : "bg-white/95 border-neutral-200"
-              }`}
-            >
-              <DialogHeader className="flex flex-col gap-2 text-center sm:text-left">
-                <DialogTitle
-                  className={`text-xl leading-none font-semibold flex items-center gap-2 ${
-                    theme === "dark" ? "text-zinc-200" : "text-neutral-900"
-                  }`}
-                >
-                  <User className="w-5 h-5 text-[#F9B418]" />
-                  Enter Client Mode
-                </DialogTitle>
-                <DialogDescription
-                  className={`text-sm ${
-                    theme === "dark" ? "text-zinc-500" : "text-neutral-600"
-                  }`}
-                >
-                  You are entering client mode for{" "}
-                  {!isFetching && clientData?.data?.name}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div
-                  className={`p-4 rounded-md border bg-[#F9B418]/10 border-[#F9B418]/30 ${
-                    theme === "dark" ? "text-zinc-200" : "text-neutral-800"
-                  }`}
-                >
-                  <p className="mb-3 font-medium">
-                    Before proceeding, please ensure:
-                  </p>
-                  <ul className="space-y-2 list-disc list-inside">
-                    <li>
-                      You have proper authorization to access this client's
-                      account
-                    </li>
-                    <li>You understand the restricted view limitations</li>
-                    <li>All actions taken will be logged for audit purposes</li>
-                    <li>
-                      You will only access information necessary for client
-                      support
-                    </li>
-                  </ul>
-                </div>
-                <p
-                  className={`text-sm ${
-                    theme === "dark" ? "text-zinc-500" : "text-neutral-600"
-                  }`}
-                >
-                  Client Mode provides a limited view of the platform as the
-                  client would see it, with certain administrative features
-                  disabled.
-                </p>
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={() => setIsClientModeModalOpen(false)}
-                    className={`flex-1 px-4 py-2.5 rounded-sm text-sm transition-all border ${
-                      theme === "dark"
-                        ? "bg-zinc-900 border-[#cccccc20] text-zinc-200 hover:bg-[#cccccc30]"
-                        : "bg-neutral-100 border-neutral-200 text-neutral-700 hover:bg-neutral-200"
-                    }`}
-                    disabled={isLoggingInAsClient}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleProceedToClientMode}
-                    disabled={isLoggingInAsClient}
-                    className="flex-1 px-4 py-2.5 rounded-sm text-sm font-medium transition-all bg-[#F9B418] hover:bg-[#F9B418]/90 text-black disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoggingInAsClient ? "Processing..." : "Proceed"}
-                  </button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    </>
-  );
+  const client = clientData?.data;
+  const back = params.get("back")?.startsWith("/clients?") ? params.get("back")! : "/clients";
+  const owners = client?.onboarding?.owners?.map((owner:any)=>owner.name).join(", ") || assignedOwner?.name || "Not assigned";
+  const enterView = () => { track("view_as_prompted", {client_id:clientId});setIsClientModeModalOpen(true); };
+  return <>
+    <PageHeader title="Client workspace" actions={<div className="flex items-center gap-3">{isEditMode?<><Button size="sm" variant="outline" disabled={saving} onClick={()=>setIsEditMode(false)}>Cancel</Button><Button size="sm" className={actionPrimary} disabled={saving} onClick={async()=>{setSaving(true);try{await clientDetailsRef.current?.saveChanges();}finally{setSaving(false);}}}>{saving?"Saving…":"Save client"}</Button></>:client&&!isError&&<Button size="sm" variant="outline" onClick={()=>refetchClientData()}>Refresh client</Button>}<ActionsNavigation/></div>}/>
+    <div data-client-workspace className="mx-auto w-full max-w-screen-2xl px-6 pb-10 pt-3 text-pl-ink md:px-8 md:pt-6">
+      <Link to={back} className="text-xs text-pl-text-2 underline underline-offset-4">Back to clients</Link>
+      {isLoading&&!client?<p role="status" className="py-8 text-sm text-pl-text-2">Loading client workspace…</p>:isUnassignedCaseOwner?<section className="py-8"><h1 className="text-xl font-semibold">Client access is not assigned</h1><p className="mt-3 max-w-prose text-sm text-pl-text-2">Ask a Photon Admin for access before opening this client's information or work.</p>{requestAccessMutation.isSuccess?<p role="status" className="mt-5 text-sm">Access request sent. A Photon Admin must assign access before you can open this client.</p>:<Button size="sm" className={`mt-5 ${actionPrimary}`} disabled={requestAccessMutation.isPending} onClick={()=>requestAccessMutation.mutate()}>{requestAccessMutation.isPending?"Sending request…":"Request client access"}</Button>}{requestAccessMutation.isError&&<p role="alert" className="mt-3 text-sm text-pl-red-text">The access request could not be sent. Try again.</p>}</section>:isError||!client?<section className="py-8"><h1 className="text-xl font-semibold">Client workspace could not be loaded</h1><p className="mt-3 text-sm text-pl-text-2">Reload to check the client's information and setup.</p><Button size="sm" className={`mt-5 ${actionPrimary}`} onClick={()=>refetchClientData()}>Reload client</Button></section>:<>
+        <header className="my-2 border-b border-pl-border pb-2 md:my-5 md:pb-4"><p className="hidden text-xs text-pl-text-2 md:block">{clientRelationship(client)}</p><h1 className="mt-1 break-words text-lg font-semibold leading-tight md:mt-2 md:text-2xl">{client.name}</h1><div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-pl-text-2 md:mt-3 md:gap-3">{user.role==="PHOTON_ADMIN"?<Button size="sm" variant="outline" onClick={()=>setIsOwnerDialogOpen(true)}>Case Owner: {owners}</Button>:<p>Case Owner · {owners}</p>}{!isEditMode&&<Button size="sm" variant="outline" onClick={enterView} title={!client.is_active?"Client view is unavailable for an inactive client record.":client.onboarding?.admins.active===0?"A Workspace Admin must activate their invitation before client view is available.":undefined} disabled={!client.is_active || (client.onboarding && client.onboarding.admins.active===0)}>Enter client view</Button>}</div></header>
+        {isEditMode?<ClientDetails ref={clientDetailsRef} clientData={client} clientId={clientId!} refetchClientData={refetchClientData} isEditMode onSaveComplete={()=>setIsEditMode(false)} onCancel={()=>setIsEditMode(false)}/>:<ClientTabs clientId={clientId!} clientData={client} clientTeam={client.User} caseOwnerName={owners} onChangeCaseOwner={user.role==="PHOTON_ADMIN"?()=>setIsOwnerDialogOpen(true):undefined} canManageTeam={!isUnassignedCaseOwner} onEditClient={()=>setIsEditMode(true)}/>}
+      </>}
+    </div>
+    <Dialog open={isOwnerDialogOpen} onOpenChange={setIsOwnerDialogOpen}><DialogContent className="max-h-full overflow-y-auto border-pl-border bg-pl-bg text-pl-ink sm:max-w-md"><DialogHeader><DialogTitle>Assign Case Owner</DialogTitle><DialogDescription>Add a support owner for {client?.name}. Existing client assignments stay in place.</DialogDescription></DialogHeader><div className="divide-y divide-pl-border">{caseOwners.map((owner:any)=><Button key={owner.id} variant="ghost" className="h-auto w-full justify-between gap-3 rounded-none px-0 py-3 text-left" disabled={ownerMutation.isPending || owner.assigned_client_ids?.includes(clientId) || owner.status!=="ACTIVE"} onClick={()=>ownerMutation.mutate(owner,{onSuccess:()=>refetchClientData()})}><span className="min-w-0"><span className="block break-words text-sm font-medium">{owner.name}</span><span className="mt-1 block break-all text-xs text-pl-text-2">{owner.email}</span></span>{owner.assigned_client_ids?.includes(clientId)&&<span className="text-xs">Assigned</span>}</Button>)}</div>{ownerMutation.isError&&<p role="alert" className="text-sm text-pl-red-text">The assignment could not be saved. Select the Case Owner to try again.</p>}</DialogContent></Dialog>
+    <Dialog open={isClientModeModalOpen} onOpenChange={setIsClientModeModalOpen}><DialogContent className="max-h-full overflow-y-auto border-pl-border bg-pl-bg text-pl-ink sm:max-w-lg"><DialogHeader><DialogTitle>Enter client view</DialogTitle><DialogDescription>Open {client?.name} as its Workspace Admin. Use Exit client view to return to your Photon Legal role.</DialogDescription></DialogHeader><p className="text-sm text-pl-text-2">Actions in client view are recorded with that workspace context.</p>{clientViewError&&<p role="alert" className="text-sm text-pl-red-text">Client view could not be opened. Your current role is unchanged; try again.</p>}<div className="flex justify-end gap-3"><Button size="sm" variant="outline" disabled={isLoggingInAsClient} onClick={()=>setIsClientModeModalOpen(false)}>Cancel</Button><Button size="sm" className={actionPrimary} disabled={isLoggingInAsClient} onClick={handleProceedToClientMode}>{isLoggingInAsClient?"Opening client view…":"Enter client view"}</Button></div></DialogContent></Dialog>
+  </>;
 };
-
 export default ClientDetailPage;

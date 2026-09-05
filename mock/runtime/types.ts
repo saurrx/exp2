@@ -2,7 +2,7 @@ import type { IdeaState, ReviewDecision, ReviewStage, PatentStatus, DueDateStatu
 
 export type RoleName = "INVENTOR" | "TECH_COMMITTEE" | "LEGAL_COUNSEL" | "CASE_OWNER" | "PHOTON_ADMIN" | "PHOTON_SUPERADMIN";
 
-export type Client = { id: string; name: string; domain: string; has_tech_committee: boolean; idea_reference_prefix: string; type: "EXISTING" | "POTENTIAL"; plan: "FREE" | "ENTERPRISE" | "PRODUCT_OWNER"; is_active: boolean; about: string | null; logo_file_id: string | null; created_at: string; updated_at: string };
+export type Client = { onboarding_confirmed_at?: string | null; onboarding_confirmed_by?: string | null; id: string; name: string; domain: string; has_tech_committee: boolean; idea_reference_prefix: string; type: "EXISTING" | "POTENTIAL"; plan: "FREE" | "ENTERPRISE" | "PRODUCT_OWNER"; is_active: boolean; about: string | null; logo_file_id: string | null; created_at: string; updated_at: string };
 export type User = { id: string; email: string; name: string; role: RoleName; status: "INVITED" | "ACTIVE" | "SUSPENDED"; client_id: string | null; assigned_client_ids: string[]; phone: string | null; country_code: string | null; country_name: string | null; address: string | null; notification_prefs: { reviewDecisions: boolean; informationRequests: boolean; filingUpdates: boolean }; last_login_at: string | null; created_at: string; updated_at: string };
 export type ClientAccess = { requested_at?: string | null; id: string; user_id: string; client_id: string; kind: "ASSIGNMENT" | "TEMPORARY" | "STEP_IN"; is_primary: boolean; reason: string | null; expires_at: string | null; granted_at: string; revoked_at: string | null };
 export type Inventor = { id: string; idea_id: string; inventor_id: string; role: "PRIMARY" | "CO"; added_at: string };

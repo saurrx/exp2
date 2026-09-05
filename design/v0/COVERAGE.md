@@ -22,7 +22,7 @@ Excluded from V0 everywhere: checkout, purchasing, billing, price selection, inv
 | Invention disclosure workspace | Inventor, Workspace Admin | `/ideas/:id/draft` | 4 | 15 | unwired | DSN-0006 |
 | Evaluation result | Inventor, Workspace Admin | `/ideas/:id/draft`, `/ideas/:id` | 11 | 12 | none | DSN-0007 |
 | Ideas list | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas` | 8 | 11 | none |  |
-| Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 16 | 17 | conceptual |  |
+| Idea detail and status | Inventor, Workspace Admin, Case Owner, Photon Admin | `/ideas/:id` | 16 | 17 | conceptual | DSN-0008 |
 | Review decision | Workspace Admin | `/ideas/:id` | 3 | 12 | none |  |
 | Workspace Admin dashboard | Workspace Admin | `/` | 10 | 17 | conceptual | DSN-0002 |
 | Patent portfolio | Inventor, Workspace Admin, Case Owner, Photon Admin | `/patents` | 7 | 12 | none |  |
@@ -119,7 +119,7 @@ Brief: `product-context/surfaces/ideas.md` · Storybook title: `Surfaces/Ideas l
 
 ## Idea detail and status
 
-Brief: `product-context/surfaces/idea-detail.md` · Storybook title: `Surfaces/Idea detail and status` · DSN: none yet
+Brief: `product-context/surfaces/idea-detail.md` · Storybook title: `Surfaces/Idea detail and status` · DSN: DSN-0008
 
 - **Personas:** Inventor, Workspace Admin, Case Owner, Photon Admin
 - **User goal:** Understand the invention disclosure, its evidence, history, ownership and current next step.

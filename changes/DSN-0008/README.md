@@ -1,6 +1,6 @@
 # DSN-0008 — Idea detail and status
 
-Status: in progress. Branch: `codex/dsn-0008-idea-detail`.
+Status: complete; independent evaluator PASS. Branch: `codex/dsn-0008-idea-detail`.
 
 ## Intent and persona
 Inventor checks feedback, status and the next step. Workspace Admin decides from a concise brief. Case Owner and Photon Admin receive a scoped filing brief and attachments. The product object is one idea, its disclosure revision, review history and related patent. Success is confidence after submission and an efficient, accurate handoff.
@@ -53,7 +53,7 @@ At 1366×768 and 1920×1080 the hierarchy is unchanged. At 200% zoom there is no
 Product fit **4** · hierarchy **4** · usability **4** · trust **4** · craft **4** · accessibility **4** · business **4**. One task leads, no score gates a decision, supporting material is collapsed, decisions are attributable, failure preserves work, and zoom keeps the action available. These are design-review assessments, not measured user outcomes. Intended outcome: fewer ambiguous status checks and more complete review-to-filing handoffs; assess time to the next valid transition while guarding against lost revision history or decisions made without the needed evidence.
 
 ## Verification
-Initial full story run: 254/254. Expanded recovery coverage: 256 stories. Semantic suite: 36 checks including rejected revision history, scoped reads/resubmission and file association. Typecheck, role lint, tokens, coverage, design build and Storybook build pass. Selected gate run passed 8/8; final run logs accompany this record. Informational isolation still reports shared-cookie contamination, so stories remain serial.
+Initial full story run: 254/254. Expanded recovery coverage: 256 stories. Semantic suite: 36 checks including rejected revision history, scoped reads/resubmission and file association. Typecheck, role lint, tokens, coverage, design build and Storybook build pass. Initial selected gates passed 8/8. Final active checks passed 7/7 with the full 256-story suite run separately; final logs accompany this record. Informational isolation still reports shared-cookie contamination, so stories remain serial.
 
 Browser checks exercised real Workspace Admin approval, rejected disclosure edit and resubmission with the new note and preserved decision, source expansion and same-origin attachment download, and filing creation with the linked patent at 1280 and 200% zoom. All five zoom checks have an onscreen action and no horizontal overflow. Supporting screenshots show expanded evidence, source, history, revision confirmation and filing form. A transient story-ready timeout on one Photon zoom screenshot was rerun successfully; final screenshot run is the evidence set.
 
@@ -81,4 +81,15 @@ REFERENCE MATCH: yes — Typography, restrained colour, hairline separation and 
 
 Round 1 corrections: BF-9 now captures the evaluated answer-text fingerprint and review revision, and shows the original revision/date plus saved-content freshness next to the score. Save metadata does not mark unchanged text stale; real answer edits do, and resubmission retains this qualification. A substantive report assessment now precedes expanded evidence. The long title describes the same cable mechanism. Access denial stays inline with Back to ideas leading and no retry. Local dialog descriptions use the secondary text token after a focused axe check found 4.34:1 contrast in the inherited muted description. Two new semantic checks cover answer-based freshness and re-evaluation attribution.
 
-Round 2 verification: **256/256 stories**, **38/38 semantic checks**, both builds passed, **0 focused axe findings** across twelve detail/recovery states, all five zoom checks passed, filing and reconsideration browser flows passed, stable screenshots with zero egress. The story readiness check now awaits the domain action becoming enabled after the access-scoped disclosure load. Fresh-context verdict pending.
+Round 2 verification: **256/256 stories**, **38/38 semantic checks**, both builds passed, **0 focused axe findings** across twelve detail/recovery states, all five zoom checks passed, filing and reconsideration browser flows passed, stable screenshots with zero egress. The story readiness check now awaits the domain action becoming enabled after the access-scoped disclosure load. Fresh-context verdict:
+
+```text
+VERDICT: PASS
+SURFACE: idea-detail  PERSONA: Inventor, Workspace Admin, Case Owner, Photon Admin
+SCORECARD: product-fit 4 · hierarchy 4 · usability 4 · trust 4 · craft 4 · accessibility 4 · business 4
+COGNITIVE LOAD: pass — Independent roleplay at 1280×720 and 1440×900 agrees with the recorded answers: status, ownership and the primary action lead, evaluation freshness is explicit, and supporting information stays on demand.
+FINDINGS (most severe first, max 7):
+None.
+STATES MISSING: none; all 77 PNGs inspected, including four persona defaults at all five viewports and supplemental interactions.
+REFERENCE MATCH: yes — Typography, restrained colour, hairline separation, control sizing and amber primary actions follow the reference language.
+```

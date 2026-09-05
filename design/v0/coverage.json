@@ -555,7 +555,7 @@
         "internal ids",
         "actions unavailable to the role"
       ],
-      "dsn": null
+      "dsn": "DSN-0008"
     },
     {
       "brief": "surfaces/review-decision.md",

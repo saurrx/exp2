@@ -1,0 +1,25 @@
+ok   typecheck (4s) 
+ok   lint:roles (0s) 
+ok   routes: every handler is real, every reachable route served (0s) 
+FAIL credentials and inert hosts (0s) FAIL host reactrouter.com not in design/inert-hosts.json (changes/DSN-0006/logs/stories.log, changes/DSN-0007/logs/dsn7-stories2.log, changes/DSN-0008/stories.l | full output: node_modules/.cache/gates/credentials-and-inert-hosts.log
+ok   manifest and graph parity (1s) 
+ok   tokens: generated outputs match src/styles/tokens.json (0s) 
+ok   fidelity: adapter boundary, OpenAPI bodies, state machine (1s) 
+ok   v0 semantic gate (four personas, one stage, coverage, exclusions, optional evaluation, badges, declared contracts) (3s) 
+ok   v0 coverage matrix rendered and current (0s) 
+ok   build:design (5s) 
+ok   storybook:build (11s) 
+ok   test:stories (interaction, serial) (49s) 
+FAIL shots (stable across two clean renders, no egress, matches baselines) (1638s) same   legacy-reference-states-network-and-permissions--permission-denied | shots: 53 failure(s) | full output: node_modules/.cache/gates/shots-stable-across-two-clean-renders-no-egress-matches-base.log
+FAIL a11y ratchet (no new fingerprints, zero in redesigned content) (97s) fixed legacy-reference-states-network-and-permissions--failing-writes|scrollable-region-focusable|serious|div[]:Invention summaryWhat the inventor says  (remove | full output: node_modules/.cache/gates/a11y-ratchet-no-new-fingerprints-zero-in-redesigned-content-.log
+info isolation probe (parallel stories safe?) (1s) FAIL Anika Sharma: own identity 0, review decisions 1 | ok Leah Feldman: own identity 1, review decisions 1 | full output: node_modules/.cache/gates/isolation-probe-parallel-stories-safe-.log
+ok   smoke (full app on mock) (2s) 
+ok   crawl (every persona, every page and detail route) (89s) 
+ok   qa invariant: desktop gate (0s) 
+FAIL qa invariant: layout rules, 6 roles x 2 viewports (125s)   ok   /profile @1440x900 | 76 page-viewport combinations · 66 violation(s) · 16 suppressed | full output: node_modules/.cache/gates/qa-invariant-layout-rules-6-roles-x-2-viewports.log
+ok   qa invariant: no visible uuid (190s) 
+FAIL qa conformance: structure against baseline-mock (155s)        extra-signature: button:pr priya raman | 31 surface(s) checked - 1341 deviation(s) - 20 suppressed | full output: node_modules/.cache/gates/qa-conformance-structure-against-baseline-mock.log
+ok   lockfile reproduces with npm ci (4s) 
+ok   runtime graph react=1 react-dom=1 root=5.4.21 react-vite=5.4.21 builder-vite=5.4.21
+
+gates: 18/23 passed, failed: credentials and inert hosts, shots (stable across two clean renders, no egress, matches baselines), a11y ratchet (no new fingerprints, zero in redesigned content), qa invariant: layout rules, 6 roles x 2 viewports, qa conformance: structure against baseline-mock

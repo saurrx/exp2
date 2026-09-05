@@ -1,0 +1,139 @@
+$ node tools/design/a11y.mjs
+exit 1 signal null
+
+BLOCK surfaces-ideas-list--workspace-admin-pending: color-contrast (serious) at span[]:19d inside redesigned content
+NEW   surfaces-invention-disclosure-workspace--empty|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--partially-prefilled|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--unsupported-gaps|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--saving|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--saved|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--offline|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--conflict|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--evaluation-running|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--evaluation-result|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--evaluation-stale|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--requested-changes|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-invention-disclosure-workspace--error|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--not-run|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--queued|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--running|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--failed|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--timed-out|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--stale-after-edits|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--re-evaluating|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--loading|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-evaluation-result--error|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-idea-detail-and-status--draft|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-idea-detail-and-status--evaluated|landmark-unique|moderate|aside[]:NIWorkspaceHomeMy ideasPatentsASAnika Sh
+NEW   surfaces-idea-detail-and-status--error|color-contrast|serious|div[]:Idea unavailable
+NEW   legacy-reference-states-network-and-permissions--failing-writes|color-contrast|serious|span[]:23d
+fixed legacy-reference-primitives-overlays--toasts|color-contrast|serious|div[]:Approved and sent to Photon Legal (remove it from the baseline)
+fixed legacy-reference-screens-dashboard--inventor-first-run|heading-order|moderate|h3[]:Patent World Map (remove it from the baseline)
+fixed legacy-reference-screens-dashboard--inventor-first-run|svg-img-alt|serious|path[img]: (remove it from the baseline)
+fixed legacy-reference-screens-dashboard--inventor|heading-order|moderate|h3[]:Patent World Map (remove it from the baseline)
+fixed legacy-reference-screens-dashboard--inventor|svg-img-alt|serious|path[img]: (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--committee-read-view|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--committee-read-view|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--committee-read-view|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--committee-read-view|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--committee-read-view|landmark-unique|moderate|aside[]:ARWorkspaceOverviewReview queue6PatentsA (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--committee-read-view|landmark-unique|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--counsel-read-view|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--counsel-read-view|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--counsel-read-view|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--counsel-read-view|landmark-no-duplicate-main|moderate|main[]:Globex MaterialsWorking submissionIdeas  (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--counsel-read-view|landmark-unique|moderate|aside[]:GMWorkspaceOverviewReview Inventor Ideas (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--counsel-read-view|landmark-unique|moderate|main[]:Globex MaterialsWorking submissionIdeas  (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-early-draft|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-early-draft|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-early-draft|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-early-draft|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-early-draft|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-early-draft|landmark-unique|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-evaluation-running|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-evaluation-running|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-evaluation-running|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-evaluation-running|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-evaluation-running|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-evaluation-running|landmark-unique|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-nearly-done|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-nearly-done|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-nearly-done|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-nearly-done|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-nearly-done|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-nearly-done|landmark-unique|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-submitted|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-submitted|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-submitted|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-submitted|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-submitted|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--inventor-submitted|landmark-unique|moderate|main[]:Acme RoboticsWorking submissionIdeas / A (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--photon-read-view|color-contrast|serious|p[]:Read here in your browser: PDF, DOCX, TX (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--photon-read-view|color-contrast|serious|p[]:Upload a document or paste text and we'l (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--photon-read-view|landmark-main-is-top-level|moderate|main[]:Attachments (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--photon-read-view|landmark-no-duplicate-main|moderate|main[]:Photon LegalWorking submissionIdeas / AC (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--photon-read-view|landmark-unique|moderate|aside[]:WorkspaceOverviewClientsIdeas2PatentsDue (remove it from the baseline)
+fixed legacy-reference-screens-draft-workspace--photon-read-view|landmark-unique|moderate|main[]:Photon LegalWorking submissionIdeas / AC (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--committee-decision|aria-progressbar-name|serious|div[progressbar]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--committee-decision|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--committee-partial-evaluation|aria-progressbar-name|serious|div[progressbar]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--committee-partial-evaluation|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-at-committee-stage|aria-progressbar-name|serious|div[progressbar]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-at-committee-stage|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|aria-progressbar-name|serious|div[progressbar]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|button-name|critical|button[]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|button-name|critical|button[radio]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|color-contrast|serious|button[]:Moisture-cured adhesive with delayed tac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|color-contrast|serious|button[]:View (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|color-contrast|serious|button[]:View AI Report (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|color-contrast|serious|p[]:100% Completion (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|color-contrast|serious|p[]:Sep 03 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|color-contrast|serious|span[]:Idea Score (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--counsel-decision|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-changes-requested|landmark-main-is-top-level|moderate|main[]:Your submissionField of the InventionBac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-changes-requested|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-changes-requested|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-changes-requested|landmark-unique|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-evaluation-running|color-contrast|serious|div[]:usually 2 to 4 weeks (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-evaluation-running|landmark-main-is-top-level|moderate|main[]:Your submissionField of the InventionBac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-evaluation-running|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-evaluation-running|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-evaluation-running|landmark-unique|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-filed|color-contrast|serious|div[]:usually 1 to 3 years (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-filed|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-filed|landmark-main-is-top-level|moderate|main[]:Your submissionField of the InventionBac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-filed|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-filed|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-filed|landmark-unique|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|color-contrast|serious|div[]:Filed (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|color-contrast|serious|div[]:Granted (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|color-contrast|serious|div[]:Sent to Photon Legal (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|landmark-main-is-top-level|moderate|main[]:Your submissionField of the InventionBac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-rejected|landmark-unique|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-sent-to-photon|color-contrast|serious|div[]:usually 1 to 3 months (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-sent-to-photon|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-sent-to-photon|landmark-main-is-top-level|moderate|main[]:Your submissionField of the InventionBac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-sent-to-photon|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-sent-to-photon|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-sent-to-photon|landmark-unique|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-under-review|color-contrast|serious|div[]:usually 2 to 4 weeks (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-under-review|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-under-review|landmark-main-is-top-level|moderate|main[]:Your submissionField of the InventionBac (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-under-review|landmark-no-duplicate-main|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-under-review|landmark-unique|moderate|aside[]:ARWorkspaceHomeMy ideasPatentsPRPriya Ra (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--inventor-under-review|landmark-unique|moderate|main[]:Acme RoboticsIdea detailsIdeas / ACME-00 (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--photon-admin-filed|aria-progressbar-name|serious|div[progressbar]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--photon-admin-filed|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--photon-admin-sent-to-photon|aria-progressbar-name|serious|div[progressbar]: (remove it from the baseline)
+fixed legacy-reference-screens-idea-details--photon-admin-sent-to-photon|heading-order|moderate|h4[]:Overlapping concepts (remove it from the baseline)
+fixed legacy-reference-screens-ideas--case-owner-table|button-name|critical|button[combobox]:Sort (remove it from the baseline)
+fixed legacy-reference-screens-ideas--inventor-cards|button-name|critical|button[combobox]:Sort (remove it from the baseline)
+fixed legacy-reference-screens-ideas--inventor-empty|button-name|critical|button[combobox]:Sort (remove it from the baseline)
+fixed legacy-reference-screens-ideas--inventor-empty|heading-order|moderate|h3[]:Every patent starts as a rough idea. (remove it from the baseline)
+fixed legacy-reference-screens-ideas--photon-admin-table|button-name|critical|button[combobox]:Sort (remove it from the baseline)
+fixed legacy-reference-states-network-and-permissions--failing-writes|color-contrast|serious|span[]:12 (remove it from the baseline)
+fixed legacy-reference-states-network-and-permissions--failing-writes|scrollable-region-focusable|serious|div[]:Invention summaryWhat the inventor says  (remove it from the baseline)
+a11y: 25 new fingerprint(s), 1 blocking in redesigned content
+

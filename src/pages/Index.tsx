@@ -23,6 +23,8 @@ import { isOutsideCounselRole } from "@/lib/roleAccess";
 import WorkspaceAdminOverview from "../components/dashboard/WorkspaceAdminOverview";
 import InventorHomeContext from "../components/dashboard/InventorHomeContext";
 
+import CaseOwnerMyWork from "../components/dashboard/CaseOwnerMyWork";
+
 const DAY_MS = 86400000;
 
 /**
@@ -423,6 +425,7 @@ const LegacyIndex = () => {
   };
 
   const totalPatents = Number(data?.data?.total_patents) || 0;
+  if (user?.role === "CASE_OWNER") return <CaseOwnerMyWork data={data?.data?.case_owner_work} loading={isLoading} error={isDashboardError} retry={() => refetchDashboard()} />;
   return (
     <>
       <div className="mx-auto w-full max-w-[1680px] px-6 pb-24 pt-6 lg:px-8 md:pb-8">

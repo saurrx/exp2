@@ -87,16 +87,18 @@
   }
 
   /* DSN-0005 reflows at desktop zoom; the device access gate is unchanged. */
-  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]), body:has([data-ideas-list]), body:has([data-review-queue]), body:has([data-patent-portfolio]), body:has([data-patent-detail]), body:has([data-actions-workspace]), body:has([data-photon-due-dates]) {
+  body:has([data-inventor-home]), body:has([data-disclosure-workspace]), body:has([data-start-idea]), body:has([data-idea-detail]), body:has([data-ideas-list]), body:has([data-review-queue]), body:has([data-patent-portfolio]), body:has([data-patent-detail]), body:has([data-actions-workspace]), body:has([data-photon-due-dates]), body:has([data-case-owner-work]) {
     min-width: 0;
   }
 
-  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh, body:has([data-ideas-list]) .h-dvh, body:has([data-review-queue]) .h-dvh, body:has([data-patent-portfolio]) .h-dvh, body:has([data-patent-detail]) .h-dvh, body:has([data-actions-workspace]) .h-dvh, body:has([data-photon-due-dates]) .h-dvh {
+  body:has([data-inventor-home]) .h-dvh, body:has([data-disclosure-workspace]) .h-dvh, body:has([data-start-idea]) .h-dvh, body:has([data-idea-detail]) .h-dvh, body:has([data-ideas-list]) .h-dvh, body:has([data-review-queue]) .h-dvh, body:has([data-patent-portfolio]) .h-dvh, body:has([data-patent-detail]) .h-dvh, body:has([data-actions-workspace]) .h-dvh, body:has([data-photon-due-dates]) .h-dvh, body:has([data-case-owner-work]) .h-dvh {
     min-height: 0;
   }
 
   /* DSN-0009: keep navigation and the list action within desktop zoom. */
   @media (max-width: theme('screens.md')) {
+    body:has([data-case-owner-work]) main > header > div > div > p,
+    body:has([data-case-owner-work]) main > header > div > div > span[aria-hidden="true"],
     body:has([data-photon-due-dates]) main > header > div > div > p,
     body:has([data-photon-due-dates]) main > header > div > div > span[aria-hidden="true"],
     body:has([data-actions-workspace]) main > header > div > div > p,

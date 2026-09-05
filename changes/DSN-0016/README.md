@@ -22,3 +22,5 @@ The current home leads with aggregate portfolio panels and a client ranking, the
 
 ## Validation
 In progress; coverage stays null until rendered evidence, required checks and independent PASS.
+
+All three low-fidelity renders were opened before UI changes. A is selected: the stable focused brief avoids comparing client groups or three lanes. The map follows assigned-client work. BF-14 adds scoped dashboard context on the existing route; no adapter or shared hook changes.

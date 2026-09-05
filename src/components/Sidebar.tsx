@@ -111,7 +111,7 @@ const navForRole = (role: Role | undefined, reviewCount: number): NavItem[] => {
   }
 
   const operationalItems: NavItem[] = [
-    { label: "Overview", path: "/", icon: LayoutDashboard },
+    { label: role === "CASE_OWNER" ? "My work" : "Overview", path: "/", icon: LayoutDashboard },
     { label: "Clients", path: "/clients", icon: Building2 },
     { label: "Ideas", path: "/ideas", icon: Lightbulb },
     { label: "Patents", path: "/patents", icon: FileStack },

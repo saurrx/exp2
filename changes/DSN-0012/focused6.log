@@ -1,0 +1,281 @@
+
+> design@0.0.0 test:stories
+> vitest run --project=storybook design/stories/surfaces/PatentPortfolio.stories.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:35:19 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+│
+▲  No story files found for the specified pattern:
+│  design/stories/**/*.mdx
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:35:20 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:35:20 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:35:20 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+
+ RUN  v4.1.11 /Users/saurabh/PL/exp2
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.design.config" without a file extension (vitest.config.ts:6:26). Add the file extension
+  - import "./vite.config" without a file extension (vite.design.config.ts:13:24). Add the file extension
+  - `__dirname` (vite.config.ts:62:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10:35:20 AM [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-swc" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+You or a plugin you are using have set `optimizeDeps.esbuildOptions` but this option is now deprecated. Vite now uses Rolldown to optimize the dependencies. Please use `optimizeDeps.rolldownOptions` instead.
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+10:35:22 AM [vite] (client) [console.warn] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+10:35:22 AM [vite] (client) [console.warn] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+ ❯ |storybook (chromium)| design/stories/surfaces/PatentPortfolio.stories.tsx (16 tests | 1 failed) 1076ms
+   × Thousands Of Records 124ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |storybook (chromium)| design/stories/surfaces/PatentPortfolio.stories.tsx > Thousands Of Records
+TestingLibraryElementError: 
+[34mClick to debug the error directly in Storybook: http://localhost:6006/?path=/story/surfaces-patent-portfolio--thousands-of-records&addonPanel=storybook/interactions/panel[39m
+
+Unable to find an element with the text: /14,356 patents/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<div>
+  <div
+    aria-label="Notifications (F8)"
+    role="region"
+    style="pointer-events: none;"
+    tabindex="-1"
+  >
+    <ol
+      class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]"
+      tabindex="-1"
+    />
+  </div>
+  <section
+    aria-atomic="false"
+    aria-label="Notifications alt+T"
+    aria-live="polite"
+    aria-relevant="additions text"
+    tabindex="-1"
+  />
+  <div
+    class="flex h-dvh min-h-[640px] bg-[var(--pulse-canvas)] text-[var(--pulse-ink)]"
+  >
+    <aside
+      class="relative z-30 hidden h-dvh shrink-0 flex-col border-r border-[var(--pulse-line)] bg-[var(--pulse-surface)] transition-[width] duration-200 md:flex w-72"
+    >
+      <div
+        class="flex h-16 items-center border-b border-[var(--pulse-line)] px-6"
+      >
+        <button
+          aria-label="Go to overview"
+          class="flex min-w-0 items-center rounded-sm text-left"
+          type="button"
+        >
+          <img
+            alt="Photon Legal"
+            class="h-8 w-auto shrink-0 object-contain"
+            src="/assets/photon-legal-brand.png"
+          />
+          <span
+            aria-hidden="true"
+            class="mx-3 h-4 w-px shrink-0 bg-[var(--pulse-line)]"
+          />
+          <span
+            aria-hidden="true"
+            class="grid h-6 w-6 shrink-0 place-items-center rounded-xs border border-[var(--pulse-line)] bg-[var(--pulse-surface-subtle)] text-[10px] font-semibold text-[var(--pulse-ink-secondary)]"
+          >
+            NI
+          </span>
+        </button>
+      </div>
+      <nav
+        aria-label="Primary navigation"
+        class="flex-1 overflow-y-auto py-5 px-4"
+      >
+        <p
+          class="mb-2 px-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--pulse-ink-muted)]"
+        >
+          Workspace
+        </p>
+        <ul
+          class="space-y-1"
+        >
+          <li>
+            <a
+              class="group flex h-10 items-center rounded-md text-sm font-medium transition-colors gap-3 px-2 text-[var(--pulse-ink-secondary)] hover:bg-[var(--pulse-surface-subtle)] hover:text-[var(--pulse-ink)]"
+              href="/"
+            >
+              <svg
+                class="lucide lucide-layout-dashboard h-[18px] w-[18px] shrink-0 text-[var(--pulse-ink-muted)] group-hover:text-[var(--pulse-ink)]"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  height="9"
+                  rx="1"
+                  width="7"
+                  x="3"
+                  y="3"
+                />
+                <rect
+                  height="5"
+                  rx="1"
+                  width="7"
+                  x="14"
+                  y="3"
+                />
+                <rect
+                  height="9"
+                  rx="1"
+                  width="7"
+                  x="14"
+                  y="12"
+                />
+                <rect
+                  height="5"
+                  rx="1"
+                  width="7"
+                  x="3"
+                  y="16"
+                />
+              </svg>
+              <span
+                class="truncate"
+              >
+                Home
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="group flex h-10 items-center rounded-md text-sm font-medium transition-colors gap-3 px-2 text-[var(--pulse-ink-secondary)] hover:bg-[var(--pulse-surface-subtle)] hover:text-[var(--pulse-ink)]"
+              href="/ideas"
+            >
+              <svg
+                class="lucide lucide-clipboard-check h-[18px] w-[18px] shrink-0 text-[var(--pulse-ink-muted)] group-hover:text-[var(--pulse-ink)]"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  height="4"
+                  rx="1"
+                  ry="1"
+                  width="8"
+                  x="8"
+                  y="2"
+                />
+                <path
+                  d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                />
+                <path
+                  d="m9 14 2 2 4-4"
+                />
+              </svg>
+              <span
+                class="truncate"
+              >
+                Ideas
+              </span>
+              <span
+                class="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-[var(--pulse-brand)] px-1.5 py-0.5 font-sans text-xs font-semibold leading-4 text-[var(--pulse-ink)]"
+              >
+                7
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="group flex h-10 items-center rounded-md text-sm font-medium transition-colors gap-3 px-2 bg-[var(--pulse-surface-subtle)] text-[var(--pulse-ink)] shadow-[inset_2px_0_0_#0C0C0C]"
+              href="/patents"
+            >
+              <svg
+                class="lucide lucide-file-stack h-[18px] w-[18px] shrink-0 text-[var(--pulse-ink)]"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 7h-3a2 2 0 0 1-2-2V2"
+                />
+                <path
+                  d="M21 6v6.5c0 .8-.7 1.5-1.5 1.5h-7c-.8 0-1.5-.7-1.5-1.5v-9c0-.8.7-1.5 1.5-1.5H17Z"
+                />
+                <path
+                  d="M7 8v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H15"
+                />
+                <path
+                  d="M3 12v8.8c0 .3.2.6.4.8.2.2.5.4.8.4H11"
+                />
+              </svg>
+              <span
+                class="truncate"
+              >
+                Patents
+              </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="group flex h-10 items-center rounded-md text-sm font-medium transition-colors gap-3 px-2 text-[var(--pulse-ink-secondary)] hover:bg-[var(--pulse-surface-subtle)] hover:text-[var(--pulse-ink)]"
+              href="/due-dates"
+            >
+              <svg
+                class="lucide lucide-calendar-days h-[18px] w-[18px] shrink-0 text-[var(--pulse-ink-muted)] group-hover:text-[var(--pulse-ink)]"
+               ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/@testing-library/dom.esm.js:339:18
+ ❯ node_modules/@testing-library/dom/dist/@testing-library/dom.esm.js:1206:24
+ ❯ node_modules/@testing-library/dom/dist/@testing-library/dom.esm.js:1185:16
+ ❯ node_modules/@testing-library/dom/dist/@testing-library/dom.esm.js:1228:18
+ ❯ getByText design/stories/surfaces/PatentPortfolio.stories.tsx:11:0
+      8|   tags: ["redesign", "viewport:1280x720", "viewport:1440x900"],
+      9|   parameters: { pulse: { scenario: "v0/inventor/portfolio", persona: "…
+     10| } satisfies Meta<typeof PatentsPage>;
+       |                                      ^
+     11| export default meta;
+     12| type Story = StoryObj<typeof meta>;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  10:35:20
+   Duration  3.39s (transform 0ms, setup 1.54s, import 197ms, tests 1.08s, environment 0ms)
+

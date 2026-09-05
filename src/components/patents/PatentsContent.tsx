@@ -956,7 +956,7 @@ const PatentsContent = (props: PatentsContentProps) => {
     {(!emptyPortfolio || canEditStatus) && <>
       <form onSubmit={event => { event.preventDefault(); handleSearchChange(searchInput.trim()); }} className="mt-4 flex items-center gap-2 [&>div]:min-w-0 [&>div]:flex-1" role="search">
         <label htmlFor="patent-search" className="sr-only">Title or application number</label><Input id="patent-search" value={searchInput} onChange={event => setSearchInput(event.target.value)} placeholder="Title or application number" className="h-9 min-w-0 flex-1" />
-        <Button type="submit" size="sm" className="bg-pl-brand text-pl-ink hover:bg-pl-brand-deep">Search patents</Button>
+        <Button type="submit" size="sm" variant={isErrorPatents || emptyPortfolio ? "outline" : "default"} className={isErrorPatents || emptyPortfolio ? "" : "bg-pl-brand text-pl-ink hover:bg-pl-brand-deep"}>Search patents</Button>
         <Button type="button" size="sm" variant="outline" className="md:hidden" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(open => !open)}>Filters</Button>
       </form>
       <div className={`${filtersOpen ? "flex" : "hidden"} mt-3 flex-wrap items-center gap-2 md:flex`}>
@@ -973,7 +973,7 @@ const PatentsContent = (props: PatentsContentProps) => {
       {isErrorClients && canEditStatus && <p role="alert" className="mt-3 text-sm">Client scopes could not be loaded.</p>}
     </>}
     {isPendingPatents ? <div role="status" className="space-y-4 py-8"><p className="text-sm text-pl-text-2">Loading patents…</p>{[1,2,3].map(row => <div key={row} aria-hidden="true" className="h-16 rounded-sm bg-pl-bg-muted" />)}</div>
-      : isErrorPatents ? <div role="alert" className="py-12 text-center"><h2 className="text-lg font-semibold">Patents could not be loaded</h2><p className="mt-2 text-sm text-pl-text-2">Your filters are retained.</p><Button size="sm" variant="outline" className="mt-4" onClick={() => refetch()}>Reload patents</Button></div>
+      : isErrorPatents ? <div role="alert" className="py-12 text-center"><h2 className="text-lg font-semibold">Patents could not be loaded</h2><p className="mt-2 text-sm text-pl-text-2">Your filters are retained.</p><Button size="sm" className="mt-4 bg-pl-brand text-pl-ink hover:bg-pl-brand-deep" onClick={() => refetch()}>Reload patents</Button></div>
       : emptyPortfolio ? <div className="py-12 text-center"><h2 className="text-lg font-semibold">No patents have been added</h2><p className="mx-auto mt-2 max-w-xl text-sm text-pl-text-2">{canEditStatus ? "Import a portfolio file for this client to make its patent records available." : "Photon Legal will add the company’s patent records here."}</p>{canEditStatus && <Button size="sm" className="mt-4 bg-pl-brand text-pl-ink hover:bg-pl-brand-deep" onClick={() => setImportOpen(true)}>Import patents</Button>}</div>
       : rows.length === 0 ? <div className="py-12 text-center"><h2 className="text-lg font-semibold">No patents match these filters</h2><p className="mt-2 text-sm text-pl-text-2">Try another title, application number or jurisdiction.</p><Button size="sm" variant="outline" className="mt-4" onClick={clearFilters}>Clear filters</Button></div>
       : <>

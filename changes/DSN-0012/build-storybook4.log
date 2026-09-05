@@ -1,0 +1,379 @@
+
+> design@0.0.0 storybook:build
+> storybook build
+
+
+┌  Building storybook v10.6.0
+│
+◇  Cleaning outputDir: storybook-static
+│
+◇  Loading presets
+│
+◇  Building manager..
+│
+●  Building open services..
+│
+●  Building preview..
+│
+▲  No story files found for the specified pattern:
+│  design/stories/**/*.mdx
+│  Vite vite v5.4.21 building for production...
+│  Vite transforming...
+│
+●  Copying static files: public at storybook-static
+│
+▲  Vite
+│  A PostCSS plugin did not pass the `from` option to `postcss.parse`.
+│  This may cause imported assets to be incorrectly transformed. If
+│  you've recently added a PostCSS plugin that raised this warning,
+│  please contact the package author to fix the issue.
+│  Vite ✓ 4433 modules transformed.
+│  Vite rendering chunks...
+│  Vite computing gzip size...
+│  Vite storybook-static/iframe.html
+│  19.25 kB │ gzip:   5.31 kB
+│  Vite storybook-static/assets/pdf.worker.min-yatZIOMy.mjs
+│  1,375.84 kB
+│  Vite storybook-static/assets/iframe-CyiAtiup.css
+│  133.51 kB │ gzip:  22.20 kB
+│  Vite storybook-static/assets/constants-CBpXd0Y3.js
+│  0.04 kB │ gzip:   0.06 kB
+│  Vite storybook-static/assets/pdf.worker.min-DgRcL-GR.js
+│  0.09 kB │ gzip:   0.11 kB
+│  Vite storybook-static/assets/roleAccess-Ovt14rZi.js
+│  0.14 kB │ gzip:   0.13 kB
+│  Vite storybook-static/assets/index-D17hSi50.js
+│  0.15 kB │ gzip:   0.15 kB
+│  Vite storybook-static/assets/formatter-L2YTDE3Q-DrKK1o2s.js
+│  0.26 kB │ gzip:   0.22 kB
+│  Vite storybook-static/assets/IdeaDraftPage-B43FOUG_.js
+│  0.27 kB │ gzip:   0.23 kB
+│  Vite storybook-static/assets/chevron-up-B9IK3ggv.js
+│  0.29 kB │ gzip:   0.24 kB
+│  Vite storybook-static/assets/chevron-down-CgCWGoEr.js
+│  0.30 kB │ gzip:   0.25 kB
+│  Vite storybook-static/assets/plus-3oOC3xR7.js
+│  0.32 kB │ gzip:   0.25 kB
+│  Vite storybook-static/assets/use-mobile-BaB5Y26q.js
+│  0.33 kB │ gzip:   0.24 kB
+│  Vite storybook-static/assets/filter-Ctr-6pgx.js
+│  0.33 kB │ gzip:   0.26 kB
+│  Vite storybook-static/assets/arrow-right-fqzKJGvu.js
+│  0.33 kB │ gzip:   0.26 kB
+│  Vite storybook-static/assets/search-Plr2vHh5.js
+│  0.34 kB │ gzip:   0.27 kB
+│  Vite storybook-static/assets/circle-check-Hd_lGGkW.js
+│  0.35 kB │ gzip:   0.27 kB
+│  Vite storybook-static/assets/clock-CJSrLJXC.js
+│  0.35 kB │ gzip:   0.27 kB
+│  Vite storybook-static/assets/mail-D_HOM3vk.js
+│  0.38 kB │ gzip:   0.30 kB
+│  Vite storybook-static/assets/columns-3-BbZaurUE.js
+│  0.39 kB │ gzip:   0.29 kB
+│  Vite storybook-static/assets/ellipsis-Dm1pztHR.js
+│  0.40 kB │ gzip:   0.27 kB
+│  Vite storybook-static/assets/actionsView-DiNVbgzf.js
+│  0.41 kB │ gzip:   0.26 kB
+│  Vite storybook-static/assets/arrow-up-down-SdwQ703k.js
+│  0.41 kB │ gzip:   0.29 kB
+│  Vite storybook-static/assets/external-link-D7zgeM0X.js
+│  0.42 kB │ gzip:   0.30 kB
+│  Vite storybook-static/assets/message-square-text-BddlLHMG.js
+│  0.42 kB │ gzip:   0.30 kB
+│  Vite storybook-static/assets/calendar-CyiR1se1.js
+│  0.42 kB │ gzip:   0.30 kB
+│  Vite storybook-static/assets/upload-HWO8nIPk.js
+│  0.42 kB │ gzip:   0.31 kB
+│  Vite storybook-static/assets/eye-BmYLN1kR.js
+│  0.43 kB │ gzip:   0.31 kB
+│  Vite storybook-static/assets/link-C6IltM3c.js
+│  0.43 kB │ gzip:   0.30 kB
+│  Vite storybook-static/assets/file-question-AI0esUIk.js
+│  0.44 kB │ gzip:   0.31 kB
+│  Vite storybook-static/assets/pencil-GRFiluEv.js
+│  0.45 kB │ gzip:   0.33 kB
+│  Vite storybook-static/assets/users-DISIzrXh.js
+│  0.47 kB │ gzip:   0.33 kB
+│  Vite storybook-static/assets/file-search-DehX-BJd.js
+│  0.49 kB │ gzip:   0.34 kB
+│  Vite storybook-static/assets/BlockedRedirect-ntwCPDy3.js
+│  0.49 kB │ gzip:   0.34 kB
+│  Vite storybook-static/assets/file-text-DESQdp8B.js
+│  0.50 kB │ gzip:   0.32 kB
+│  Vite storybook-static/assets/trash-2-5Ka_jM6w.js
+│  0.52 kB │ gzip:   0.34 kB
+│  Vite storybook-static/assets/product-surfaces-CcH-nQeT.js
+│  0.60 kB │ gzip:   0.32 kB
+│  Vite storybook-static/assets/chevrons-right-CrAiYure.js
+│  0.63 kB │ gzip:   0.30 kB
+│  Vite storybook-static/assets/star-BWIo1C4Y.js
+│  0.64 kB │ gzip:   0.40 kB
+│  Vite storybook-static/assets/dateRange-CBDP7qe6.js
+│  0.65 kB │ gzip:   0.39 kB
+│  Vite storybook-static/assets/label-DS1ScB1A.js
+│  0.67 kB │ gzip:   0.46 kB
+│  Vite storybook-static/assets/sparkles-vAck8Eyv.js
+│  0.68 kB │ gzip:   0.40 kB
+│  Vite storybook-static/assets/AuthLoadingOverlay-hNMeSg6q.js
+│  0.76 kB │ gzip:   0.47 kB
+│  Vite storybook-static/assets/usePatentEventCompletion-DiR8FutG.js
+│  0.76 kB │ gzip:   0.47 kB
+│  Vite storybook-static/assets/rotate-ccw-Cm88QYzz.js
+│  0.79 kB │ gzip:   0.36 kB
+│  Vite storybook-static/assets/pen-line-BGeVdX_a.js
+│  0.79 kB │ gzip:   0.41 kB
+│  Vite storybook-static/assets/badge-DDXzep0f.js
+│  0.80 kB │ gzip:   0.43 kB
+│  Vite storybook-static/assets/react-18-1KOZfgmj.js
+│  0.80 kB │ gzip:   0.48 kB
+│  Vite storybook-static/assets/textarea-CgZX4LQ9.js
+│  0.82 kB │ gzip:   0.49 kB
+│  Vite storybook-static/assets/s3Upload-BOprgKnf.js
+│  0.90 kB │ gzip:   0.47 kB
+│  Vite storybook-static/assets/separator-DPE53sOW.js
+│  0.95 kB │ gzip:   0.55 kB
+│  Vite storybook-static/assets/badge.stories-D90lkhIG.js
+│  1.03 kB │ gzip:   0.59 kB
+│  Vite storybook-static/assets/preload-helper-C1FmrZbK.js
+│  1.14 kB │ gzip:   0.68 kB
+│  Vite storybook-static/assets/menu-radio-item-BYJIxEkp.js
+│  1.14 kB │ gzip:   0.66 kB
+│  Vite storybook-static/assets/save--r8gceZx.js
+│  1.23 kB │ gzip:   0.51 kB
+│  Vite storybook-static/assets/table-DP6SRJGy.js
+│  1.26 kB │ gzip:   0.46 kB
+│  Vite storybook-static/assets/textarea.stories-ZzFV-eDc.js
+│  1.27 kB │ gzip:   0.70 kB
+│  Vite storybook-static/assets/card.stories-Bc0BhFLi.js
+│  1.33 kB │ gzip:   0.67 kB
+│  Vite storybook-static/assets/commonApi.service-rlre3MXT.js
+│  1.37 kB │ gzip:   0.70 kB
+│  Vite storybook-static/assets/StatusChip-B-kEzrJc.js
+│  1.38 kB │ gzip:   0.74 kB
+│  Vite storybook-static/assets/AuthField-GjGrFp50.js
+│  1.38 kB │ gzip:   0.74 kB
+│  Vite storybook-static/assets/zoom-out-DUfpHQ77.js
+│  1.40 kB │ gzip:   0.44 kB
+│  Vite storybook-static/assets/tooltip.stories-Ygj1KGqQ.js
+│  1.41 kB │ gzip:   0.69 kB
+│  Vite storybook-static/assets/card-C-uQda_s.js
+│  1.48 kB │ gzip:   0.49 kB
+│  Vite storybook-static/assets/switch.stories-BwSCR1Ty.js
+│  1.48 kB │ gzip:   0.74 kB
+│  Vite storybook-static/assets/Loader-CzlC6zHN.js
+│  1.66 kB │ gzip:   0.70 kB
+│  Vite storybook-static/assets/filter-button-2Yk7aw9i.js
+│  1.74 kB │ gzip:   0.86 kB
+│  Vite storybook-static/assets/patentLegalStatus-CXs_s3vP.js
+│  1.77 kB │ gzip:   0.50 kB
+│  Vite storybook-static/assets/Assistant.stories-ByS55jxy.js
+│  1.79 kB │ gzip:   0.93 kB
+│  Vite storybook-static/assets/GradientBlobs-CUfOsKtn.js
+│  1.83 kB │ gzip:   0.87 kB
+│  Vite storybook-static/assets/documentText-BDh15d7Z.js
+│  1.85 kB │ gzip:   0.98 kB
+│  Vite storybook-static/assets/ActionDropdown-B_x1RbpE.js
+│  1.87 kB │ gzip:   0.93 kB
+│  Vite storybook-static/assets/user-x-CDS_7pMR.js
+│  1.89 kB │ gzip:   0.62 kB
+│  Vite storybook-static/assets/radio-group.stories-CssPXfp0.js
+│  1.93 kB │ gzip:   0.92 kB
+│  Vite storybook-static/assets/NotFound.stories-BtRqkRyf.js
+│  2.04 kB │ gzip:   1.05 kB
+│  Vite storybook-static/assets/dialog.stories-CcOY8oLP.js
+│  2.07 kB │ gzip:   0.93 kB
+│  Vite storybook-static/assets/globe-BGQf2Krd.js
+│  2.09 kB │ gzip:   0.67 kB
+│  Vite storybook-static/assets/popover.stories-tHBzPcVU.js
+│  2.11 kB │ gzip:   1.01 kB
+│  Vite storybook-static/assets/BrandIcons-CVlzxRO3.js
+│  2.15 kB │ gzip:   0.93 kB
+│  Vite storybook-static/assets/collapsible-jIRNV3sa.js
+│  2.32 kB │ gzip:   1.03 kB
+│  Vite storybook-static/assets/tabs.stories-DJg-DtB5.js
+│  2.35 kB │ gzip:   1.04 kB
+│  Vite storybook-static/assets/checkbox.stories-C16wHp-m.js
+│  2.48 kB │ gzip:   0.94 kB
+│  Vite storybook-static/assets/input.stories-BuLzwFnU.js
+│  2.50 kB │ gzip:   0.95 kB
+│  Vite storybook-static/assets/progress-C08X9pMJ.js
+│  2.62 kB │ gzip:   1.26 kB
+│  Vite storybook-static/assets/input-X_SJGcdR.js
+│  2.72 kB │ gzip:   1.32 kB
+│  Vite storybook-static/assets/menu-radio-item.stories-CMCkLN2p.js
+│  2.75 kB │ gzip:   1.32 kB
+│  Vite storybook-static/assets/sheet-DdAPgvP0.js
+│  2.75 kB │ gzip:   1.02 kB
+│  Vite storybook-static/assets/user-BYGN8Vbz.js
+│  2.84 kB │ gzip:   0.83 kB
+│  Vite storybook-static/assets/product-chip-B4R4bMox.js
+│  2.88 kB │ gzip:   1.01 kB
+│  Vite storybook-static/assets/Chips.stories-CRMjQbQZ.js
+│  2.89 kB │ gzip:   1.09 kB
+│  Vite storybook-static/assets/product-chip.stories-ZyyZoVLI.js
+│  2.92 kB │ gzip:   1.26 kB
+│  Vite storybook-static/assets/Patents.stories-BjdFunnn.js
+│  2.94 kB │ gzip:   1.28 kB
+│  Vite storybook-static/assets/dateRange.stories-Dizur_Xm.js
+│  2.99 kB │ gzip:   1.09 kB
+│  Vite storybook-static/assets/alert-dialog.stories-BYCmMrqC.js
+│  3.04 kB │ gzip:   1.17 kB
+│  Vite storybook-static/assets/Button.stories-Be4dJ1pC.js
+│  3.20 kB │ gzip:   1.05 kB
+│  Vite storybook-static/assets/useMutation-De0VqFYb.js
+│  3.22 kB │ gzip:   1.31 kB
+│  Vite storybook-static/assets/misc-primitives.stories-ChAh0jhE.js
+│  3.43 kB │ gzip:   1.27 kB
+│  Vite storybook-static/assets/tabs-DAKsRJ43.js
+│  3.48 kB │ gzip:   1.48 kB
+│  Vite storybook-static/assets/StatusChip.stories-B4JcSMuC.js
+│  3.51 kB │ gzip:   1.39 kB
+│  Vite storybook-static/assets/shield-check-DLgEsW0j.js
+│  3.63 kB │ gzip:   1.11 kB
+│  Vite storybook-static/assets/ReviewQueueWorkspace.stories-DGgwE9BZ.js
+│  3.70 kB │ gzip:   1.15 kB
+│  Vite storybook-static/assets/States.stories-DOc59t7D.js
+│  3.78 kB │ gzip:   1.60 kB
+│  Vite storybook-static/assets/button.stories-CJ7wearf.js
+│  3.79 kB │ gzip:   1.31 kB
+│  Vite storybook-static/assets/DateRangeFilter-wgrAJXfw.js
+│  3.83 kB │ gzip:   1.27 kB
+│  Vite storybook-static/assets/Dashboard.stories-CxJIxUkr.js
+│  4.14 kB │ gzip:   1.43 kB
+│  Vite storybook-static/assets/switch-BaSO3drQ.js
+│  4.23 kB │ gzip:   1.84 kB
+│  Vite storybook-static/assets/alert-dialog-deemRSCV.js
+│  4.24 kB │ gzip:   1.40 kB
+│  Vite storybook-static/assets/checkbox-BfStYySm.js
+│  4.50 kB │ gzip:   1.96 kB
+│  Vite storybook-static/assets/filter-button.stories-DttkvMi5.js
+│  4.51 kB │ gzip:   1.59 kB
+│  Vite storybook-static/assets/tokens.tailwind-lbOp-r2d.js
+│  4.64 kB │ gzip:   1.78 kB
+│  Vite storybook-static/assets/BrandIcons.stories-B4_9-ozS.js
+│  4.97 kB │ gzip:   1.84 kB
+│  Vite storybook-static/assets/popover-Bq848idP.js
+│  5.13 kB │ gzip:   1.98 kB
+│  Vite storybook-static/assets/GradientBlobs.stories-BQwbMuKu.js
+│  5.51 kB │ gzip:   1.79 kB
+│  Vite storybook-static/assets/DateRangeFilter.stories-nDTbK5Kr.js
+│  5.76 kB │ gzip:   1.88 kB
+│  Vite storybook-static/assets/radio-group-eVsKysJ3.js
+│  6.08 kB │ gzip:   2.44 kB
+│  Vite storybook-static/assets/AuthLoadingOverlay.stories-DMTFN-e4.js
+│  6.11 kB │ gzip:   2.24 kB
+│  Vite storybook-static/assets/PatentFieldsForm-C3V9jBtK.js
+│  6.13 kB │ gzip:   2.10 kB
+│  Vite storybook-static/assets/Inputs.stories-IHdZkUhs.js
+│  6.59 kB │ gzip:   1.97 kB
+│  Vite storybook-static/assets/Surfaces.stories-D0vp2g8a.js
+│  7.06 kB │ gzip:   2.23 kB
+│  Vite storybook-static/assets/IdeaSubmissionModal-YIDTmR6d.js
+│  7.84 kB │ gzip:   3.17 kB
+│  Vite storybook-static/assets/LinkedIdeaBadge.stories-DfhNNYGc.js
+│  7.92 kB │ gzip:   2.85 kB
+│  Vite storybook-static/assets/actionsView.stories-DmhnSJ_G.js
+│  8.09 kB │ gzip:   2.80 kB
+│  Vite storybook-static/assets/PatentFieldsForm.stories-CR5YssnN.js
+│  8.17 kB │ gzip:   2.55 kB
+│  Vite storybook-static/assets/Overlays.stories-C_Uy2V22.js
+│  8.55 kB │ gzip:   2.46 kB
+│  Vite storybook-static/assets/Ideas.stories-DSsQOMoa.js
+│  8.89 kB │ gzip:   2.44 kB
+│  Vite storybook-static/assets/StartIdea.stories-CxPij61n.js
+│  9.56 kB │ gzip:   2.76 kB
+│  Vite storybook-static/assets/InventorHome.stories-C8VzfVzL.js
+│  9.64 kB │ gzip:   2.40 kB
+│  Vite storybook-static/assets/Evaluation.stories-B76cN53m.js
+│  11.32 kB │ gzip:   2.78 kB
+│  Vite storybook-static/assets/ReviewDecision.stories-CNhnT9xy.js
+│  12.44 kB │ gzip:   2.95 kB
+│  Vite storybook-static/assets/scroll-area-DFv5O4PY.js
+│  13.80 kB │ gzip:   4.37 kB
+│  Vite storybook-static/assets/command-z1iy5p3M.js
+│  14.05 kB │ gzip:   5.26 kB
+│  Vite storybook-static/assets/DisclosureWorkspace.stories-CzsFm5TR.js
+│  14.37 kB │ gzip:   3.36 kB
+│  Vite storybook-static/assets/IdeasPage-BOakAQZI.js
+│  14.78 kB │ gzip:   5.07 kB
+│  Vite storybook-static/assets/Login.stories-BpL7DbK_.js
+│  14.78 kB │ gzip:   4.85 kB
+│  Vite storybook-static/assets/index-DmuyIqNx.js
+│  17.00 kB │ gzip:   6.40 kB
+│  Vite storybook-static/assets/Radius.stories-CyXthk7t.js
+│  17.42 kB │ gzip:   4.82 kB
+│  Vite storybook-static/assets/PatentPortfolio.stories-CLulzxYE.js
+│  19.24 kB │ gzip:   3.93 kB
+│  Vite storybook-static/assets/format-B8qhVQYN.js
+│  20.23 kB │ gzip:   5.66 kB
+│  Vite
+│  storybook-static/assets/WorkspaceAdminDashboard.stories-DkGBzjec.js
+│  21.74 kB │ gzip:   4.57 kB
+│  Vite storybook-static/assets/select-MV66VnrE.js
+│  22.34 kB │ gzip:   7.74 kB
+│  Vite storybook-static/assets/Auth.stories-DhKRmy9J.js
+│  23.64 kB │ gzip:   6.29 kB
+│  Vite storybook-static/vite-inject-mocker-entry.js
+│  28.53 kB │ gzip:   9.89 kB
+│  Vite storybook-static/assets/matchers-JIUQ3HVY-CAdg16Fl.js
+│  29.35 kB │ gzip:  10.00 kB
+│  Vite storybook-static/assets/Color-6AOWCN3U-DiCmcA5B.js
+│  30.37 kB │ gzip:  11.38 kB
+│  Vite storybook-static/assets/WithTooltip-CDUNV5IS-DGXsR4DA.js
+│  33.21 kB │ gzip:  11.65 kB
+│  Vite storybook-static/assets/Actions.stories-CDJR_oBc.js
+│  35.70 kB │ gzip:   9.15 kB
+│  Vite storybook-static/assets/ReviewQueueWorkspace-D037Xjuy.js
+│  36.45 kB │ gzip:  11.70 kB
+│  Vite storybook-static/assets/ClientsPage-D4YU7oZU.js
+│  44.30 kB │ gzip:  11.01 kB
+│  Vite storybook-static/assets/Tokens.stories-gKX508qW.js
+│  46.36 kB │ gzip:  10.68 kB
+│  Vite storybook-static/assets/DraftWorkspace-BHr3OSMO.js
+│  49.33 kB │ gzip:  14.95 kB
+│  Vite storybook-static/assets/DueDates.stories-C_27_Xcf.js
+│  55.59 kB │ gzip:  13.28 kB
+│  Vite storybook-static/assets/IdeaDetail.stories-BJIdM-DZ.js
+│  56.82 kB │ gzip:  14.12 kB
+│  Vite storybook-static/assets/moment-C5S46NFB.js
+│  60.81 kB │ gzip:  19.58 kB
+│  Vite storybook-static/assets/index.esm-C9q5TIQf.js
+│  70.53 kB │ gzip:  22.79 kB
+│  Vite storybook-static/assets/PatentsPage-D7oaYYUE.js
+│  74.64 kB │ gzip:  18.59 kB
+│  Vite storybook-static/assets/syntaxhighlighter-4REYKNEV-Cg5B5Sci.js
+│  77.81 kB │ gzip:  26.99 kB
+│  Vite storybook-static/assets/proxy-D48x3app.js
+│  124.76 kB │ gzip:  40.70 kB
+│  Vite storybook-static/assets/Clients.stories-Btl7tqNi.js
+│  136.17 kB │ gzip:  43.45 kB
+│  Vite storybook-static/assets/Workspace.stories-FxwzFUV6.js
+│  182.59 kB │ gzip:  47.30 kB
+│  Vite storybook-static/assets/pdf-BnPRJEQ6.js
+│  365.12 kB │ gzip: 107.40 kB
+│  Vite storybook-static/assets/mammoth.browser-Zr7VcNyC.js
+│  499.90 kB │ gzip: 124.75 kB
+│  Vite storybook-static/assets/axe-Bhb-y-va.js
+│  601.10 kB │ gzip: 165.31 kB
+│  Vite storybook-static/assets/Index-CfM7TO9v.js
+│  621.31 kB │ gzip: 171.69 kB
+│  Vite storybook-static/assets/Foundations.stories-D9OcJ_P7.js
+│  755.26 kB │ gzip: 136.13 kB
+│  Vite storybook-static/assets/DocsRenderer-JROSPFPF-BTJ7gX1b.js
+│  850.65 kB │ gzip: 270.37 kB
+│  Vite storybook-static/assets/iframe-fREKwdS2.js
+│  2,431.03 kB │ gzip: 727.15 kB
+│
+▲  Vite
+│  (!) Some chunks are larger than 500 kB after minification. Consider:
+│  - Using dynamic import() to code-split the application
+│  - Use build.rollupOptions.output.manualChunks to improve chunking:
+│  ]8;;https://rollupjs.org/configuration-options/#output-manualchunkshttps://rollupjs.org/configuration-options/#output-manualchunks]8;;
+│  - Adjust chunk size limit for this warning via
+│  build.chunkSizeWarningLimit.
+│  Vite ✓ built in 11.65s
+│
+◇  Output directory: /Users/saurabh/PL/exp2/storybook-static
+│
+└  Storybook build completed successfully
+

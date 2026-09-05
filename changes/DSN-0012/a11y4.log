@@ -1,0 +1,17 @@
+inventor axe []
+inventor zoom {"doc":false,"table":[false]}
+workspace-admin axe []
+workspace-admin zoom {"doc":false,"table":[false]}
+case-owner axe []
+case-owner zoom {"doc":false,"table":[false]}
+photon-admin axe []
+photon-admin zoom {"doc":false,"table":[false]}
+empty-imported-portfolio axe []
+empty-imported-portfolio zoom {"doc":false,"table":[]}
+long-titles axe []
+long-titles zoom {"doc":false,"table":[false]}
+import-result axe []
+import-result zoom {"doc":false,"table":[false]}
+error axe []
+error zoom {"doc":false,"table":[]}
+failures 0

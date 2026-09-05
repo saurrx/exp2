@@ -1,0 +1,8 @@
+PASS inventor filtered export 6 same jurisdiction/status
+PASS inventor clear filters, paging
+PASS workspace-admin filtered export 6 same jurisdiction/status
+PASS workspace-admin clear filters, paging
+PASS case-owner filtered export 6 same jurisdiction/status
+PASS case-owner clear filters, paging
+PASS photon-admin filtered export 6 same jurisdiction/status
+PASS photon-admin clear filters, paging

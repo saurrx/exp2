@@ -1,0 +1,212 @@
+{
+  "_doc": "Source glob -> feature areas, for pulse-frontend. A path matching nothing is treated as a FULL run.",
+  "contractSha256": "e01c8ec9ce22bf0777fa722dae1f4344d2a8e48b571c64640016aad483ce965c",
+  "testRoots": [
+    "src",
+    "qa"
+  ],
+  "runners": [
+    {
+      "_doc": "Static security gates under qa/security/ are standalone node scripts (no browser, no build). Declared before the generic runner so the tier's intent is explicit; same command, so behaviour is identical.",
+      "match": "qa/security/.*\\.mjs$",
+      "command": [
+        "node"
+      ],
+      "each": true
+    },
+    {
+      "_doc": "Browser + node tiers are standalone scripts. each:true keeps them sequential, which is what stops five role logins racing the login throttle.",
+      "match": "\\.qa\\.mjs$",
+      "command": [
+        "node"
+      ],
+      "each": true
+    }
+  ],
+  "checkpoints": {
+    "_doc": "Which shared-contract checkpoints this repo participates in. \"tagged\" = select by @cp: tag and fail if that selects nothing; \"all\" = every tagged test file; \"n/a: <reason>\" = no such surface here, exits 0. A contract checkpoint missing from this map is an error, so adding one forces every repo to decide what it does about it.",
+    "smoke": "tagged",
+    "pre-deploy": "tagged",
+    "post-deploy": "tagged",
+    "nightly": "all"
+  },
+  "map": {
+    "src/pages/auth/**": [
+      "auth"
+    ],
+    "src/components/auth/**": [
+      "auth"
+    ],
+    "src/components/common/**": [
+      "*"
+    ],
+    "src/pages/Index.tsx": [
+      "dashboard"
+    ],
+    "src/components/dashboard/**": [
+      "dashboard"
+    ],
+    "src/components/TimelineAndEvents.tsx": [
+      "dashboard",
+      "duedates"
+    ],
+    "src/pages/IdeasPage.tsx": [
+      "ideas"
+    ],
+    "src/pages/IdeaDetailsPage.tsx": [
+      "ideas",
+      "review",
+      "agent-eval"
+    ],
+    "src/pages/IdeaDraftPage.tsx": [
+      "drafts",
+      "agent-eval"
+    ],
+    "src/components/ideas/**": [
+      "ideas",
+      "drafts",
+      "review",
+      "agent-eval"
+    ],
+    "src/components/review/**": [
+      "review",
+      "ideas"
+    ],
+    "src/pages/PatentsPage.tsx": [
+      "patents"
+    ],
+    "src/components/patents/**": [
+      "patents"
+    ],
+    "src/pages/DueDatesPage.tsx": [
+      "duedates"
+    ],
+    "src/components/due-dates/**": [
+      "duedates"
+    ],
+    "src/pages/ActionsPage.tsx": [
+      "actions"
+    ],
+    "src/components/actions/**": [
+      "actions"
+    ],
+    "src/pages/client/**": [
+      "clients"
+    ],
+    "src/components/clients/**": [
+      "clients"
+    ],
+    "src/pages/WorkspacePage.tsx": [
+      "workspace"
+    ],
+    "src/pages/ProfilePage.tsx": [
+      "workspace"
+    ],
+    "src/components/workspace/**": [
+      "workspace",
+      "invites"
+    ],
+    "src/lib/realAdapter.ts": [
+      "*"
+    ],
+    "src/lib/apiConfig.ts": [
+      "*"
+    ],
+    "src/lib/auth.ts": [
+      "*"
+    ],
+    "src/lib/ProtectedRoutes.tsx": [
+      "*"
+    ],
+    "src/lib/PublicRoutes.tsx": [
+      "*"
+    ],
+    "src/App.tsx": [
+      "*"
+    ],
+    "src/main.tsx": [
+      "*"
+    ],
+    "src/components/DashboardLayout.tsx": [
+      "*"
+    ],
+    "src/components/Sidebar.tsx": [
+      "*"
+    ],
+    "src/components/Header.tsx": [
+      "*"
+    ],
+    "src/components/layout/**": [
+      "*"
+    ],
+    "src/components/ui/**": [
+      "*"
+    ],
+    "src/lib/**": [
+      "*"
+    ],
+    "src/hooks/**": [
+      "*"
+    ],
+    "src/contexts/**": [
+      "*"
+    ],
+    "src/index.css": [
+      "*"
+    ],
+    "src/style.css": [
+      "*"
+    ],
+    "tailwind.config.ts": [
+      "*"
+    ],
+    "package-lock.json": [
+      "*"
+    ],
+    "package.json": [
+      "*"
+    ],
+    "vite.config.ts": [
+      "*"
+    ],
+    "vitest.config.ts": [
+      "*"
+    ],
+    ".storybook/**": [
+      "*"
+    ],
+    "vercel.json": [
+      "infra"
+    ],
+    ".gitlab-ci.yml": [
+      "infra"
+    ],
+    "qa/security/**": [
+      "infra"
+    ],
+    "qa/journey/**": [
+      "ideas",
+      "drafts",
+      "review",
+      "clients",
+      "actions",
+      "workspace",
+      "infra"
+    ],
+    "qa/lib/**": [
+      "*"
+    ],
+    "qa/**": [
+      "infra"
+    ],
+    "CLAUDE.md": [],
+    "README.md": [],
+    ".vscode/**": [],
+    ".github/**": [],
+    ".githooks/**": [
+      "infra"
+    ],
+    ".gitignore": [],
+    "LICENSE": []
+  }
+}

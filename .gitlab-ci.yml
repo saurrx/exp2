@@ -1,0 +1,81 @@
+# The design fork's pipeline. Production's pipeline is not inherited: this
+# repository has no backend, no deploy through CI and no secrets. The build
+# job runs on every push; the browser job runs on main and on merge requests
+# marked ready (label "ready"), because it costs 15 to 25 minutes.
+stages: [test, browser]
+
+variables:
+  GIT_DEPTH: 0
+  QA_MOCK: "1"
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+cache:
+  key: { files: [package-lock.json] }
+  paths: [.npm/]
+
+build:
+  stage: test
+  image: node:22-slim
+  interruptible: true
+  script:
+    - npm ci --no-audit --no-fund
+    - node qa/cli.mjs contract
+    - node qa/cli.mjs exceptions
+    - node qa/contract/adapter-coverage.qa.mjs
+    - node qa/contract/social-login-mapping.qa.mjs
+    - node qa/contract/auth-field-contract.qa.mjs
+    # Scores are stored 0-100 and shown out of 10. They used to be shown both
+    # ways at once — the same idea read 72 to the inventor and 7.2 to the
+    # counsel reviewing it.
+    - node qa/contract/score-scale.qa.mjs
+    # Static half of the desktop gate. It has existed since the gate was written
+    # and CI has never invoked it — the build job runs a hand-written list, so
+    # adding a gate to the repo did not add it to CI (findings F-078).
+    - node qa/invariant/desktop-gate.qa.mjs
+    # Both sides of the patent-status translation table. 487 production
+    # patents were arriving with an unmapped status the screens could not
+    # render or filter, and nothing failed because the lookup has a `?? s`
+    # fallback that always produces a string.
+    - node qa/contract/status-parity.qa.mjs
+    - node qa/map/generate.mjs --check
+    - npm run typecheck
+    - npm run lint:roles
+    - node tools/design/routes.mjs
+    - node tools/design/credentials.mjs
+    - node tools/design/manifest.mjs
+    - node tools/design/fingerprint.mjs --self-test
+    - npm run test:fidelity
+    - npm run build:design
+    - npm run storybook:build
+  artifacts:
+    paths: [dist/, storybook-static/]
+    expire_in: 1 week
+
+browser:
+  stage: browser
+  image: mcr.microsoft.com/playwright:v1.62.0-noble
+  interruptible: true
+  needs: [build]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /ready/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+      allow_failure: false
+  script:
+    - npm ci --no-audit --no-fund
+    - npm run test:stories
+    - node tools/design/shots.mjs --twice
+    - node tools/design/a11y.mjs
+    - (npx vite preview --config vite.design.config.ts --port 3700 --strictPort &) && sleep 4
+    - node tools/design/smoke.mjs
+    - node tools/design/crawl.mjs
+    - node qa/invariant/desktop-gate.qa.mjs
+    - node qa/invariant/layout.qa.mjs --base http://localhost:3700
+    - node qa/invariant/no-visible-uuid.qa.mjs --base http://localhost:3700
+    - node qa/conformance/structure.qa.mjs --base http://localhost:3700
+    - node qa/cli.mjs exceptions --strict
+  artifacts:
+    when: on_failure
+    paths: [qa/visual/baselines/*.actual.png]
+    expire_in: 3 days

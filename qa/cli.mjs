@@ -1,0 +1,391 @@
+#!/usr/bin/env node
+/**
+ * qa — the test selector.
+ *
+ *   qa affected            areas touched by the current diff, and the tests for them
+ *   qa run --tier security --area ideas       select and RUN (--list to only list)
+ *   qa checkpoint smoke
+ *   qa exceptions          check the exception register is honest
+ *   qa contract            check the shared contract has not drifted
+ *
+ * Why this exists rather than a tool: the three repos are SEPARATE git repos,
+ * so nothing off the shelf does cross-repo impact analysis. Nx and Turbo
+ * `affected` are one-workspace concepts; jest/vitest `--changed` walk a module
+ * graph that stops at the repo edge. The mapping from "I changed this file" to
+ * "run those tests over there" has to be declared, so it is declared in
+ * qa/areas.json and resolved here.
+ *
+ * Depends on nothing. Node built-ins only, in all three repos.
+ */
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execSync, spawnSync } from 'node:child_process';
+import { join, dirname, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const QA = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(QA, '..');
+const read = (f) => JSON.parse(readFileSync(join(QA, f), 'utf8'));
+
+const contract = read('contract.json');
+const areasMap = read('areas.json');
+const ALL_AREAS = new Set(contract.areas.values);
+
+/* ---------- glob matching (no dependency) ---------------------------------
+ * Supports the two forms areas.json uses: `**` across directories and `*`
+ * within a segment. Deliberately small — if a pattern needs more than this,
+ * the pattern is too clever.
+ */
+function globToRe(glob) {
+  let re = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*') {
+      if (glob[i + 1] === '*') { re += '.*'; i++; if (glob[i + 1] === '/') i++; }
+      else re += '[^/]*';
+    } else if ('.+^${}()|[]\\'.includes(c)) re += '\\' + c;
+    else if (c === '?') re += '[^/]';
+    else re += c;
+  }
+  return new RegExp('^' + re + '$');
+}
+const compiled = Object.entries(areasMap.map).map(([g, areas]) => [globToRe(g), areas, g]);
+
+function areasFor(files) {
+  const hit = new Set(); const why = new Map(); const unmatched = [];
+  for (const f of files) {
+    let matched = false;
+    for (const [re, areas, g] of compiled) {
+      if (!re.test(f)) continue;
+      matched = true;
+      for (const a of areas) {
+        if (a === '*') { for (const x of ALL_AREAS) hit.add(x); }
+        else hit.add(a);
+      }
+      if (!why.has(g)) why.set(g, []);
+      why.get(g).push(f);
+    }
+    if (!matched) unmatched.push(f);
+  }
+  return { areas: [...hit].sort(), why, unmatched };
+}
+
+function changedFiles(base) {
+  const b = base || process.env.QA_BASE || 'origin/main';
+  let mergeBase;
+  try { mergeBase = execSync(`git merge-base ${b} HEAD`, { cwd: ROOT }).toString().trim(); }
+  catch {
+    console.error(`qa: no merge base with ${b}.`);
+    console.error('    If this is CI, the clone is probably shallow — set GIT_DEPTH: 0.');
+    process.exit(2);
+  }
+  const out = execSync(`git diff --name-only ${mergeBase}...HEAD`, { cwd: ROOT }).toString();
+  const staged = execSync('git status --porcelain', { cwd: ROOT }).toString()
+    .split('\n').filter(Boolean).map(l => l.slice(3).trim()).filter(Boolean);
+  return [...new Set([...out.split('\n'), ...staged])].filter(Boolean);
+}
+
+/* ---------- exception register ------------------------------------------- */
+function loadExceptions() {
+  const p = join(QA, 'exceptions.json');
+  return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')).exceptions ?? [] : [];
+}
+
+/**
+ * Which exceptions actually fired, per tier, from the last complete run of each.
+ * Written by the tiers via qa/lib/exception-hits.mjs.
+ */
+function loadHits() {
+  const dir = join(QA, '.exception-hits');
+  if (!existsSync(dir)) return {};
+  const out = {};
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith('.json')) continue;
+    try {
+      const d = JSON.parse(readFileSync(join(dir, f), 'utf8'));
+      if (d?.tier) out[d.tier] = d;
+    } catch { /* a half-written file is not evidence */ }
+  }
+  return out;
+}
+
+/**
+ * Tiers whose findings come from RULES, where an exception matching nothing
+ * really is dead.
+ *
+ * `conformance` is deliberately absent. Its findings are diffs against a
+ * committed baseline, so the moment the baseline is re-recorded there is
+ * nothing left to suppress — its exceptions go dormant by construction and
+ * wake again the next time reality drifts. Judging them the same way would
+ * report eleven perfectly good suppressions as dead every time someone runs
+ * `--update`, which is how a strict check teaches people to pass `--no-strict`.
+ */
+const RULE_BASED_TIERS = new Set(['invariant', 'contract', 'security', 'behaviour', 'unit', 'journey']);
+
+function checkExceptions({ strict = false } = {}) {
+  const ex = loadExceptions();
+  const today = new Date().toISOString().slice(0, 10);
+  const hits = strict ? loadHits() : {};
+  let bad = 0;
+  if (!ex.length) { console.log('qa: no exceptions registered.'); return 0; }
+  for (const e of ex) {
+    const problems = [];
+    if (!e.id) problems.push('no id');
+    if (!e.reason) problems.push('no reason');
+    if (!e.owner) problems.push('no owner');
+    if (!e.expires) problems.push('no expiry');
+    else if (e.expires < today) problems.push(`EXPIRED ${e.expires}`);
+    // A suppression that no longer matches anything is dead: it hides nothing,
+    // and it will go on hiding nothing after the thing it was written for comes
+    // back. Only judged when a COMPLETE run of the entry's own tier is on
+    // record — a security exception must not look dead because only the
+    // invariant tier ran.
+    let note = '';
+    if (strict && !problems.length) {
+      const tier = e.match?.tier;
+      const run = tier ? hits[tier] : null;
+      if (!RULE_BASED_TIERS.has(tier)) note = `  (dormancy expected — ${tier ?? 'untiered'} compares against a baseline)`;
+      else if (!run) note = `  (not judged — no complete ${tier} run on record)`;
+      else if (!run.complete) note = `  (not judged — last ${tier} run was incomplete)`;
+      else if (!run.ids.includes(e.id)) problems.push(`DEAD — matched nothing in the last complete ${tier} run`);
+    }
+    if (problems.length) { bad++; console.log(`  FAIL ${e.id ?? '(unnamed)'} — ${problems.join(', ')}`); }
+    else console.log(`  ok   ${e.id}  (expires ${e.expires}, ${e.owner})${note}`);
+  }
+  // A suppression that has outlived its reason is itself a defect: it hides a
+  // real failure and nobody is looking at it any more.
+  if (bad) console.log(`\nqa: ${bad} exception(s) are expired or incomplete. Fix the underlying issue or renew deliberately.`);
+  return bad ? 1 : 0;
+}
+
+/* ---------- contract drift ------------------------------------------------ */
+function checkContract() {
+  const expect = areasMap.contractSha256;
+  // node:crypto, not `shasum`: node:22-slim has no shasum and this failed in
+  // CI while passing on macOS, which is the whole reason CI exists.
+  const actual = createHash('sha256').update(readFileSync(join(QA, 'contract.json'))).digest('hex');
+  if (!expect) { console.log(`qa: contract sha not pinned. Add "contractSha256": "${actual}" to areas.json.`); return 1; }
+  if (expect !== actual) {
+    console.log('qa: CONTRACT DRIFT.');
+    console.log(`    expected ${expect}`);
+    console.log(`    actual   ${actual}`);
+    console.log('    qa/contract.json must be byte-identical across all three repos.');
+    console.log('    If you changed it deliberately, copy it to the other two repos and update contractSha256 in each.');
+    return 1;
+  }
+  console.log(`qa: contract ok (${actual.slice(0, 12)}…)`);
+  return 0;
+}
+
+/* ---------- test discovery ------------------------------------------------ */
+// Skipped wholesale. node_modules is the one that matters: patent-agent is a
+// pnpm workspace, so every package links the others' node_modules back in and
+// a naive walk finds ~1,300 "tests" belonging to zod.
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', '.git', 'coverage',
+  '.turbo', '.next', 'playwright-report', 'test-results']);
+
+function walk(dir, out = []) {
+  if (!existsSync(dir)) return out;
+  for (const e of readdirSync(dir)) {
+    if (SKIP_DIRS.has(e)) continue;
+    const p = join(dir, e);
+    let st;
+    try { st = statSync(p); } catch { continue; }   // broken symlink
+    if (st.isDirectory()) walk(p, out);
+    else if (/\.(spec|test)\.[cm]?[jt]sx?$/.test(e) || /\.qa\.mjs$/.test(e)) out.push(p);
+  }
+  return out;
+}
+
+const TAG_RE = /@(area|role|tier|sec|soc2|gdpr|cp):([A-Za-z0-9_.\-]+)/g;
+function tagsOf(file) {
+  const txt = readFileSync(file, 'utf8');
+  const tags = { area: [], role: [], tier: [], sec: [], soc2: [], gdpr: [], cp: [] };
+  for (const m of txt.matchAll(TAG_RE)) tags[m[1]].push(m[2]);
+  return tags;
+}
+
+function discover() {
+  const roots = (areasMap.testRoots ?? ['src', 'qa']).map(r => join(ROOT, r));
+  const files = roots.flatMap(r => walk(r));
+  return files.map(f => ({ file: relative(ROOT, f), tags: tagsOf(f) }));
+}
+
+function select({ areas, tier, sec, cp }) {
+  return discover().filter(t => {
+    if (tier && !t.tags.tier.includes(tier)) return false;
+    if (sec && !t.tags.sec.includes(sec)) return false;
+    if (cp && !t.tags.cp.includes(cp)) return false;
+    if (areas && areas.length) {
+      // An untagged test is always run: absence of a tag must never mean
+      // "skip", or a test silently stops being selected the day someone
+      // forgets the annotation.
+      if (!t.tags.area.length) return true;
+      if (!t.tags.area.some(a => areas.includes(a))) return false;
+    }
+    return true;
+  });
+}
+
+
+/* ---------- execution -----------------------------------------------------
+ * Selection is only half the job. `run` and `checkpoint` used to print a list
+ * and exit 0, which is the worst possible outcome: the command a human is told
+ * to trust reports success without executing a single assertion. CI was green
+ * because .gitlab-ci.yml invokes the runners directly and never went through
+ * here — so the gap was invisible from the pipeline.
+ *
+ * HOW a test file is executed is repo-specific (vitest here, jest there, plain
+ * `node` for the .qa.mjs scripts), so it is declared per repo in
+ * qa/areas.json `runners` and this file stays byte-identical across all three.
+ *
+ * `each: true` runs one process per file. The browser tiers need it — they are
+ * standalone scripts, and running them sequentially in one process each is
+ * what keeps five logins from racing the login throttle.
+ */
+function runnerFor(file) {
+  for (const r of areasMap.runners ?? []) if (new RegExp(r.match).test(file)) return r;
+  return null;
+}
+
+function execute(tests) {
+  // Nothing selected is a failure, not a pass. A checkpoint that matches no
+  // test is a broken filter, and reporting "ok" for it is how a suite rots.
+  if (!tests.length) {
+    console.error('qa: no tests selected — refusing to report success.');
+    return 1;
+  }
+  const files = tests.map(t => t.file);
+  const unrunnable = files.filter(f => !runnerFor(f));
+  if (unrunnable.length) {
+    // Same rule as an unmapped glob: a file nobody knows how to run must be
+    // loud. Silently skipping it would mean the count says 12 and 3 ran.
+    console.error(`qa: ${unrunnable.length} selected file(s) match no runner in areas.json:`);
+    unrunnable.forEach(f => console.error('    ' + f));
+    return 1;
+  }
+
+  // Group in selection order so a repo's grouping stays predictable.
+  const groups = [];
+  for (const f of files) {
+    const r = runnerFor(f);
+    const last = groups[groups.length - 1];
+    if (!r.each && last && last.runner === r) last.files.push(f);
+    else groups.push({ runner: r, files: [f] });
+  }
+
+  const failed = [];
+  for (const g of groups) {
+    const batches = g.runner.each ? g.files.map(f => [f]) : [g.files];
+    for (const batch of batches) {
+      const argv = [...g.runner.command, ...batch];
+      console.log(`\nqa> ${argv.join(' ')}`);
+      const res = spawnSync(argv[0], argv.slice(1), { cwd: ROOT, stdio: 'inherit', shell: false });
+      // A signal-killed child has status null; that is a failure, not a pass.
+      if (res.status !== 0) failed.push(...batch);
+    }
+  }
+
+  console.log(`\nqa: ${files.length} file(s), ${failed.length} failed`);
+  failed.forEach(f => console.log('  FAIL ' + f));
+  return failed.length ? 1 : 0;
+}
+
+/* ---------- commands ------------------------------------------------------ */
+const [, , cmd, ...rest] = process.argv;
+const flag = (n, d) => { const i = rest.indexOf('--' + n); return i === -1 ? d : rest[i + 1]; };
+
+if (cmd === 'affected') {
+  const files = changedFiles(flag('base'));
+  if (!files.length) { console.log('qa: no changes vs base.'); process.exit(0); }
+  const { areas, why, unmatched } = areasFor(files);
+  console.log(`qa: ${files.length} changed file(s)`);
+  for (const [g, fs] of why) console.log(`  ${g}  ->  ${areasMap.map[g].join(', ')}   (${fs.length} file${fs.length > 1 ? 's' : ''})`);
+  if (unmatched.length) {
+    // Unmapped is loud on purpose: an unmapped path is a hole in the map, and
+    // the safe reading of "I don't know what this affects" is "everything".
+    console.log(`\nqa: ${unmatched.length} file(s) match no glob — treating as full run:`);
+    unmatched.slice(0, 10).forEach(f => console.log(`    ${f}`));
+    if (unmatched.length > 10) console.log(`    …and ${unmatched.length - 10} more`);
+  }
+  const eff = unmatched.length ? [...ALL_AREAS].sort() : areas;
+  console.log(`\nareas: ${eff.join(' ') || '(none)'}`);
+  const tests = select({ areas: eff });
+  console.log(`tests: ${tests.length}`);
+  tests.forEach(t => console.log(`  ${t.file}${t.tags.tier.length ? '  [' + t.tags.tier.join(',') + ']' : ''}`));
+  if (rest.includes('--print-areas')) console.log('\nQA_AREAS=' + eff.join(','));
+  process.exit(0);
+}
+
+if (cmd === 'run') {
+  const areas = (flag('area') ?? '').split(',').filter(Boolean);
+  const tests = select({ areas, tier: flag('tier'), sec: flag('sec'), cp: flag('cp') });
+  console.log(`qa: ${tests.length} test file(s)`);
+  tests.forEach(t => console.log('  ' + t.file));
+  process.exit(rest.includes('--list') ? 0 : execute(tests));
+}
+
+/**
+ * A checkpoint means the same thing in all three repos, but the WORK it implies
+ * does not exist everywhere: a repo with no UI has no journey to smoke-test.
+ * That is a legitimate empty, and it must not read the same as a filter that
+ * matched nothing by mistake — so each repo DECLARES its stance in
+ * qa/areas.json `checkpoints`:
+ *
+ *   "tagged"  select by @cp: tag; selecting zero is a broken filter and fails
+ *   "all"     every tagged test file in the repo (this is what `nightly` means)
+ *   "n/a: …"  this repo has no such surface; exits 0 and prints the reason
+ *
+ * A checkpoint in the shared contract but absent from areas.json is an ERROR,
+ * not a default. Adding one to contract.json then forces all three repos to say
+ * what they do about it, which is the same reflex the contract hash enforces.
+ */
+if (cmd === 'checkpoint') {
+  const name = rest[0];
+  const known = Object.keys(contract.checkpoints.values);
+  if (!known.includes(name)) {
+    console.error(`qa: unknown checkpoint "${name}". Known: ${known.join(', ')}`);
+    process.exit(1);
+  }
+  const stance = (areasMap.checkpoints ?? {})[name];
+  if (!stance) {
+    console.error(`qa: checkpoint "${name}" is in contract.json but undeclared in this repo's areas.json.`);
+    console.error('    Declare it as "tagged", "all", or "n/a: <reason>".');
+    process.exit(1);
+  }
+  if (stance.startsWith('n/a')) {
+    console.log(`qa: checkpoint "${name}" — ${stance} (nothing to run here)`);
+    process.exit(0);
+  }
+  const tests = stance === 'all' ? discover() : select({ cp: name });
+  console.log(`qa: checkpoint "${name}" [${stance}] -> ${tests.length} test file(s)`);
+  tests.forEach(t => console.log('  ' + t.file));
+  process.exit(rest.includes('--list') ? 0 : execute(tests));
+}
+
+if (cmd === 'exceptions') process.exit(checkExceptions({ strict: rest.includes('--strict') }));
+if (cmd === 'contract') process.exit(checkContract());
+
+if (cmd === 'list') {
+  const all = discover();
+  console.log(`qa: ${all.length} tagged test file(s)`);
+  for (const t of all) {
+    const s = Object.entries(t.tags).filter(([, v]) => v.length)
+      .map(([k, v]) => v.map(x => `@${k}:${x}`).join(' ')).join(' ');
+    console.log(`  ${t.file}\n      ${s || '(untagged — always runs)'}`);
+  }
+  process.exit(0);
+}
+
+console.log(`qa — test selection across the three Pulse repos
+
+  qa affected [--base origin/main] [--print-areas]
+  qa run --tier <t> [--area a,b] [--sec s] [--cp c] [--list]
+  qa checkpoint <smoke|pre-deploy|post-deploy|nightly> [--list]
+                             # both EXECUTE the selection; --list only prints it
+  qa exceptions [--strict]   # --strict also fails a suppression that matched nothing
+  qa contract
+  qa list
+
+Tiers: ${Object.keys(contract.tiers.values).join(' ')}
+Areas: ${contract.areas.values.join(' ')}`);

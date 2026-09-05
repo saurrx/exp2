@@ -1,0 +1,335 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import API_CONFIG from "@/lib/apiConfig";
+import useUserCookie from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/useTheme";
+import { Dialog, DialogContentNoClose } from "@/components/ui/dialog";
+import PatentWorldMap from "@/components/PatentWorldMap";
+import TopInventors, { type InventorEntry } from "@/components/TopInventors";
+import TimelineAndEvents from "@/components/TimelineAndEvents";
+import { IdeaPipeline, NeedsReview } from "@/components/dashboard/DashboardStats";
+import { StatStrip, type StatGroupSpec } from "@/components/dashboard/StatStrip";
+
+/**
+ * The Workspace Admin's Overview (DSN-0002, product-context/surfaces/workspace-admin-dashboard.md).
+ *
+ * Two jobs in one glance: what needs a decision, and how the portfolio stands.
+ * Row 1 is five scoped numbers, each a link to the list it counts: awaiting
+ * review and deadlines for the workspace; total, granted and pending
+ * patents for the company portfolio. Row 2 is the company portfolio (Patents worldwide, kept by founder
+ * override) and Top inventors (kept by founder override). Row 3 is the queue,
+ * Review Inventor Ideas, with the page's only primary button, and the pipeline.
+ *
+ * The strip's aggregates come from /v1/dashboard as backend finding BF-5; the
+ * mock serves them for V0 scenarios and the record is conceptual until the
+ * backend does. Nothing here is counted in the browser from a paged list: when
+ * an aggregate is missing the box shows a dash and says it is not available.
+ */
+
+const DAY_MS = 86400000;
+const AGING_THRESHOLD_DAYS = 30;
+// The review statuses in the old dialect the adapter translates; the same
+// literal the Review queue link and the sidebar badge use.
+const REVIEW_STATUS = "UNDER_REVIEW,SENT_TO_IHC";
+const DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const LONG_DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
+type Aggregates = {
+  awaiting_review?: number;
+  oldest_waiting_days?: number | null;
+  actions_due_30_days?: number;
+  next_action_due_at?: string | null;
+  submitted_this_quarter?: number;
+  submitted_last_quarter?: number;
+  quarter_start?: string;
+  quarter_end?: string;
+  patents_filed_this_quarter?: number;
+  idea_pipeline?: Partial<Record<"this_quarter" | "last_quarter" | "all_time", PipelineCounts>>;
+};
+
+type PipelineCounts = {
+  submitted?: number;
+  reviewPending?: number;
+  sentToPhoton?: number;
+  filed?: number;
+  granted?: number;
+  oldestWaitingDays?: number | null;
+};
+
+const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+const WorkspaceAdminOverview = () => {
+  const navigate = useNavigate();
+  const { user } = useUserCookie();
+  const { theme } = useTheme();
+  const [isPatentDialogOpen, setIsPatentDialogOpen] = useState(false);
+  const [pipelinePeriod, setPipelinePeriod] = useState<"this_quarter" | "last_quarter" | "all_time">("all_time");
+  const [timelineMonth, setTimelineMonth] = useState(() => new Date().getMonth() + 1);
+  const [timelineYear, setTimelineYear] = useState(() => new Date().getFullYear());
+  const [timelinePage, setTimelinePage] = useState(1);
+  const [timelinePageSize, setTimelinePageSize] = useState(30);
+
+  const scope = user ? `${user.id}:${user.role}:${user.client_id ?? "none"}` : null;
+  const ready = !!scope;
+
+  const { isLoading: isDashboardLoading, isError: isDashboardError, data, refetch: refetchDashboard } = useQuery({
+    queryKey: ["dashboard", scope],
+    enabled: ready,
+    queryFn: async () => (await API_CONFIG.get("/api/v1/dashboard"))?.data,
+  });
+  const { data: pipelineData, isLoading: isPipelineLoading, isError: isPipelineError, refetch: refetchPipeline } = useQuery({
+    queryKey: ["dashboard_pipeline", scope],
+    enabled: ready,
+    queryFn: async () => (await API_CONFIG.get("/api/v1/idea/pipeline"))?.data,
+  });
+  const { isLoading: isQueueLoading, isError: isQueueError, data: ideasData, refetch: refetchIdeas } = useQuery({
+    queryKey: ["dashboard_ideas", scope, false],
+    enabled: ready,
+    queryFn: async () => (await API_CONFIG.get(`/api/v1/idea/fetch-by-user?page=1&limit=100&status=${REVIEW_STATUS}`))?.data,
+  });
+  const { isLoading: isTimelineLoading, data: timelineData, refetch: refetchTimeline } = useQuery({
+    queryKey: ["workspace_admin_timeline", scope, timelineMonth, timelineYear, timelinePage, timelinePageSize],
+    enabled: ready,
+    queryFn: async () => (await API_CONFIG.get(`/api/v1/patent/fetch/upcoming-due-dates?month=${timelineMonth}&year=${timelineYear}&limit=0`))?.data,
+  });
+
+  const d = data?.data ?? {};
+  const w: Aggregates = d.workspace ?? {};
+  const pipeline = pipelineData?.data;
+
+  const reviewQueue = React.useMemo(() => {
+    const ideas: any[] = Array.isArray(ideasData?.data) ? ideasData.data : [];
+    return ideas
+      .filter((i) => ["UNDER_REVIEW", "SENT_TO_IHC"].includes(i.status))
+      .map((i) => {
+        const submittedAt = new Date(i.submission_date || 0).getTime();
+        const updatedAt = new Date(i.updatedAt || i.updated_at || 0).getTime();
+        const resubmitted = Number(i.revision) > 1;
+        const queueStartedAt = resubmitted ? Math.max(submittedAt, updatedAt) : submittedAt;
+        return {
+          id: i.id,
+          title: i.title,
+          secondary: typeof i.created_by === "string" ? i.created_by : i.created_by?.name,
+          score: i.score,
+          submittedAt: new Date(queueStartedAt).toISOString(),
+          resubmitted,
+          waitingDays: Math.max(0, Math.floor((Date.now() - queueStartedAt) / DAY_MS)),
+        };
+      })
+      .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+  }, [ideasData]);
+
+  /* ------------------------------ the strip ------------------------------ */
+  const awaiting = num(w.awaiting_review) ?? num(pipeline?.reviewPending) ?? (ideasData ? reviewQueue.length : null);
+  const oldest = num(w.oldest_waiting_days) ?? (reviewQueue.length ? Math.max(...reviewQueue.map((r) => r.waitingDays)) : null);
+  const actionsDue = num(w.actions_due_30_days);
+  const nextDue = w.next_action_due_at ? new Date(w.next_action_due_at) : null;
+  const totalPatents = num(d.total_patents);
+  const granted = num(d.granted_patents);
+  const pendingPatents = num(d.pending_patents);
+  const filedQ = num(w.patents_filed_this_quarter);
+  const grantedShare = totalPatents && granted !== null ? Math.round((granted / totalPatents) * 100) : null;
+  const unavailable = isDashboardError;
+
+  const groups: StatGroupSpec[] = [
+    {
+      key: "workspace",
+      boxes: [
+        {
+          key: "awaiting", label: "Awaiting review", rule: awaiting ? "amber" : "neutral",
+          value: unavailable ? null : awaiting,
+          qualifier: unavailable ? "not available" : awaiting ? `oldest ${oldest ?? 0}d` : "nothing waiting",
+          qualifierSpoken: unavailable ? "not available" : awaiting ? `oldest ${oldest ?? 0} days` : "nothing waiting",
+          qualifierTone: awaiting ? "amber" : undefined,
+          to: `/ideas?status=${REVIEW_STATUS}`, title: "Ideas awaiting your decision, oldest first",
+        },
+        {
+          key: "actions", label: "Deadlines · 30 days", rule: actionsDue ? "red" : "neutral",
+          value: unavailable ? null : actionsDue,
+          qualifier: unavailable ? "not available" : actionsDue === null ? "not available yet" : actionsDue && nextDue ? `Next: ${DATE.format(nextDue)}` : "None due in 30 days",
+          qualifierSpoken: unavailable ? "not available" : actionsDue === null ? "not available yet" : actionsDue && nextDue ? `next due ${LONG_DATE.format(nextDue)}` : "none due in 30 days",
+          to: "/due-dates", title: "Deadlines in the next 30 days",
+        },
+      ],
+    },
+    {
+      key: "portfolio",
+      boxes: [
+        {
+          key: "patents", label: "Total patents", rule: totalPatents ? "navy" : "neutral",
+          value: unavailable ? null : totalPatents,
+          qualifier: unavailable ? "not available" : totalPatents ? (filedQ === null ? "company portfolio" : `↑ ${filedQ} filed this quarter`) : "No patents added yet",
+          qualifierSpoken: unavailable ? "not available" : totalPatents ? (filedQ === null ? "company portfolio" : `${filedQ} filed this quarter`) : "no patents added yet",
+          qualifierTone: totalPatents && filedQ ? "green" : undefined,
+          to: "/patents", title: "The company patent portfolio",
+        },
+        {
+          key: "granted", label: "Granted", rule: granted ? "green" : "neutral",
+          value: unavailable ? null : granted,
+          qualifier: unavailable ? "not available" : grantedShare !== null ? `${grantedShare}% of portfolio` : "No patents added yet",
+          qualifierSpoken: unavailable ? "not available" : grantedShare !== null ? `${grantedShare} percent of portfolio` : "no patents added yet",
+          qualifierTone: granted ? "green" : undefined,
+          to: "/patents?status=ACTIVE_GRANTED", title: "Granted patents in the company portfolio",
+        },
+        {
+          key: "pending", label: "Pending patents", rule: "neutral",
+          value: unavailable ? null : pendingPatents,
+          qualifier: unavailable ? "not available" : totalPatents ? "applied or in examination" : "No patents added yet",
+          qualifierSpoken: unavailable ? "not available" : totalPatents ? "applied or in examination" : "no patents added yet",
+          to: "/patents?status=ACTIVE_APPLIED,ACTIVE_EXAMINATION", title: "Patents applied for or in examination",
+        },
+      ],
+    },
+  ];
+
+  /* ------------------------------ the panels ------------------------------ */
+  // The jurisdiction list is a BF-5 aggregate; without it the subtitle states the total alone.
+  const jurisdictions: Array<{ jurisdiction: string; count: number }> | null = Array.isArray(d.patents_by_jurisdiction) ? d.patents_by_jurisdiction : null;
+  const mapSubtitle = unavailable
+    ? "Not loaded"
+    : totalPatents
+      ? `${totalPatents} patent${totalPatents === 1 ? "" : "s"}${jurisdictions ? ` · ${jurisdictions.length} jurisdiction${jurisdictions.length === 1 ? "" : "s"}` : ""}`
+      : "No patents added yet";
+
+  const topInventors = d.top_inventors as { this_month?: InventorEntry[]; this_quarter?: InventorEntry[]; last_quarter?: InventorEntry[]; this_year?: InventorEntry[]; all_time?: InventorEntry[] } | undefined;
+  const periods = {
+    thisMonth: topInventors?.this_month ?? [],
+    thisQuarter: topInventors?.this_quarter ?? [],
+    lastQuarter: topInventors?.last_quarter ?? [],
+    thisYear: topInventors?.this_year ?? [],
+    allTime: topInventors?.all_time ?? [],
+  };
+  const pipelinePeriods = w.idea_pipeline;
+  const selectedPipeline: PipelineCounts = pipelinePeriods?.[pipelinePeriod] ?? pipeline ?? {};
+
+  const goToPipelineStage = (stage: string) => {
+    if (stage === "granted") { navigate("/patents?status=ACTIVE_GRANTED"); return; }
+    const map: Record<string, string | null> = { submitted: null, review: REVIEW_STATUS, sent_to_oc: "SEND_TO_OC", filed: "FILED" };
+    const status = map[stage];
+    navigate(status ? `/ideas?status=${status}` : "/ideas");
+  };
+
+  const strip = isDashboardLoading && !unavailable ? (
+    <section aria-label="Overview" aria-busy="true" className="flex flex-col gap-4 xl:grid xl:grid-cols-5">
+      {[0, 1, 2, 3, 4].map((k) => (
+        <div key={k} className="min-h-[132px] animate-pulse rounded-md border border-[var(--pulse-line)] bg-[var(--pulse-surface)]" />
+      ))}
+    </section>
+  ) : (
+    <StatStrip groups={groups} />
+  );
+
+  return (
+    <>
+      <div className="mx-auto w-full max-w-[1680px] px-6 pb-24 pt-6 lg:px-8 md:pb-8">
+        <div className="mb-6">{strip}</div>
+        {unavailable && (
+          <div role="status" className="mb-6 flex items-center justify-between gap-4 rounded-md border border-[var(--pulse-line)] bg-[var(--pulse-surface)] px-4 py-3 text-[13px] text-[var(--pulse-ink-secondary)]">
+            <span>The overview numbers could not be loaded. The queue below still loads on its own.</span>
+            <button type="button" onClick={() => refetchDashboard()} className="rounded-sm border border-[var(--pulse-line)] px-2.5 py-1 text-[12px] font-semibold text-[var(--pulse-ink)] hover:bg-[var(--pulse-surface-subtle)]">
+              Retry
+            </button>
+          </div>
+        )}
+        <div className="grid grid-cols-12 gap-6">
+          <section aria-label="Patents worldwide" className="col-span-12 h-[384px] xl:col-span-8">
+            <div className="relative z-10 h-full overflow-hidden rounded-md">
+              <PatentWorldMap
+                totalPatents={totalPatents ?? 0}
+                height={384}
+                isPatentDialogOpen={isPatentDialogOpen}
+                setIsPatentDialogOpen={() => setIsPatentDialogOpen(!isPatentDialogOpen)}
+                v0={{ title: "Patents worldwide", subtitle: mapSubtitle, heading: "h2" }}
+              />
+            </div>
+          </section>
+          <section aria-label="Top inventors" className="col-span-12 h-[384px] xl:col-span-4">
+            <TopInventors
+              onOpenInventor={(e) => navigate(`/ideas?search=${encodeURIComponent(e.name)}`)}
+              v0={{
+                periods,
+                empty: topInventors
+                  ? { text: "No submissions this quarter yet.", linkLabel: "Workspace › People", onLink: () => navigate("/workspace") }
+                  : { text: "Not available yet.", linkLabel: "Workspace › People", onLink: () => navigate("/workspace") },
+                loading: isDashboardLoading || !ready,
+                error: unavailable ? { onRetry: () => refetchDashboard() } : undefined,
+              }}
+            />
+          </section>
+          <section aria-label="Review Inventor Ideas" className="col-span-12 xl:col-span-8">
+            <NeedsReview
+              rows={reviewQueue}
+              laterCount={0}
+              title="Review Inventor Ideas"
+              onOpen={(id) => navigate(`/ideas/${id}`)}
+              onReviewAll={() => navigate(`/ideas?status=${REVIEW_STATUS}`)}
+              onViewAll={() => navigate(`/ideas?status=${REVIEW_STATUS}`)}
+              hasError={isQueueError}
+              onRetry={() => refetchIdeas()}
+              v0={{
+                loading: isQueueLoading || !ready,
+                agingThresholdDays: AGING_THRESHOLD_DAYS,
+                empty: { text: "Nothing waiting for your review.", linkLabel: "Workspace › People" },
+                onEmptyLink: () => navigate("/workspace"),
+              }}
+            />
+          </section>
+          <section aria-label="Idea pipeline" className="col-span-12 xl:col-span-4">
+            <IdeaPipeline
+              heading="h2"
+              periodLabel={{ this_quarter: "This quarter", last_quarter: "Last quarter", all_time: "All time" }[pipelinePeriod]}
+              periodOptions={pipelinePeriods ? [
+                { value: "this_quarter", label: "This quarter" },
+                { value: "last_quarter", label: "Last quarter" },
+                { value: "all_time", label: "All time" },
+              ] : undefined}
+              selectedPeriod={pipelinePeriod}
+              onPeriodChange={pipelinePeriods ? (value) => setPipelinePeriod(value as typeof pipelinePeriod) : undefined}
+              submitted={Number(selectedPipeline.submitted) || 0}
+              reviewPending={Number(selectedPipeline.reviewPending) || 0}
+              sentToOC={Number(selectedPipeline.sentToPhoton) || 0}
+              filed={Number(selectedPipeline.filed) || 0}
+              granted={Number(selectedPipeline.granted) || 0}
+              oldestWaitingDays={selectedPipeline.oldestWaitingDays !== undefined ? selectedPipeline.oldestWaitingDays : oldest}
+              loading={isPipelineLoading || isDashboardLoading || !ready}
+              onStageClick={goToPipelineStage}
+              hasError={isPipelineError}
+              onRetry={() => refetchPipeline()}
+            />
+          </section>
+        </div>
+        <div className="mt-6">
+          <TimelineAndEvents
+            dueDates={timelineData?.data ?? []}
+            isLoading={isTimelineLoading}
+            pagination={timelineData?.pagination}
+            onPageChange={setTimelinePage}
+            onItemsPerPageChange={setTimelinePageSize}
+            setMonth={setTimelineMonth}
+            setYear={setTimelineYear}
+            refetch={() => { void refetchTimeline(); }}
+          />
+        </div>
+      </div>
+
+      {isPatentDialogOpen && (
+        <Dialog open={isPatentDialogOpen} onOpenChange={setIsPatentDialogOpen}>
+          <DialogContentNoClose
+            className={`lg:max-w-[1440px] max-w-[400px] md:max-w-[700px] rounded-lg h-[90vh] backdrop-blur-xl border ${
+              theme === "dark" ? "bg-black/90 border-[#cccccc20]" : "bg-white/95 border-neutral-200"
+            }`}
+          >
+            <PatentWorldMap
+              totalPatents={totalPatents ?? 0}
+              isPatentDialogOpen={isPatentDialogOpen}
+              setIsPatentDialogOpen={() => setIsPatentDialogOpen(!isPatentDialogOpen)}
+              v0={{ title: "Patents worldwide", subtitle: mapSubtitle, heading: "h2" }}
+            />
+          </DialogContentNoClose>
+        </Dialog>
+      )}
+    </>
+  );
+};
+
+export default WorkspaceAdminOverview;

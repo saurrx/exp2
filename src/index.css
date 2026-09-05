@@ -1,0 +1,401 @@
+
+/* Tokens: src/styles/tokens.json is the source (PL-TKN-004); tools/tokens.mjs writes tokens.css. fonts.css self-hosts the sheet's faces. */
+@import "./styles/fonts.css";
+@import "./styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    background: var(--pulse-canvas);
+    color: var(--pulse-ink);
+    font-size: 15px;
+    line-height: 1.5;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ------------------------------------------------------------------
+     THE DESKTOP GATE, and the two rules that must move with it.
+
+     Pulse is a desktop product, and the gate used to be pure WIDTH:
+     anything under 1024px CSS pixels got "please use a desktop". But CSS
+     pixels shrink with browser zoom — a 1440px laptop at 150% reports a
+     960px viewport — so people sitting at a desktop, on a desktop, were
+     told to go and find a desktop, with no way out of it. Zoom is also
+     exactly what a person with low vision reaches for first, which makes
+     a width-only gate an accessibility failure, not just an annoyance.
+
+     So the gate asks what the DEVICE is, not how many pixels are left:
+     `pointer: coarse` and `hover: none` together mean the primary input
+     is a finger and there is no cursor — a phone or tablet. A zoomed
+     desktop still reports `pointer: fine` / `hover: hover`, and a
+     touchscreen laptop reports fine/hover too because its PRIMARY input
+     is the trackpad. Below 640px nothing can lay this app out on any
+     device, so that stays a hard floor.
+
+     `.pulse-desktop-gate` (DesktopOnlyGate) and these two rules share one
+     condition and must keep sharing it — qa/invariant/desktop-gate.qa.mjs
+     fails if they drift. Getting it wrong in either direction is a real
+     bug: a gate with no scroll lock leaves the app scrolling underneath
+     it, and a scroll lock with no gate freezes a desktop user's page.
+     ------------------------------------------------------------------ */
+  .pulse-desktop-gate {
+    display: none;
+  }
+
+  @media (max-width: 639.98px),
+         (max-width: 1023.98px) and (pointer: coarse) and (hover: none) {
+    .pulse-desktop-gate {
+      display: block;
+    }
+
+    /* The gate covers the app; nothing underneath is meant to be reachable,
+       and the gate is its own scroll container. */
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+  }
+
+  /* The floor applies wherever the app is actually SHOWN — which now includes
+     a zoomed desktop below 1024px. Horizontal scroll is the right answer
+     there: the layout keeps its proportions and the reader can pan or zoom
+     out. Applied unconditionally it would inflate the layout viewport a
+     `fixed inset-0` gate sizes against, which is what once pushed the gate's
+     message off-screen. */
+  @media not all and (max-width: 639.98px) {
+    body {
+      min-width: 1024px;
+    }
+  }
+
+  @media (max-width: 1023.98px) and (pointer: coarse) and (hover: none) {
+    body {
+      min-width: 0;
+    }
+  }
+
+  /* A one-time entrance for dashboard numbers: transform only, no fade, so
+     contrast is final from the first frame. Static under reduced motion. */
+  @keyframes pulse-rise {
+    from { transform: translateY(6px); }
+    to { transform: translateY(0); }
+  }
+  .pulse-rise {
+    animation: pulse-rise 240ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-rise { animation: none; }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--pulse-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: #ffe3a0;
+    color: var(--pulse-ink);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  /* 
+    By default, show scrollbar thumb as normal. 
+    For small screens, make scrollbar thumb transparent except while scrolling ("active").
+    We'll use ::-webkit-scrollbar-thumb:active for visibility while scrolling.
+  */
+  ::-webkit-scrollbar-thumb {
+    @apply bg-photon-gray-300 rounded-full hover:bg-photon-gray-400 transition-colors;
+  }
+  @media (max-width: 640px) {
+    ::-webkit-scrollbar-thumb {
+      transition: background 0.2s;
+    }
+  
+  }
+}
+
+@layer components {
+  /* min-h-full is what lets a short page still paint the full canvas. It also
+     silently beats an explicit height, though: the table pages set
+     h-[calc(100dvh-64px)] and were rendered min-h-full (the full viewport)
+     instead, so each sat 64px lower than it was tall and overhung the bottom of
+     the scroll area. Those pages pair it with min-h-0. */
+  .pulse-product-page {
+    @apply relative min-h-full font-sans;
+    background: var(--pulse-canvas);
+    color: var(--pulse-ink);
+  }
+
+  .pulse-product-page .animate-blob {
+    display: none !important;
+  }
+
+  .pulse-toolbar {
+    @apply mx-6 my-5 flex min-h-[66px] flex-wrap items-center gap-3 rounded-md border p-3;
+    background: var(--pulse-surface);
+    border-color: var(--pulse-line);
+    box-shadow: var(--pulse-shadow-card);
+  }
+
+  /* One row, at the width this app is actually used at.
+     The Patents toolbar grew a Clients filter for the Photon side and stopped
+     fitting: at 1280 the Sort control wrapped onto a line of its own under a
+     half-empty row, which reads as a layout bug rather than a filter. The
+     controls are labelled buttons, so the honest fix is to make each of them
+     narrower rather than to hide any of them: tighter horizontal padding, a
+     smaller gap between a control's icon and its word, and a search field that
+     gives up width first (it is the one control that stays usable narrow).
+     Wrapping still happens below ~1100px — it is a safety valve, not the
+     normal state. */
+  .pulse-toolbar-tight > button,
+  .pulse-toolbar-tight [data-slot="popover-trigger"] > button {
+    @apply px-3;
+  }
+  .pulse-toolbar-tight > button > svg:first-child {
+    @apply mr-0.5;
+  }
+
+  .pulse-table-frame {
+    @apply mx-6 mb-6 overflow-hidden rounded-md border;
+    background: var(--pulse-surface);
+    border-color: var(--pulse-line);
+    box-shadow: var(--pulse-shadow-card);
+  }
+
+  .pulse-table-page input:not([type="checkbox"]):not([type="radio"]),
+  .pulse-table-page select,
+  .pulse-table-page [role="combobox"] {
+    border-radius: var(--pl-radius-sm) !important;
+    border-color: var(--pulse-line) !important;
+    background: var(--pulse-surface) !important;
+    color: var(--pulse-ink) !important;
+    box-shadow: none !important;
+  }
+
+  .pulse-table-page input::placeholder {
+    color: var(--pulse-ink-muted) !important;
+  }
+
+  .pulse-table-page table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--pulse-surface);
+  }
+
+  .pulse-data-table {
+    font-family: var(--pl-font-ui);
+    font-size: 14px;
+    line-height: 20px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .pulse-table-page thead {
+    background: var(--pulse-surface-subtle) !important;
+  }
+
+  .pulse-table-page th {
+    height: 48px !important;
+    padding: 0 16px !important;
+    border-color: var(--pulse-line) !important;
+    color: var(--pulse-ink-muted) !important;
+    font-family: var(--pl-font-ui) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    text-transform: none !important;
+  }
+
+  .pulse-table-page td {
+    height: 48px !important;
+    padding: 0 16px !important;
+    border-color: var(--pulse-line) !important;
+    color: var(--pulse-ink-secondary);
+    font-size: 14px;
+  }
+
+  .pulse-table-page tbody tr {
+    transition: background-color 140ms ease;
+  }
+
+  .pulse-table-page tbody tr:hover {
+    background: var(--pulse-surface-subtle) !important;
+  }
+
+  .pulse-filter-control {
+    @apply inline-flex h-10 items-center gap-2 rounded-sm border px-3.5 text-sm font-medium transition-colors;
+    border-color: var(--pulse-line) !important;
+    background: var(--pulse-surface) !important;
+    color: var(--pulse-ink-secondary) !important;
+  }
+
+  .pulse-filter-control:hover {
+    border-color: var(--pulse-line-strong) !important;
+    color: var(--pulse-ink) !important;
+  }
+
+  .pulse-content-card {
+    @apply rounded-md border;
+    background: var(--pulse-surface);
+    border-color: var(--pulse-line);
+    box-shadow: var(--pulse-shadow-card);
+  }
+
+  .pulse-pagination-bar {
+    @apply border-t px-4 py-3;
+    border-color: var(--pulse-line);
+    background: color-mix(in srgb, var(--pulse-surface) 96%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  /* ------------------------------------------------------------------
+     The auth screens (login, signup, invite, forgot/reset password).
+
+     These rules used to be selected POSITIONALLY —
+     `.pulse-auth-shell > :nth-last-child(2) > div:last-child` — which meant the
+     white card, the light background and every text-colour override depended on
+     the decorative panel still being the last child of the shell. Removing that
+     panel silently moved every selector onto the wrong element. They are now
+     anchored to real class names, so the markup can change without the theme
+     collapsing.
+
+     Radius is deliberately small (6px, the same as the input fields) rather than
+     the 24px pill this used to be: a corner, not a bubble.
+     ------------------------------------------------------------------ */
+  .pulse-auth-shell {
+    background: #f6f6f8 !important;
+  }
+
+  .pulse-auth-panel {
+    background: #f6f6f8;
+  }
+
+  .pulse-auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 32px;
+    border: 1px solid #e3e2e8;
+    border-radius: var(--pl-radius-md);
+    background: #ffffff;
+    box-shadow: var(--pulse-shadow-elevated);
+  }
+
+  .pulse-auth-card h1,
+  .pulse-auth-card .text-white {
+    color: #17161d !important;
+  }
+
+  .pulse-auth-card .text-neutral-300 {
+    color: #45434c !important;
+  }
+
+  .pulse-auth-card .text-neutral-400,
+  .pulse-auth-card .text-neutral-500 {
+    color: #6f6d77 !important;
+  }
+
+  .pulse-auth-card .text-neutral-600,
+  .pulse-auth-card .text-neutral-700 {
+    color: #96949d !important;
+  }
+
+  .pulse-auth-card input {
+    border-color: #d9d8df !important;
+    background: #ffffff !important;
+    color: #17161d !important;
+  }
+
+  /* The invalid state has to beat the generic input rule above, which is
+     !important and would otherwise repaint an errored field neutral grey. */
+  .pulse-auth-card input[aria-invalid="true"] {
+    border-color: #dc2626 !important;
+  }
+
+  .pulse-auth-card input::placeholder {
+    color: #aaa8b0 !important;
+  }
+
+  .pulse-auth-card button[class*="bg-white/5"] {
+    border-color: #dedde3 !important;
+    background: #ffffff !important;
+  }
+
+  .pulse-auth-card button[class*="bg-white/5"]:hover {
+    border-color: #c9c7d0 !important;
+    background: #f8f8fa !important;
+  }
+
+  .pulse-auth-card .h-px.bg-neutral-900 {
+    background: #e5e4e9 !important;
+  }
+
+  .metric-card {
+    @apply bg-white rounded-md p-5 border border-photon-gray-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col;
+  }
+
+  /* Card elevated light style from Figma */
+  .card-elevated-light {
+    @apply bg-white rounded-md border border-zinc-200 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  /* Card elevated dark style */
+  .card-elevated-dark {
+    @apply bg-[linear-gradient(135deg,#1e1e1eb3_0%,#1a1a1a99_100%)] rounded-md border border-zinc-800 shadow-sm hover:shadow-md hover:bg-[#1a1a1a99] transition-all duration-300;
+  }
+
+  /* Label muted style */
+  .label-muted {
+    @apply text-zinc-500;
+  }
+
+  /* Scrollbar modern light style */
+  .scrollbar-modern-light {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+  }
+
+  .scrollbar-modern-light::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  
+  .scrollbar-modern-light::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-modern-light::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.3);
+    border-radius: var(--pl-radius-full);
+  }
+
+  .scrollbar-modern-light::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(156, 163, 175, 0.5);
+  }
+
+  /* Dark mode base styles */
+  .dark {
+    color-scheme: dark;
+  }
+}

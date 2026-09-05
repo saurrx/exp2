@@ -1,0 +1,53 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "_design": "The design fork's Vercel config: no API rewrite (the worker answers /v1 in-page), a content policy limited to the frame's own origin, production's other headers kept. Deployments use tools/design/deploy.mjs, which writes its own config into the output directories; this file is the reference and what the static security gates read.",
+  "rewrites": [
+    {
+      "source": "/((?!assets/|mockServiceWorker\\.js$).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/v1/auth/microsoft",
+      "destination": "/?persona=admin@photonlegal.test",
+      "permanent": false
+    },
+    {
+      "source": "/v1/auth/saml/login",
+      "destination": "/auth/saml/callback?persona=counsel@acme.test",
+      "permanent": false
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "geolocation=(), microphone=(), camera=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains"
+        }
+      ]
+    }
+  ]
+}

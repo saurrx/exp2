@@ -1,0 +1,47 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# environment — never commit; VITE_ vars are compiled into the bundle
+.env
+.env.*
+!.env.example
+*.local
+
+# visual-regression output
+/test-results/
+/playwright-report/
+/blob-report/
+.playwright/
+
+.DS_Store
+*.log
+.vscode/*
+!.vscode/extensions.json
+# Shared so every editor type-checks with the TypeScript CI uses, not the one
+# VSCode happens to bundle.
+!.vscode/settings.json
+.idea/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+qa/.sessions/
+qa/.conformance-design/
+qa/.exception-hits/
+qa/.api-trace.jsonl
+
+# transient esbuild output from qa/contract/social-login-mapping.qa.mjs
+qa/.adapter-build/
+
+# design fork tooling output
+storybook-static/
+.vitest-attachments/
+__screenshots__/
+.vercel
+
+# October desktop — local canvas state
+.october/

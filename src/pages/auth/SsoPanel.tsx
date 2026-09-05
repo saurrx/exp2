@@ -30,6 +30,7 @@ export function SsoButton({ onStart, disabled }: { onStart: () => void; disabled
 export function SsoEmailStep({ onCancel }: { onCancel: () => void }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | undefined>();
+  const [unavailable, setUnavailable] = useState(false);
 
   const submit = () => {
     const value = email.trim().toLowerCase();
@@ -38,6 +39,7 @@ export function SsoEmailStep({ onCancel }: { onCancel: () => void }) {
       return;
     }
     if (!ssoAllows(value)) {
+      setUnavailable(true);
       setError(
         "SSO isn't enabled for your organisation. Use your email and password, or Google or Microsoft.",
       );
@@ -49,15 +51,16 @@ export function SsoEmailStep({ onCancel }: { onCancel: () => void }) {
 
   return (
     <div className="space-y-3">
-      <Button type="button" variant="link" size="sm" onClick={onCancel} className="mb-2 h-auto px-0 py-0">Other sign-in methods</Button>
+      {!unavailable && <Button type="button" variant="link" size="sm" onClick={onCancel} className="mb-2 h-auto px-0 py-0">Other sign-in methods</Button>}
       <AuthField label="Work email" name="sso-email" type="email" autoComplete="username" placeholder="you@company.test"
         error={error} value={email} onChange={(e) => {
           setEmail(e.target.value.replace(/\s+/g, "").toLowerCase());
+          setUnavailable(false);
           if (error) setError(undefined);
         }} onKeyDown={(e) => {
           if (e.key === "Enter") { e.preventDefault(); submit(); }
         }} />
-      <Button type="button" size="sm" onClick={submit} className="w-full">Continue with SSO</Button>
+      <Button type="button" size="sm" onClick={unavailable ? onCancel : submit} className="w-full">{unavailable ? "Choose another method" : "Continue with SSO"}</Button>
     </div>
   );
 }

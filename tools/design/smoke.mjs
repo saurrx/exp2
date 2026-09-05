@@ -32,7 +32,7 @@ await step("Inventor signs in and lands on their home", async () => {
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.waitForURL(base + "/", { timeout: 15000 });
   await page.waitForLoadState("networkidle");
-  await page.getByText("Anika Sharma").first().waitFor({ timeout: 10000 });
+  await page.locator("[data-inventor-home]").waitFor({ timeout: 10000 });
   await page.screenshot({ path: `${shots}/02-inventor-home.png` });
 });
 // DSN-0010: V0 review decision replaces the retired committee/counsel journeys.

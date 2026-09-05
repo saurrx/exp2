@@ -35,6 +35,7 @@ const Invite = () => {
   const { state } = loaction;
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [workspaceName, setWorkspaceName] = useState<string>();
   const [entryError, setEntryError] = useState<string>();
   const [linkUnavailable, setLinkUnavailable] = useState(false);
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const Invite = () => {
   const code = searchParams.get("code") || inviteCode;
   const domain = searchParams.get("domain");
 
-  useEffect(() => { setIsSent(false); setLinkUnavailable(false); setEntryError(undefined); }, [code]);
+  useEffect(() => { setIsSent(false); setWorkspaceName(undefined); setLinkUnavailable(false); setEntryError(undefined); }, [code]);
 
   // Someone followed an invite or share link and landed here. The code itself is
   // a credential and never travels; this is only "a link was opened", which is
@@ -87,6 +88,7 @@ const Invite = () => {
         });
 
         if (response?.data?.data) {
+          setWorkspaceName(response.data.data.organization_name);
           setIsSent(true);
         }
       } catch (error) {
@@ -108,6 +110,7 @@ const Invite = () => {
     <AuthLayout title={isSent ? "Invitation verified" : "Join your workspace"}
       description={isSent ? "Continue to sign in with your work account." : "Enter your work email to verify this invitation."}>
       {isSent ? <div className="space-y-4">
+        {workspaceName && <p className="ph-no-capture break-words text-base font-semibold text-pl-navy">{workspaceName}</p>}
         <p className="ph-no-capture break-words text-sm font-medium text-pl-navy">{values.email}</p>
         <Button size="sm" className="w-full" onClick={() => navigate("/login")}>Continue to sign in</Button>
       </div> : <>

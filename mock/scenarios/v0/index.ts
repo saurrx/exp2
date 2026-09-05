@@ -524,10 +524,11 @@ const clientStates = ["potential-client", "new-client", "no-owner", "no-admin", 
 }));
 
 // DSN-0019: public entry scenarios reuse existing users/invitations and statuses.
-const authenticationStates = ["entry", "expired-invitation", "access-denied"].map(slug => v0(`v0/auth/${slug}`, `Authentication and access: ${slug}`, "Synthetic public entry and existing access-state evidence.", U.inventor.email, [U.inventor.email, U.admin.email, U.caseOwner.email, U.photonAdmin.email], () => {
+const authenticationStates = ["entry", "expired-invitation", "access-denied", "long-workspace"].map(slug => v0(`v0/auth/${slug}`, `Authentication and access: ${slug}`, "Synthetic public entry and existing access-state evidence.", U.inventor.email, [U.inventor.email, U.admin.email, U.caseOwner.email, U.photonAdmin.email], () => {
   const d = structuredClone(northwindBuild(`v0/auth/${slug}`, SMALL));
   if (slug === "expired-invitation") d.invites.forEach(i => { i.status = "EXPIRED"; i.expires_at = clock.daysAgo(1); });
   if (slug === "access-denied") d.users.find(u => u.id === U.inventor.id)!.status = "SUSPENDED";
+  if (slug === "long-workspace") d.clients.find(c => c.id === U.inventor.client_id)!.name = "Northwind Instruments and Advanced Measurement Research Laboratories";
   return d;
 }));
 

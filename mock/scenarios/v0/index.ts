@@ -158,6 +158,23 @@ const inventorPortfolio = v0("v0/inventor/portfolio", "Inventor with ideas in ev
   "Anika Sharma's ideas: drafts at three completions including one evaluated and not submitted, awaiting review, changes requested, resubmitted, rejected, sent to Photon Legal, filed. Evaluations not run, running, partial, succeeded, and a low score that was submitted.",
   U.inventor.email, [U.inventor.email, U.coinventor.email, U.admin.email], () => northwindBuild("v0/inventor/portfolio"));
 
+// DSN-0005: focused Inventor home states, built through the same scenario engine.
+const homeScenario = (slug: string, title: string, specs: IdeaSpec[]) => v0(`v0/inventor/${slug}`, title,
+  "Focused Inventor home state with synthetic Northwind ideas and company portfolio context.",
+  U.inventor.email, [U.inventor.email], () => northwindBuild(`v0/inventor/${slug}`, SMALL, specs));
+const homeNoIdeas = homeScenario("no-ideas", "Inventor with no ideas", northwind().filter((i) => i.author.id !== U.inventor.id && !i.coInventors?.some((u) => u.id === U.inventor.id)));
+const homeDraft = homeScenario("active-draft", "Inventor with one active draft", [{ invention: 0, author: U.inventor, state: "DRAFT", ageDays: 2, completion: 40 }]);
+const homeStatuses = homeScenario("several-statuses", "Inventor ideas with next steps", [
+  { invention: 0, author: U.inventor, state: "CHANGES_REQUESTED", ageDays: 6, reviewer: U.admin, comment: "Please explain the calibration step so a reader can repeat it." },
+  { invention: 1, author: U.inventor, state: "DRAFT", ageDays: 2, completion: 40 },
+  { invention: 2, author: U.inventor, state: "LEGAL_REVIEW", ageDays: 1 },
+  { invention: 3, author: U.inventor, state: "SENT_TO_PHOTON", ageDays: 8, reviewer: U.admin },
+  { invention: 4, author: U.inventor, state: "FILED", ageDays: 50, reviewer: U.admin },
+]);
+const homeChanges = homeScenario("requested-changes", "Inventor responding to requested changes", [{ invention: 0, author: U.inventor, state: "CHANGES_REQUESTED", ageDays: 6, reviewer: U.admin, comment: "Please explain the calibration step so a reader can repeat it." }]);
+const homeRecent = homeScenario("recent-submission", "Inventor after submission", [{ invention: 0, author: U.inventor, state: "LEGAL_REVIEW", ageDays: 0 }]);
+const homeEvaluation = homeScenario("evaluation-available", "Inventor with an evaluation ready", [{ invention: 0, author: U.inventor, state: "DRAFT", ageDays: 2, completion: 100, evaluation: { state: "SUCCEEDED", score: 23 } }]);
+
 const workspaceAdminQueue = v0("v0/workspace-admin/queue", "Workspace Admin queue at Northwind",
   "Seven scored ideas awaiting the one review stage, oldest 56 days, one submitted on behalf of an inventor by the admin, one resubmitted after changes. Five contributing inventors, two Workspace Admins, and deadlines with contextual dates.",
   U.admin.email, [U.admin.email, U.admin2.email, U.inventor.email, U.caseOwner.email], () => northwindBuild("v0/workspace-admin/queue"));
@@ -219,6 +236,6 @@ const authFailures = v0("v0/auth/failures", "Authentication failures",
   "The only V0 scenario that returns 401 on purpose: invalid login, expired session with a failed refresh, revoked access, SSO failure, unknown domain at signup.",
   U.admin.email, [U.admin.email], () => { const d = emptyDataV0({ authFails: true }); d.portfolios = SMALL; return d; });
 
-export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([inventorFirstRun, inventorPortfolio, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
+export const V0_SCENARIOS: Record<string, ScenarioDef> = Object.fromEntries([inventorFirstRun, inventorPortfolio, homeNoIdeas, homeDraft, homeStatuses, homeChanges, homeRecent, homeEvaluation, workspaceAdminQueue, workspaceAdminEmpty, oneUrgent, largeQueue, noActionsDue, quiet, emptyPortfolio, single, longTitleIdeas, caseOwnerMyWork, photonAdminFirm, large, failure, slow, authFailures].map((s) => [s.name, s]));
 export const DEFAULT_V0_SCENARIO = workspaceAdminQueue.name;
 export { ORBITAL };

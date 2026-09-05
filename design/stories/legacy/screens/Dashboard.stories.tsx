@@ -9,8 +9,6 @@ type Story = StoryObj<typeof meta>;
 
 const seen = (text: RegExp) => async ({ canvasElement }: { canvasElement: HTMLElement }) => { await expect(await within(canvasElement).findByText(text, {}, { timeout: 10_000 })).toBeVisible(); };
 
-export const Inventor: Story = { parameters: { pulse: { scenario: "inventor/portfolio", persona: "INVENTOR", route: "/" } }, play: seen(/Priya Raman/) };
-export const InventorFirstRun: Story = { name: "Inventor, nothing submitted yet", parameters: { pulse: { scenario: "inventor/first-run", persona: "INVENTOR", route: "/" } }, play: seen(/Hana Kobayashi/) };
 export const TechCommittee: Story = { parameters: { pulse: { scenario: "committee/queue", persona: "TECH_COMMITTEE", route: "/" } }, play: seen(/Tomás Ibarra/) };
 export const LegalCounsel: Story = { parameters: { pulse: { scenario: "counsel/queue", persona: "LEGAL_COUNSEL", route: "/" } }, play: seen(/Jun Sato/) };
 export const CaseOwner: Story = { parameters: { pulse: { scenario: "case-owner/assigned", persona: "CASE_OWNER", route: "/" } }, play: seen(/Ravi Menon/) };

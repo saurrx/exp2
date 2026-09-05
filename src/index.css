@@ -86,6 +86,11 @@
     }
   }
 
+  /* DSN-0005 reflows at desktop zoom; the device access gate is unchanged. */
+  body:has([data-inventor-home]) {
+    min-width: 0;
+  }
+
   /* A one-time entrance for dashboard numbers: transform only, no fade, so
      contrast is final from the first frame. Static under reduced motion. */
   @keyframes pulse-rise {

@@ -148,3 +148,13 @@ scope, permissions, vocabulary or a reference screen.
 - Autonomous runs: see `RUN-GOALS.md`, `ROUTINE-PROMPT.md`, `PROGRESS.md`,
   `STEER.md`, `.claude/rules/autonomous-run.md` and the hooks in
   `.claude/settings.json` (completion gate, evidence gate, kill switch).
+
+## Codex lane (this repository)
+
+This repository is the GPT-6 Astra lane of the V0 run (see CODEX-RUN.md).
+Branches are `codex/dsn-NNNN-<slug>`. The hooks in `.claude/settings.json`
+(completion gate, evidence gate, kill switch) are Claude Code hooks and do
+not run under Codex; the same contract is carried by the scheduled task's
+prompt and `/goal`. The evaluator is run with `codex exec --sandbox read-only`
+on `.claude/agents/evaluator.md` so it grades from a fresh context. Everything
+else in this file applies unchanged.

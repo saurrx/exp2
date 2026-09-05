@@ -12,7 +12,7 @@ make it not stop:
 - **verify-gate** — `design/v0/coverage.json` (the ledger) cannot be edited
   until the session has opened at least two screenshots of the surface with
   the Read tool.
-- **The routine** (`ROUTINE-PROMPT.md`) — a Claude Code cloud routine firing
+- **The scheduler** (`CODEX-RUN.md` in this lane; `ROUTINE-PROMPT.md` in the Claude lane) — a Claude Code cloud routine firing
   every 30 minutes (hourly if the plan refuses) on `main`. Each firing is a
   fresh VM and a fresh context: it yields if another firing committed in the
   last 25 minutes, otherwise resumes the in-progress surface or starts the

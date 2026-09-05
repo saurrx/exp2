@@ -79,3 +79,5 @@ REFERENCE MATCH: yes — Typography, restrained amber primary controls, hairline
 ```
 
 Findings 2 and 3 are addressed in source: unselected urgent rows now show the patent reference and Review client instruction/Check recorded event distinction; the selected setup task and assignment age are suppressed from the supporting roster. The queued capture/gate continuation was stopped before it ran because these corrections require a new static build. The broad runner continues against its unchanged earlier build. Revised validation and captures are pending. Finding 1 still requires the specific auth authorization; no readiness claim.
+
+Second shared-navigation review: 16 additional portfolio/due-date captures have the identical isolated 490-pixel label change, documented in sidebar-diffs-second.json. Opened representative empty portfolio and upcoming due-date full captures, then accepted those current renders. Total navigation-only updates: 35. Other differences remain unaccepted.

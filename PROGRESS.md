@@ -315,3 +315,5 @@ Concurrency yield — 2026-09-06T10:06:04.562744+00:00: another run committed DS
 
 
 Concurrency yield — 2026-09-06T10:07:13.096552+00:00: this scheduled firing yielded to other-run DSN-0019 commits 9a71c25 and a4d9ec0 inside the 25-minute exclusion window. Main fetched and pulled; existing visual artifacts preserved. No surface edits or validation performed.
+
+Concurrency yield — 2026-09-06T10:07:45.709678+00:00: this firing yielded to other-run DSN-0019 commits 9a71c25 and a4d9ec0 within the 25-minute exclusion window. Fetched and refreshed main in an isolated worktree; preserved the active dirty checkout. Dependencies present, no AGENT_STOP. No surface edits or tests performed.

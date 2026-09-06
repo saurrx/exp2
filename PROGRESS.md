@@ -403,3 +403,7 @@ Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies pr
 
 ## DSN-0019 authorization recheck — 2026-09-06T22:37:32.595813+00:00
 Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies present, no stop file or recent concurrency commit. Two fresh remote steering retries found no signup exception. Static inspection confirms email signup targets the password-required handler and completion targets password reset. Blocked by the automation’s explicit auth/adapter prohibition; Needs the founder: authorize the bounded correction in changes/DSN-0019/signup-correction.md. Preserve existing mechanics and unrelated visual artifacts. No product edits or runtime tests this firing; coverage 15/17, no PASS or merge claimed.
+
+
+## DSN-0019 authorization recheck — 2026-09-06T23:37:31.924941+00:00
+Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies present, no stop file or recent concurrency commit. Two fresh remote steering retries found no signup exception. Static inspection confirms email signup targets the password-required handler and completion retains its existing mapping. Blocked by the automation’s explicit auth/adapter prohibition; Needs the founder: authorize the bounded correction in changes/DSN-0019/signup-correction.md. Preserve existing mechanics and unrelated visual artifacts. No product edits or runtime tests this firing; coverage 15/17, no PASS or merge claimed.

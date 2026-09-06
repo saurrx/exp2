@@ -309,3 +309,6 @@ Concurrency yield — 2026-09-05T13:50:12.499529+00:00: this scheduled firing yi
 Concurrency yield — 2026-09-05T14:51:45.694788+00:00: this scheduled firing yielded to other-run DSN-0019 commit 3dfb0cf inside the 25-minute exclusion window. Active codex/dsn-0019-auth checkout and validation artifacts preserved; yield recorded from a separate main worktree. No surface edits or validation performed.
 
 Concurrency yield — 2026-09-06T10:05:38.667934+00:00: this scheduled firing yielded to other-run DSN-0019 commits 9a71c25 and a4d9ec0 inside the 25-minute exclusion window. Environment fetch/main pull succeeded; dependencies present and no AGENT_STOP. Existing surface work and unrelated actual-image artifacts preserved; no surface edits or validation performed.
+
+
+Concurrency yield — 2026-09-06T10:06:04.562744+00:00: another run committed DSN-0019 checkpoints 9a71c25 and a4d9ec0 within 25 minutes; this firing yielded without surface edits or tests. Existing visual artifacts preserved.

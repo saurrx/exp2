@@ -312,3 +312,6 @@ Concurrency yield — 2026-09-06T10:05:38.667934+00:00: this scheduled firing yi
 
 
 Concurrency yield — 2026-09-06T10:06:04.562744+00:00: another run committed DSN-0019 checkpoints 9a71c25 and a4d9ec0 within 25 minutes; this firing yielded without surface edits or tests. Existing visual artifacts preserved.
+
+
+Concurrency yield — 2026-09-06T10:07:13.096552+00:00: this scheduled firing yielded to other-run DSN-0019 commits 9a71c25 and a4d9ec0 inside the 25-minute exclusion window. Main fetched and pulled; existing visual artifacts preserved. No surface edits or validation performed.

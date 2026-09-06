@@ -367,3 +367,7 @@ Environment fetch/main pull and surface-branch pull succeeded; dependencies pres
 
 ## DSN-0019 authorization recheck — 2026-09-06T13:31:46.736313+00:00
 Environment fetched/pulled, dependencies present, no stop file or recent concurrency commit. Resumed codex/dsn-0019-auth. Two fresh remote steering retries found no signup exception; static inspection confirms email signup still targets the password-required handler and completion targets password reset. Blocked by the automation’s explicit auth/adapter prohibition; the bounded proposal remains changes/DSN-0019/signup-correction.md. Needs the founder: authorize that exception. Preserve existing mechanics and unrelated visual artifacts; no product edits or runtime validation this firing. Coverage remains 15/17; no PASS, merge or completion claimed.
+
+
+## DSN-0019 authorization recheck — 2026-09-06T14:32:41.273937+00:00
+Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies present, no stop file or recent concurrency commit. Two fresh remote steering retries found no signup exception. Static inspection confirms email signup targets the password-required handler and completion targets password reset. Blocked by the automation’s explicit auth/adapter prohibition; Needs the founder: authorize the bounded correction in changes/DSN-0019/signup-correction.md. Preserve existing mechanics and unrelated visual artifacts. No product edits or runtime tests this firing; coverage 15/17, no PASS or merge claimed.

@@ -332,3 +332,5 @@ Concurrency yield — 2026-09-08T07:01:02.616691+00:00: yielded to another run�
 
 ## DSN-0019 authorization recheck — 2026-09-08T07:01:13.064923+00:00
 Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies present, no stop file or recent concurrency commit. Two fresh remote steering retries found no signup exception. Static inspection confirms email signup still targets the password-required handler and completion targets password reset. Blocked by the automation’s explicit auth/adapter prohibition; Needs the founder: authorize the bounded correction in changes/DSN-0019/signup-correction.md. Assumption: preserve existing mechanics and unrelated visual artifacts. No product edits or runtime tests this firing; coverage 15/17, no PASS or merge claimed.
+
+Concurrency yield — 2026-09-08T07:01:35.847910+00:00: another firing committed a5a173b and switched the shared checkout to main during this audit. Yielding immediately; blocker checkpoint 2faa6d1 therefore landed on main, not the auth branch. No product changes; existing visual artifacts preserved.

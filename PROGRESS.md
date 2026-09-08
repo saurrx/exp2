@@ -515,3 +515,7 @@ Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies pr
 
 ## DSN-0019 authorization recheck — 2026-09-08T06:59:30.326081+00:00
 Environment fetched/pulled main and resumed codex/dsn-0019-auth; dependencies present, no stop file or recent concurrency commit. Two fresh remote steering retries found no signup exception. Static inspection confirms email signup still targets the password-required handler and completion targets password reset. Blocked by the automation’s explicit auth/adapter prohibition; Needs the founder: authorize the bounded correction in changes/DSN-0019/signup-correction.md. Assumption: preserve existing mechanics and unrelated visual artifacts. No product edits or runtime tests this firing; coverage 15/17, no PASS or merge claimed.
+
+
+## DSN-0019 authorization recheck — 2026-09-08T07:36:08.792332+00:00
+Environment fetched/pulled main and resumed codex/dsn-0019-auth; Vite and Chromium present, no stop file or recent concurrency commit. Two fresh remote steering retries found no signup exception. Static inspection confirms email signup still maps to the password-required handler; protected signup files match the remote branch. Needs the founder — blocked: authorize the bounded correction in changes/DSN-0019/signup-correction.md; the automation explicitly prohibits auth/adapter changes. Assumption: preserve existing mechanics and unrelated visual artifacts. No product edits or runtime tests this firing; no PASS, coverage change or merge claimed.
